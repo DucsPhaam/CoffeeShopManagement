@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
+
+<StackPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.common.CashbookController">
+
+    <!-- Main Content -->
+    <VBox spacing="20.0" style="-fx-background-color: #f8f9fa;">
+        <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+        </padding>
+        <children>
+            <!-- Header with Date -->
+            <HBox alignment="CENTER_LEFT" spacing="20.0">
+                <Label text="📒 Cashbook" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;">
+                    <font>
+                        <Font size="28.0" />
+                    </font>
+                </Label>
+                <Region HBox.hgrow="ALWAYS" />
+                <Label fx:id="lblDate" text="Thursday, October 16, 2025" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;" />
+                <Button fx:id="btnRefresh" onAction="#handleRefresh" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 8; -fx-pref-height: 40px; -fx-pref-width: 120px;" text="🔄 Refresh" />
+            </HBox>
+
+            <!-- Statistics Cards -->
+            <GridPane hgap="20.0" vgap="20.0">
+                <columnConstraints>
+                    <ColumnConstraints hgrow="SOMETIMES" minWidth="200.0" percentWidth="25.0" />
+                    <ColumnConstraints hgrow="SOMETIMES" minWidth="200.0" percentWidth="25.0" />
+                    <ColumnConstraints hgrow="SOMETIMES" minWidth="200.0" percentWidth="25.0" />
+                    <ColumnConstraints hgrow="SOMETIMES" minWidth="200.0" percentWidth="25.0" />
+                </columnConstraints>
+
+                <!-- Card 1: Total Income -->
+                <VBox spacing="12.0" style="-fx-background-color: linear-gradient(to bottom right, #667eea 0%, #764ba2 100%); -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 5);" GridPane.columnIndex="0">
+                    <Label text="💵 TOTAL INCOME" textFill="#E8E8E8">
+                        <font>
+                            <Font size="12.0" />
+                        </font>
+                    </Label>
+                    <Label fx:id="lblTotalIncome" text="0.00" textFill="WHITE">
+                        <font>
+                            <Font name="System Bold" size="28.0" />
+                        </font>
+                    </Label>
+                </VBox>
+
+                <!-- Card 2: Total Expense -->
+                <VBox spacing="12.0" style="-fx-background-color: linear-gradient(to bottom right, #f093fb 0%, #f5576c 100%); -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 5);" GridPane.columnIndex="1">
+                    <Label text="📉 TOTAL EXPENSE" textFill="#E8E8E8">
+                        <font>
+                            <Font size="12.0" />
+                        </font>
+                    </Label>
+                    <Label fx:id="lblTotalExpense" text="0.00" textFill="WHITE">
+                        <font>
+                            <Font name="System Bold" size="28.0" />
+                        </font>
+                    </Label>
+                </VBox>
+
+                <!-- Card 3: Profit/Loss -->
+                <VBox spacing="12.0" style="-fx-background-color: linear-gradient(to bottom right, #4facfe 0%, #00f2fe 100%); -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 5);" GridPane.columnIndex="2">
+                    <Label text="📊 PROFIT/LOSS" textFill="#E8E8E8">
+                        <font>
+                            <Font size="12.0" />
+                        </font>
+                    </Label>
+                    <Label fx:id="lblProfitLoss" text="0.00" textFill="WHITE">
+                        <font>
+                            <Font name="System Bold" size="28.0" />
+                        </font>
+                    </Label>
+                </VBox>
+
+                <!-- Card 4: Current Balance -->
+                <VBox spacing="12.0" style="-fx-background-color: linear-gradient(to bottom right, #fa709a 0%, #fee140 100%); -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 5);" GridPane.columnIndex="3">
+                    <Label text="💰 CURRENT BALANCE" textFill="#E8E8E8">
+                        <font>
+                            <Font size="12.0" />
+                        </font>
+                    </Label>
+                    <Label fx:id="lblCurrentBalance" text="0.00" textFill="WHITE">
+                        <font>
+                            <Font name="System Bold" size="28.0" />
+                        </font>
+                    </Label>
+                </VBox>
+            </GridPane>
+
+            <!-- Search and Filter Bar -->
+            <HBox spacing="15.0" alignment="CENTER_LEFT" style="-fx-background-color: white; -fx-padding: 15.0; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 3);">
+                <Label text="From Date:" style="-fx-font-size: 14px; -fx-text-fill: #2c3e50;" />
+                <DatePicker fx:id="dpFromDate" onAction="#handleFilterDate" style="-fx-pref-width: 150px; -fx-font-size: 14px;" />
+                <Label text="To Date:" style="-fx-font-size: 14px; -fx-text-fill: #2c3e50;" />
+                <DatePicker fx:id="dpToDate" onAction="#handleFilterDate" style="-fx-pref-width: 150px; -fx-font-size: 14px;" />
+                <Label text="Type:" style="-fx-font-size: 14px; -fx-text-fill: #2c3e50;" />
+                <ComboBox fx:id="cmbFilterType" onAction="#handleFilter" style="-fx-pref-width: 150px; -fx-font-size: 14px;">
+                    <items>
+                        <FXCollections fx:factory="observableArrayList">
+                            <String fx:value="All"/>
+                            <String fx:value="Income"/>
+                            <String fx:value="Expense"/>
+                        </FXCollections>
+                    </items>
+                </ComboBox>
+                <TextField fx:id="txtSearch" promptText="🔍 Search by reason..." style="-fx-pref-width: 300px; -fx-font-size: 14px;" onKeyReleased="#handleSearch" />
+                <Button fx:id="btnAddTransaction" text="➕ Add Transaction" onAction="#handleAddTransaction"
+                        style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 8; -fx-pref-height: 40px; -fx-pref-width: 150px;" />
+            </HBox>
+
+            <!-- Transactions Table -->
+            <VBox VBox.vgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 20.0; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 5);">
+                <TableView fx:id="tableTransactions" VBox.vgrow="ALWAYS" style="-fx-font-size: 13px; -fx-background-radius: 8;">
+                    <columns>
+                        <TableColumn fx:id="colId" text="ID" prefWidth="50.0" style="-fx-alignment: CENTER;" />
+                        <TableColumn fx:id="colType" text="Type" prefWidth="100.0" style="-fx-alignment: CENTER;" />
+                        <TableColumn fx:id="colAmount" text="Amount" prefWidth="120.0" style="-fx-alignment: CENTER;" />
+                        <TableColumn fx:id="colReason" text="Reason" prefWidth="250.0" />
+                        <TableColumn fx:id="colCreatedBy" text="Created By" prefWidth="150.0" style="-fx-alignment: CENTER;" />
+                        <TableColumn fx:id="colCreatedAt" text="Created At" prefWidth="150.0" style="-fx-alignment: CENTER;" />
+                        <TableColumn fx:id="colActions" text="Actions" prefWidth="150.0" style="-fx-alignment: CENTER;" />
+                    </columns>
+                </TableView>
+                <HBox spacing="20.0" alignment="CENTER_LEFT" style="-fx-padding: 15.0 0 0 0;">
+                    <Label fx:id="lblTotalTransactions" text="Total: 0 transactions" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
+                    <Label fx:id="lblBalance" text="Balance: $0.00" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #27ae60;" />
+                </HBox>
+            </VBox>
+        </children>
+    </VBox>
+
+    <!-- Dialog Overlay (This is the missing part!) -->
+    <Pane fx:id="overlay" visible="false" managed="false" style="-fx-background-color: rgba(0, 0, 0, 0.6);">
+        <VBox fx:id="dialogPane" alignment="CENTER" style="-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 30, 0, 0, 10); -fx-padding: 35; -fx-pref-width: 550; -fx-pref-height: 450;"
+              layoutX="400" layoutY="150">
+
+            <!-- Dialog Header -->
+            <Label fx:id="dialogTitle" text="Add New Transaction" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-padding: 0 0 20 0;" />
+
+            <!-- Dialog Form -->
+            <GridPane hgap="20.0" vgap="20.0" style="-fx-padding: 20 0 30 0;">
+                <columnConstraints>
+                    <ColumnConstraints hgrow="NEVER" minWidth="120.0" />
+                    <ColumnConstraints hgrow="ALWAYS" minWidth="300.0" />
+                </columnConstraints>
+
+                <!-- Type -->
+                <Label text="Type:" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #34495e;" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                <ComboBox fx:id="cmbType" promptText="Select type..." style="-fx-pref-width: 300px; -fx-font-size: 14px;" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                    <items>
+                        <FXCollections fx:factory="observableArrayList">
+                            <String fx:value="Income"/>
+                            <String fx:value="Expense"/>
+                        </FXCollections>
+                    </items>
+                </ComboBox>
+
+                <!-- Amount -->
+                <Label text="Amount:" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #34495e;" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <TextField fx:id="txtAmount" promptText="Enter amount..." style="-fx-pref-width: 300px; -fx-font-size: 14px; -fx-padding: 10;" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                <!-- Reason -->
+                <Label text="Reason:" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #34495e;" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                <TextField fx:id="txtReason" promptText="Enter reason..." style="-fx-pref-width: 300px; -fx-font-size: 14px; -fx-padding: 10;" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            </GridPane>
+
+            <!-- Dialog Buttons -->
+            <HBox spacing="15.0" alignment="CENTER" style="-fx-padding: 20 0 0 0;">
+                <Button text="❌ Cancel" onAction="#handleCloseDialog"
+                        style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 10; -fx-pref-height: 45px; -fx-pref-width: 140px; -fx-font-size: 15px; -fx-font-weight: bold;" />
+                <Button fx:id="btnSave" text="💾 Save" onAction="#handleSaveTransaction"
+                        style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 10; -fx-pref-height: 45px; -fx-pref-width: 140px; -fx-font-size: 15px; -fx-font-weight: bold;" />
+            </HBox>
+        </VBox>
+    </Pane>
+
+</StackPane>

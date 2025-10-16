@@ -1,0 +1,977 @@
+package controller.manager;
+
+import dao.*;
+import javafx.animation.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
+import javafx.scene.chart.*;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.util.Duration;
+import model.*;
+
+import java.io.FileWriter;
+import java.io.IOException;
+import java.sql.*;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.*;
+import java.util.Date;
+
+public class ReportController {
+
+    @FXML private Label lblCurrentDate;
+    @FXML private ComboBox<String> cmbReportType;
+    @FXML private ComboBox<String> cmbTimePeriod;
+    @FXML private DatePicker dpFromDate;
+    @FXML private DatePicker dpToDate;
+    @FXML private Label lblFromDate;
+    @FXML private Label lblToDate;
+
+    // Summary Cards
+    @FXML private Label lblTotalRevenue;
+    @FXML private Label lblRevenueChange;
+    @FXML private Label lblTotalOrders;
+    @FXML private Label lblOrdersChange;
+    @FXML private Label lblNetProfit;
+    @FXML private Label lblProfitMargin;
+    @FXML private Label lblAvgOrderValue;
+    @FXML private Label lblAvgChange;
+
+    // Charts
+    @FXML private Label lblChartTitle;
+    @FXML private BarChart<String, Number> mainChart;
+    @FXML private CategoryAxis xAxis;
+    @FXML private NumberAxis yAxis;
+    @FXML private PieChart pieChart;
+
+    // Table
+    @FXML private Label lblTableTitle;
+    @FXML private TableView<Map<String, Object>> tableReport;
+    @FXML private TextField txtTableSearch;
+    @FXML private Label lblTableSummary;
+
+    // Loading
+    @FXML private StackPane loadingOverlay;
+    @FXML private Button btnGenerateReport;
+
+    private ObservableList<Map<String, Object>> reportData;
+    private ObservableList<Map<String, Object>> filteredData;
+    private DecimalFormat currencyFormat = new DecimalFormat("$#,##0.00");
+    private DecimalFormat percentFormat = new DecimalFormat("#0.0%");
+
+    @FXML
+    public void initialize() {
+        reportData = FXCollections.observableArrayList();
+        filteredData = FXCollections.observableArrayList();
+
+        updateCurrentDate();
+        setupDefaults();
+        handleGenerateReport();
+    }
+
+    private void updateCurrentDate() {
+        SimpleDateFormat sdf = new SimpleDateFormat("EEEE, MMMM dd, yyyy");
+        lblCurrentDate.setText(sdf.format(new Date()));
+    }
+
+    private void setupDefaults() {
+        cmbReportType.setValue("Revenue by Date");
+        cmbTimePeriod.setValue("This Month");
+    }
+
+    @FXML
+    private void handleReportTypeChange() {
+        // UI adjustments based on report type
+    }
+
+    @FXML
+    private void handleTimePeriodChange() {
+        String period = cmbTimePeriod.getValue();
+        boolean isCustom = "Custom Range".equals(period);
+
+        lblFromDate.setVisible(isCustom);
+        lblFromDate.setManaged(isCustom);
+        dpFromDate.setVisible(isCustom);
+        dpFromDate.setManaged(isCustom);
+
+        lblToDate.setVisible(isCustom);
+        lblToDate.setManaged(isCustom);
+        dpToDate.setVisible(isCustom);
+        dpToDate.setManaged(isCustom);
+    }
+
+    @FXML
+    private void handleGenerateReport() {
+        showLoading(true);
+
+        Timeline timeline = new Timeline(new KeyFrame(Duration.millis(500), e -> {
+            generateReport();
+            showLoading(false);
+        }));
+        timeline.play();
+    }
+
+    private void generateReport() {
+        String reportType = cmbReportType.getValue();
+
+        switch (reportType) {
+            case "Revenue by Date":
+                generateRevenueByDateReport();
+                break;
+            case "Revenue by Staff":
+                generateRevenueByStaffReport();
+                break;
+            case "Product Performance":
+                generateProductPerformanceReport();
+                break;
+            case "Profit Analysis":
+                generateProfitAnalysisReport();
+                break;
+            case "Inventory Usage":
+                generateInventoryUsageReport();
+                break;
+            default:
+                generateRevenueByDateReport();
+        }
+    }
+
+    private void generateRevenueByDateReport() {
+        reportData.clear();
+        tableReport.getColumns().clear();
+
+        DateRange dateRange = getDateRange();
+
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            String sql = "SELECT DATE(o.created_at) as order_date, " +
+                    "COUNT(DISTINCT o.id) as total_orders, " +
+                    "SUM(p.total_price) as revenue, " +
+                    "SUM(p.total_price - p.vat) as revenue_no_vat " +
+                    "FROM orders o " +
+                    "JOIN payments p ON o.id = p.order_id " +
+                    "WHERE o.created_at BETWEEN ? AND ? " +
+                    "AND o.status = 'paid' " +
+                    "GROUP BY DATE(o.created_at) " +
+                    "ORDER BY order_date DESC";
+
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setTimestamp(1, new Timestamp(dateRange.fromDate.getTime()));
+            ps.setTimestamp(2, new Timestamp(dateRange.toDate.getTime()));
+
+            ResultSet rs = ps.executeQuery();
+
+            double totalRevenue = 0;
+            int totalOrders = 0;
+
+            while (rs.next()) {
+                Map<String, Object> row = new HashMap<>();
+                row.put("date", rs.getDate("order_date"));
+                row.put("orders", rs.getInt("total_orders"));
+                row.put("revenue", rs.getDouble("revenue"));
+                row.put("revenue_no_vat", rs.getDouble("revenue_no_vat"));
+
+                reportData.add(row);
+                totalRevenue += rs.getDouble("revenue");
+                totalOrders += rs.getInt("total_orders");
+            }
+
+            updateSummaryCards(totalRevenue, totalOrders);
+            setupRevenueByDateTable();
+            updateRevenueChart();
+            updateRevenuePieChart();
+
+            filteredData.setAll(reportData);
+            tableReport.setItems(filteredData);
+            lblTableSummary.setText("Showing " + filteredData.size() + " records");
+
+            lblChartTitle.setText("📊 Revenue Trend");
+            lblTableTitle.setText("📋 Revenue by Date Details");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "Failed to generate report: " + e.getMessage());
+        }
+    }
+
+    private void generateRevenueByStaffReport() {
+        reportData.clear();
+        tableReport.getColumns().clear();
+
+        DateRange dateRange = getDateRange();
+
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            String sql = "SELECT u.id, u.username, u.role, " +
+                    "COUNT(DISTINCT o.id) as total_orders, " +
+                    "SUM(p.total_price) as revenue, " +
+                    "AVG(p.total_price) as avg_order_value " +
+                    "FROM users u " +
+                    "LEFT JOIN orders o ON u.id = o.staff_id " +
+                    "LEFT JOIN payments p ON o.id = p.order_id " +
+                    "WHERE o.created_at BETWEEN ? AND ? " +
+                    "AND o.status = 'paid' " +
+                    "GROUP BY u.id, u.username, u.role " +
+                    "ORDER BY revenue DESC";
+
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setTimestamp(1, new Timestamp(dateRange.fromDate.getTime()));
+            ps.setTimestamp(2, new Timestamp(dateRange.toDate.getTime()));
+
+            ResultSet rs = ps.executeQuery();
+
+            double totalRevenue = 0;
+            int totalOrders = 0;
+
+            while (rs.next()) {
+                Map<String, Object> row = new HashMap<>();
+                row.put("staff_id", rs.getInt("id"));
+                row.put("username", rs.getString("username"));
+                row.put("role", rs.getString("role"));
+                row.put("orders", rs.getInt("total_orders"));
+                row.put("revenue", rs.getDouble("revenue"));
+                row.put("avg_order", rs.getDouble("avg_order_value"));
+
+                reportData.add(row);
+                totalRevenue += rs.getDouble("revenue");
+                totalOrders += rs.getInt("total_orders");
+            }
+
+            updateSummaryCards(totalRevenue, totalOrders);
+            setupRevenueByStaffTable();
+            updateStaffRevenueChart();
+            updateStaffPieChart();
+
+            filteredData.setAll(reportData);
+            tableReport.setItems(filteredData);
+            lblTableSummary.setText("Showing " + filteredData.size() + " staff members");
+
+            lblChartTitle.setText("📊 Revenue by Staff");
+            lblTableTitle.setText("📋 Staff Performance Details");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "Failed to generate report: " + e.getMessage());
+        }
+    }
+
+    private void generateProductPerformanceReport() {
+        reportData.clear();
+        tableReport.getColumns().clear();
+
+        DateRange dateRange = getDateRange();
+
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            String sql = "SELECT p.id, p.name, p.price, " +
+                    "SUM(oi.quantity) as total_sold, " +
+                    "SUM(oi.quantity * oi.price) as revenue, " +
+                    "COUNT(DISTINCT oi.order_id) as num_orders " +
+                    "FROM products p " +
+                    "JOIN order_items oi ON p.id = oi.product_id " +
+                    "JOIN orders o ON oi.order_id = o.id " +
+                    "WHERE o.created_at BETWEEN ? AND ? " +
+                    "AND o.status = 'paid' " +
+                    "GROUP BY p.id, p.name, p.price " +
+                    "ORDER BY revenue DESC";
+
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setTimestamp(1, new Timestamp(dateRange.fromDate.getTime()));
+            ps.setTimestamp(2, new Timestamp(dateRange.toDate.getTime()));
+
+            ResultSet rs = ps.executeQuery();
+
+            double totalRevenue = 0;
+            int totalSold = 0;
+            int totalOrders = 0;
+
+            while (rs.next()) {
+                Map<String, Object> row = new HashMap<>();
+                row.put("product_id", rs.getInt("id"));
+                row.put("product_name", rs.getString("name"));
+                row.put("unit_price", rs.getDouble("price"));
+                row.put("quantity_sold", rs.getInt("total_sold"));
+                row.put("revenue", rs.getDouble("revenue"));
+                row.put("num_orders", rs.getInt("num_orders"));
+
+                reportData.add(row);
+                totalRevenue += rs.getDouble("revenue");
+                totalSold += rs.getInt("total_sold");
+                totalOrders += rs.getInt("num_orders");
+            }
+
+            updateSummaryCards(totalRevenue, totalOrders);
+            setupProductPerformanceTable();
+            updateProductChart();
+            updateProductPieChart();
+
+            filteredData.setAll(reportData);
+            tableReport.setItems(filteredData);
+            lblTableSummary.setText("Showing " + filteredData.size() + " products | Total Sold: " + totalSold);
+
+            lblChartTitle.setText("📊 Product Performance");
+            lblTableTitle.setText("📋 Product Sales Details");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "Failed to generate report: " + e.getMessage());
+        }
+    }
+
+    private void generateProfitAnalysisReport() {
+        reportData.clear();
+        tableReport.getColumns().clear();
+
+        DateRange dateRange = getDateRange();
+
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            String sql = "SELECT DATE(o.created_at) as order_date, " +
+                    "SUM(p.total_price) as revenue, " +
+                    "SUM(p.vat) as total_vat, " +
+                    "COUNT(DISTINCT o.id) as orders " +
+                    "FROM orders o " +
+                    "JOIN payments p ON o.id = p.order_id " +
+                    "WHERE o.created_at BETWEEN ? AND ? " +
+                    "AND o.status = 'paid' " +
+                    "GROUP BY DATE(o.created_at) " +
+                    "ORDER BY order_date DESC";
+
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setTimestamp(1, new Timestamp(dateRange.fromDate.getTime()));
+            ps.setTimestamp(2, new Timestamp(dateRange.toDate.getTime()));
+
+            ResultSet rs = ps.executeQuery();
+
+            double totalRevenue = 0;
+            double totalCost = 0;
+            int totalOrders = 0;
+
+            while (rs.next()) {
+                double revenue = rs.getDouble("revenue");
+                double estimatedCost = revenue * 0.35; // 35% cost estimate
+                double profit = revenue - estimatedCost;
+
+                Map<String, Object> row = new HashMap<>();
+                row.put("date", rs.getDate("order_date"));
+                row.put("revenue", revenue);
+                row.put("cost", estimatedCost);
+                row.put("profit", profit);
+                row.put("profit_margin", profit / revenue);
+                row.put("orders", rs.getInt("orders"));
+
+                reportData.add(row);
+                totalRevenue += revenue;
+                totalCost += estimatedCost;
+                totalOrders += rs.getInt("orders");
+            }
+
+            double netProfit = totalRevenue - totalCost;
+            lblTotalRevenue.setText(currencyFormat.format(totalRevenue));
+            lblTotalOrders.setText(String.valueOf(totalOrders));
+            lblNetProfit.setText(currencyFormat.format(netProfit));
+            lblProfitMargin.setText("Margin: " + percentFormat.format(netProfit / totalRevenue));
+            lblAvgOrderValue.setText(currencyFormat.format(totalOrders > 0 ? totalRevenue / totalOrders : 0));
+
+            setupProfitAnalysisTable();
+            updateProfitChart();
+            updateProfitPieChart();
+
+            filteredData.setAll(reportData);
+            tableReport.setItems(filteredData);
+            lblTableSummary.setText("Showing " + filteredData.size() + " records");
+
+            lblChartTitle.setText("📊 Profit Analysis");
+            lblTableTitle.setText("📋 Profit Details by Date");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "Failed to generate report: " + e.getMessage());
+        }
+    }
+
+    private void generateInventoryUsageReport() {
+        reportData.clear();
+        tableReport.getColumns().clear();
+
+        DateRange dateRange = getDateRange();
+
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            String sql = "SELECT i.id, i.name, i.unit, i.cost_per_unit, i.quantity as current_stock, " +
+                    "SUM(pi.quantity * oi.quantity) as total_used, " +
+                    "SUM(pi.quantity * oi.quantity * i.cost_per_unit) as total_cost " +
+                    "FROM inventory i " +
+                    "JOIN product_ingredients pi ON i.id = pi.inventory_id " +
+                    "JOIN order_items oi ON pi.product_id = oi.product_id " +
+                    "JOIN orders o ON oi.order_id = o.id " +
+                    "WHERE o.created_at BETWEEN ? AND ? " +
+                    "AND o.status = 'paid' " +
+                    "GROUP BY i.id, i.name, i.unit, i.cost_per_unit, i.quantity " +
+                    "ORDER BY total_cost DESC";
+
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setTimestamp(1, new Timestamp(dateRange.fromDate.getTime()));
+            ps.setTimestamp(2, new Timestamp(dateRange.toDate.getTime()));
+
+            ResultSet rs = ps.executeQuery();
+
+            double totalCost = 0;
+
+            while (rs.next()) {
+                Map<String, Object> row = new HashMap<>();
+                row.put("inventory_id", rs.getInt("id"));
+                row.put("item_name", rs.getString("name"));
+                row.put("unit", rs.getString("unit"));
+                row.put("cost_per_unit", rs.getDouble("cost_per_unit"));
+                row.put("current_stock", rs.getDouble("current_stock"));
+                row.put("total_used", rs.getDouble("total_used"));
+                row.put("total_cost", rs.getDouble("total_cost"));
+
+                reportData.add(row);
+                totalCost += rs.getDouble("total_cost");
+            }
+
+            lblTotalRevenue.setText("N/A");
+            lblTotalOrders.setText(String.valueOf(reportData.size()));
+            lblNetProfit.setText(currencyFormat.format(-totalCost)); // Negative as cost
+            lblProfitMargin.setText("Total Cost");
+            lblAvgOrderValue.setText(currencyFormat.format(reportData.size() > 0 ? totalCost / reportData.size() : 0));
+
+            setupInventoryUsageTable();
+            updateInventoryChart();
+            updateInventoryPieChart();
+
+            filteredData.setAll(reportData);
+            tableReport.setItems(filteredData);
+            lblTableSummary.setText("Showing " + filteredData.size() + " inventory items");
+
+            lblChartTitle.setText("📊 Inventory Usage");
+            lblTableTitle.setText("📋 Inventory Consumption Details");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "Failed to generate report: " + e.getMessage());
+        }
+    }
+
+    // Table Setup Methods
+    private void setupRevenueByDateTable() {
+        TableColumn<Map<String, Object>, Date> colDate = new TableColumn<>("Date");
+        colDate.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>((Date) data.getValue().get("date")));
+        colDate.setCellFactory(col -> new TableCell<Map<String, Object>, Date>() {
+            @Override
+            protected void updateItem(Date item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : new SimpleDateFormat("MMM dd, yyyy").format(item));
+            }
+        });
+
+        TableColumn<Map<String, Object>, Integer> colOrders = new TableColumn<>("Orders");
+        colOrders.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>((Integer) data.getValue().get("orders")));
+
+        TableColumn<Map<String, Object>, Double> colRevenue = new TableColumn<>("Revenue");
+        colRevenue.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>((Double) data.getValue().get("revenue")));
+        colRevenue.setCellFactory(col -> new TableCell<Map<String, Object>, Double>() {
+            @Override
+            protected void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : currencyFormat.format(item));
+            }
+        });
+
+        tableReport.getColumns().addAll(colDate, colOrders, colRevenue);
+    }
+
+    private void setupRevenueByStaffTable() {
+        TableColumn<Map<String, Object>, String> colUsername = new TableColumn<>("Staff");
+        colUsername.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty((String) data.getValue().get("username")));
+
+        TableColumn<Map<String, Object>, String> colRole = new TableColumn<>("Role");
+        colRole.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty((String) data.getValue().get("role")));
+
+        TableColumn<Map<String, Object>, Integer> colOrders = new TableColumn<>("Orders");
+        colOrders.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>((Integer) data.getValue().get("orders")));
+
+        TableColumn<Map<String, Object>, Double> colRevenue = new TableColumn<>("Revenue");
+        colRevenue.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>((Double) data.getValue().get("revenue")));
+        colRevenue.setCellFactory(col -> new TableCell<Map<String, Object>, Double>() {
+            @Override
+            protected void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : currencyFormat.format(item));
+            }
+        });
+
+        TableColumn<Map<String, Object>, Double> colAvg = new TableColumn<>("Avg Order");
+        colAvg.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>((Double) data.getValue().get("avg_order")));
+        colAvg.setCellFactory(col -> new TableCell<Map<String, Object>, Double>() {
+            @Override
+            protected void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : currencyFormat.format(item));
+            }
+        });
+
+        tableReport.getColumns().addAll(colUsername, colRole, colOrders, colRevenue, colAvg);
+    }
+
+    private void setupProductPerformanceTable() {
+        TableColumn<Map<String, Object>, String> colProduct = new TableColumn<>("Product");
+        colProduct.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty((String) data.getValue().get("product_name")));
+
+        TableColumn<Map<String, Object>, Double> colPrice = new TableColumn<>("Unit Price");
+        colPrice.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>((Double) data.getValue().get("unit_price")));
+        colPrice.setCellFactory(col -> new TableCell<Map<String, Object>, Double>() {
+            @Override
+            protected void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : currencyFormat.format(item));
+            }
+        });
+
+        TableColumn<Map<String, Object>, Integer> colSold = new TableColumn<>("Qty Sold");
+        colSold.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>((Integer) data.getValue().get("quantity_sold")));
+
+        TableColumn<Map<String, Object>, Double> colRevenue = new TableColumn<>("Revenue");
+        colRevenue.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>((Double) data.getValue().get("revenue")));
+        colRevenue.setCellFactory(col -> new TableCell<Map<String, Object>, Double>() {
+            @Override
+            protected void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : currencyFormat.format(item));
+            }
+        });
+
+        TableColumn<Map<String, Object>, Integer> colOrders = new TableColumn<>("Orders");
+        colOrders.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>((Integer) data.getValue().get("num_orders")));
+
+        tableReport.getColumns().addAll(colProduct, colPrice, colSold, colRevenue, colOrders);
+    }
+
+    private void setupProfitAnalysisTable() {
+        TableColumn<Map<String, Object>, Date> colDate = new TableColumn<>("Date");
+        colDate.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>((Date) data.getValue().get("date")));
+        colDate.setCellFactory(col -> new TableCell<Map<String, Object>, Date>() {
+            @Override
+            protected void updateItem(Date item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : new SimpleDateFormat("MMM dd, yyyy").format(item));
+            }
+        });
+
+        TableColumn<Map<String, Object>, Double> colRevenue = new TableColumn<>("Revenue");
+        colRevenue.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>((Double) data.getValue().get("revenue")));
+        colRevenue.setCellFactory(col -> new TableCell<Map<String, Object>, Double>() {
+            @Override
+            protected void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : currencyFormat.format(item));
+            }
+        });
+
+        TableColumn<Map<String, Object>, Double> colCost = new TableColumn<>("Cost");
+        colCost.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>((Double) data.getValue().get("cost")));
+        colCost.setCellFactory(col -> new TableCell<Map<String, Object>, Double>() {
+            @Override
+            protected void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : currencyFormat.format(item));
+            }
+        });
+
+        TableColumn<Map<String, Object>, Double> colProfit = new TableColumn<>("Profit");
+        colProfit.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>((Double) data.getValue().get("profit")));
+        colProfit.setCellFactory(col -> new TableCell<Map<String, Object>, Double>() {
+            @Override
+            protected void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : currencyFormat.format(item));
+            }
+        });
+
+        TableColumn<Map<String, Object>, Double> colMargin = new TableColumn<>("Margin %");
+        colMargin.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>((Double) data.getValue().get("profit_margin")));
+        colMargin.setCellFactory(col -> new TableCell<Map<String, Object>, Double>() {
+            @Override
+            protected void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : percentFormat.format(item));
+            }
+        });
+
+        tableReport.getColumns().addAll(colDate, colRevenue, colCost, colProfit, colMargin);
+    }
+
+    private void setupInventoryUsageTable() {
+        TableColumn<Map<String, Object>, String> colItem = new TableColumn<>("Item");
+        colItem.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty((String) data.getValue().get("item_name")));
+
+        TableColumn<Map<String, Object>, String> colUnit = new TableColumn<>("Unit");
+        colUnit.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty((String) data.getValue().get("unit")));
+
+        TableColumn<Map<String, Object>, Double> colUsed = new TableColumn<>("Used");
+        colUsed.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>((Double) data.getValue().get("total_used")));
+        colUsed.setCellFactory(col -> new TableCell<Map<String, Object>, Double>() {
+            @Override
+            protected void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : String.format("%.2f", item));
+            }
+        });
+
+        TableColumn<Map<String, Object>, Double> colStock = new TableColumn<>("Current Stock");
+        colStock.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>((Double) data.getValue().get("current_stock")));
+        colStock.setCellFactory(col -> new TableCell<Map<String, Object>, Double>() {
+            @Override
+            protected void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : String.format("%.2f", item));
+            }
+        });
+
+        TableColumn<Map<String, Object>, Double> colCost = new TableColumn<>("Total Cost");
+        colCost.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>((Double) data.getValue().get("total_cost")));
+        colCost.setCellFactory(col -> new TableCell<Map<String, Object>, Double>() {
+            @Override
+            protected void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : currencyFormat.format(item));
+            }
+        });
+
+        tableReport.getColumns().addAll(colItem, colUnit, colUsed, colStock, colCost);
+    }
+
+    // Chart Update Methods
+    private void updateRevenueChart() {
+        mainChart.getData().clear();
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Daily Revenue");
+
+        SimpleDateFormat sdf = new SimpleDateFormat("MMM dd");
+        for (Map<String, Object> row : reportData) {
+            String date = sdf.format((Date) row.get("date"));
+            double revenue = (Double) row.get("revenue");
+            series.getData().add(new XYChart.Data<>(date, revenue));
+        }
+
+        mainChart.getData().add(series);
+        yAxis.setLabel("Revenue ($)");
+    }
+
+    private void updateRevenuePieChart() {
+        pieChart.getData().clear();
+
+        SimpleDateFormat sdf = new SimpleDateFormat("MMM dd");
+        for (Map<String, Object> row : reportData) {
+            String date = sdf.format((Date) row.get("date"));
+            double revenue = (Double) row.get("revenue");
+            pieChart.getData().add(new PieChart.Data(date, revenue));
+        }
+    }
+
+    private void updateStaffRevenueChart() {
+        mainChart.getData().clear();
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Staff Revenue");
+
+        for (Map<String, Object> row : reportData) {
+            String staff = (String) row.get("username");
+            double revenue = (Double) row.get("revenue");
+            series.getData().add(new XYChart.Data<>(staff, revenue));
+        }
+
+        mainChart.getData().add(series);
+        yAxis.setLabel("Revenue ($)");
+    }
+
+    private void updateStaffPieChart() {
+        pieChart.getData().clear();
+
+        for (Map<String, Object> row : reportData) {
+            String staff = (String) row.get("username");
+            double revenue = (Double) row.get("revenue");
+            pieChart.getData().add(new PieChart.Data(staff, revenue));
+        }
+    }
+
+    private void updateProductChart() {
+        mainChart.getData().clear();
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Product Sales");
+
+        int count = 0;
+        for (Map<String, Object> row : reportData) {
+            if (count++ >= 10) break; // Top 10 products
+            String product = (String) row.get("product_name");
+            double revenue = (Double) row.get("revenue");
+            series.getData().add(new XYChart.Data<>(product, revenue));
+        }
+
+        mainChart.getData().add(series);
+        yAxis.setLabel("Revenue ($)");
+    }
+
+    private void updateProductPieChart() {
+        pieChart.getData().clear();
+
+        int count = 0;
+        for (Map<String, Object> row : reportData) {
+            if (count++ >= 8) break; // Top 8 products for pie chart
+            String product = (String) row.get("product_name");
+            double revenue = (Double) row.get("revenue");
+            pieChart.getData().add(new PieChart.Data(product, revenue));
+        }
+    }
+
+    private void updateProfitChart() {
+        mainChart.getData().clear();
+        XYChart.Series<String, Number> revenueSeriesSeries = new XYChart.Series<>();
+        revenueSeriesSeries.setName("Revenue");
+
+        XYChart.Series<String, Number> profitSeries = new XYChart.Series<>();
+        profitSeries.setName("Profit");
+
+        SimpleDateFormat sdf = new SimpleDateFormat("MMM dd");
+        for (Map<String, Object> row : reportData) {
+            String date = sdf.format((Date) row.get("date"));
+            double revenue = (Double) row.get("revenue");
+            double profit = (Double) row.get("profit");
+
+            revenueSeriesSeries.getData().add(new XYChart.Data<>(date, revenue));
+            profitSeries.getData().add(new XYChart.Data<>(date, profit));
+        }
+
+        mainChart.getData().addAll(revenueSeriesSeries, profitSeries);
+        yAxis.setLabel("Amount ($)");
+    }
+
+    private void updateProfitPieChart() {
+        pieChart.getData().clear();
+
+        double totalRevenue = 0;
+        double totalCost = 0;
+
+        for (Map<String, Object> row : reportData) {
+            totalRevenue += (Double) row.get("revenue");
+            totalCost += (Double) row.get("cost");
+        }
+
+        double profit = totalRevenue - totalCost;
+
+        pieChart.getData().add(new PieChart.Data("Revenue", totalRevenue));
+        pieChart.getData().add(new PieChart.Data("Cost", totalCost));
+        pieChart.getData().add(new PieChart.Data("Profit", profit));
+    }
+
+    private void updateInventoryChart() {
+        mainChart.getData().clear();
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Inventory Usage");
+
+        int count = 0;
+        for (Map<String, Object> row : reportData) {
+            if (count++ >= 10) break;
+            String item = (String) row.get("item_name");
+            double used = (Double) row.get("total_used");
+            series.getData().add(new XYChart.Data<>(item, used));
+        }
+
+        mainChart.getData().add(series);
+        yAxis.setLabel("Quantity Used");
+    }
+
+    private void updateInventoryPieChart() {
+        pieChart.getData().clear();
+
+        int count = 0;
+        for (Map<String, Object> row : reportData) {
+            if (count++ >= 8) break;
+            String item = (String) row.get("item_name");
+            double cost = (Double) row.get("total_cost");
+            pieChart.getData().add(new PieChart.Data(item, cost));
+        }
+    }
+
+    // Helper Methods
+    private void updateSummaryCards(double totalRevenue, int totalOrders) {
+        lblTotalRevenue.setText(currencyFormat.format(totalRevenue));
+        lblTotalOrders.setText(String.valueOf(totalOrders));
+        lblAvgOrderValue.setText(currencyFormat.format(totalOrders > 0 ? totalRevenue / totalOrders : 0));
+
+        double estimatedCosts = totalRevenue * 0.35;
+        double profit = totalRevenue - estimatedCosts;
+        lblNetProfit.setText(currencyFormat.format(profit));
+        lblProfitMargin.setText("Margin: " + percentFormat.format(totalRevenue > 0 ? profit / totalRevenue : 0));
+
+        // Mock change percentages
+        lblRevenueChange.setText("↑ +12.5% from last period");
+        lblOrdersChange.setText("↑ +8.3% from last period");
+        lblAvgChange.setText("↑ +3.7% from last period");
+    }
+
+    private DateRange getDateRange() {
+        DateRange range = new DateRange();
+        String period = cmbTimePeriod.getValue();
+
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY, 23);
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.SECOND, 59);
+        range.toDate = cal.getTime();
+
+        switch (period) {
+            case "Today":
+                cal.set(Calendar.HOUR_OF_DAY, 0);
+                cal.set(Calendar.MINUTE, 0);
+                cal.set(Calendar.SECOND, 0);
+                range.fromDate = cal.getTime();
+                break;
+
+            case "This Week":
+                cal.set(Calendar.DAY_OF_WEEK, cal.getFirstDayOfWeek());
+                cal.set(Calendar.HOUR_OF_DAY, 0);
+                cal.set(Calendar.MINUTE, 0);
+                cal.set(Calendar.SECOND, 0);
+                range.fromDate = cal.getTime();
+                break;
+
+            case "This Month":
+                cal.set(Calendar.DAY_OF_MONTH, 1);
+                cal.set(Calendar.HOUR_OF_DAY, 0);
+                cal.set(Calendar.MINUTE, 0);
+                cal.set(Calendar.SECOND, 0);
+                range.fromDate = cal.getTime();
+                break;
+
+            case "This Year":
+                cal.set(Calendar.DAY_OF_YEAR, 1);
+                cal.set(Calendar.HOUR_OF_DAY, 0);
+                cal.set(Calendar.MINUTE, 0);
+                cal.set(Calendar.SECOND, 0);
+                range.fromDate = cal.getTime();
+                break;
+
+            case "Custom Range":
+                if (dpFromDate.getValue() != null && dpToDate.getValue() != null) {
+                    range.fromDate = Date.from(dpFromDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
+                    range.toDate = Date.from(dpToDate.getValue().atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant());
+                } else {
+                    // Default to this month if dates not set
+                    cal.set(Calendar.DAY_OF_MONTH, 1);
+                    cal.set(Calendar.HOUR_OF_DAY, 0);
+                    cal.set(Calendar.MINUTE, 0);
+                    cal.set(Calendar.SECOND, 0);
+                    range.fromDate = cal.getTime();
+
+                    cal = Calendar.getInstance();
+                    cal.set(Calendar.HOUR_OF_DAY, 23);
+                    cal.set(Calendar.MINUTE, 59);
+                    cal.set(Calendar.SECOND, 59);
+                    range.toDate = cal.getTime();
+                }
+                break;
+
+            default:
+                cal.add(Calendar.DAY_OF_MONTH, -30);
+                range.fromDate = cal.getTime();
+        }
+
+        return range;
+    }
+
+    @FXML
+    private void handleTableSearch() {
+        String searchText = txtTableSearch.getText().toLowerCase().trim();
+
+        if (searchText.isEmpty()) {
+            filteredData.setAll(reportData);
+        } else {
+            filteredData.clear();
+            for (Map<String, Object> row : reportData) {
+                boolean matches = false;
+                for (Object value : row.values()) {
+                    if (value != null && value.toString().toLowerCase().contains(searchText)) {
+                        matches = true;
+                        break;
+                    }
+                }
+                if (matches) {
+                    filteredData.add(row);
+                }
+            }
+        }
+
+        tableReport.setItems(filteredData);
+        lblTableSummary.setText("Showing " + filteredData.size() + " of " + reportData.size() + " records");
+    }
+
+    @FXML
+    private void handleExportChart() {
+        showAlert(Alert.AlertType.INFORMATION, "Export Chart", "Chart export feature coming soon!");
+    }
+
+    @FXML
+    private void handleExportCSV() {
+        if (reportData.isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "No Data", "No data to export!");
+            return;
+        }
+
+        try {
+            String filename = "report_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".csv";
+            FileWriter writer = new FileWriter(filename);
+
+            // Write headers
+            Map<String, Object> firstRow = reportData.get(0);
+            writer.append(String.join(",", firstRow.keySet()));
+            writer.append("\n");
+
+            // Write data
+            for (Map<String, Object> row : reportData) {
+                List<String> values = new ArrayList<>();
+                for (Object value : row.values()) {
+                    values.add(value != null ? value.toString() : "");
+                }
+                writer.append(String.join(",", values));
+                writer.append("\n");
+            }
+
+            writer.flush();
+            writer.close();
+
+            showAlert(Alert.AlertType.INFORMATION, "Export Successful",
+                    "Data exported to " + filename);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Export Failed",
+                    "Failed to export CSV: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleExportPDF() {
+        showAlert(Alert.AlertType.INFORMATION, "Export PDF", "PDF export feature coming soon!");
+    }
+
+    private void showLoading(boolean show) {
+        loadingOverlay.setVisible(show);
+        loadingOverlay.setManaged(show);
+    }
+
+    private void showAlert(Alert.AlertType type, String title, String message) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    // Inner class for date range
+    private static class DateRange {
+        Date fromDate;
+        Date toDate;
+    }
+}

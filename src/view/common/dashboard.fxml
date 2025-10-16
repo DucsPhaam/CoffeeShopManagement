@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
+
+<VBox spacing="20.0" style="-fx-background-color: #f8f9fa;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.common.DashboardController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+
+    <children>
+        <!-- Header with Date -->
+        <HBox alignment="CENTER_LEFT" spacing="20.0">
+            <Label text="📊 Overview" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;">
+                <font>
+                    <Font size="28.0" />
+                </font>
+            </Label>
+            <Region HBox.hgrow="ALWAYS" />
+            <Label fx:id="lblDate" text="Thursday, 16/10/2025" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;" />
+            <Button fx:id="btnRefresh" onAction="#handleRefresh" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 8; -fx-pref-height: 40px; -fx-pref-width: 120px;" text="🔄 Refresh" />
+        </HBox>
+
+        <!-- Statistics Cards -->
+        <GridPane hgap="20.0" vgap="20.0">
+            <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="200.0" percentWidth="25.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="200.0" percentWidth="25.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="200.0" percentWidth="25.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="200.0" percentWidth="25.0" />
+            </columnConstraints>
+
+            <!-- Card 1: Daily Revenue -->
+            <VBox spacing="12.0" style="-fx-background-color: linear-gradient(to bottom right, #667eea 0%, #764ba2 100%); -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 5);" GridPane.columnIndex="0">
+                <Label text="💵 DAILY REVENUE" textFill="#E8E8E8">
+                    <font>
+                        <Font size="12.0" />
+                    </font>
+                </Label>
+                <Label fx:id="lblDailyRevenue" text="0 đ" textFill="WHITE">
+                    <font>
+                        <Font name="System Bold" size="28.0" />
+                    </font>
+                </Label>
+                <Label fx:id="lblDailyChange" text="↑ +0% compared to yesterday" textFill="#A8F5A8" style="-fx-font-size: 11px;" />
+            </VBox>
+
+            <!-- Card 2: Monthly Revenue -->
+            <VBox spacing="12.0" style="-fx-background-color: linear-gradient(to bottom right, #f093fb 0%, #f5576c 100%); -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 5);" GridPane.columnIndex="1">
+                <Label text="📈 MONTHLY REVENUE" textFill="#E8E8E8">
+                    <font>
+                        <Font size="12.0" />
+                    </font>
+                </Label>
+                <Label fx:id="lblMonthlyRevenue" text="0 đ" textFill="WHITE">
+                    <font>
+                        <Font name="System Bold" size="28.0" />
+                    </font>
+                </Label>
+                <Label fx:id="lblMonthlyChange" text="↑ +0% compared to last month" textFill="#A8F5A8" style="-fx-font-size: 11px;" />
+            </VBox>
+
+            <!-- Card 3: Today Orders -->
+            <VBox spacing="12.0" style="-fx-background-color: linear-gradient(to bottom right, #4facfe 0%, #00f2fe 100%); -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 5);" GridPane.columnIndex="2">
+                <Label text="📝 TODAY'S ORDERS" textFill="#E8E8E8">
+                    <font>
+                        <Font size="12.0" />
+                    </font>
+                </Label>
+                <Label fx:id="lblTodayOrders" text="0" textFill="WHITE">
+                    <font>
+                        <Font name="System Bold" size="28.0" />
+                    </font>
+                </Label>
+                <HBox spacing="15.0">
+                    <Label fx:id="lblPaidOrders" text="✓ Paid: 0" textFill="WHITE" style="-fx-font-size: 11px;" />
+                    <Label fx:id="lblUnpaidOrders" text="⏳ Unpaid: 0" textFill="#FFE66D" style="-fx-font-size: 11px;" />
+                </HBox>
+            </VBox>
+
+            <!-- Card 4: Tables Status -->
+            <VBox spacing="12.0" style="-fx-background-color: linear-gradient(to bottom right, #fa709a 0%, #fee140 100%); -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 5);" GridPane.columnIndex="3">
+                <Label text="🪑 TABLE STATUS" textFill="#E8E8E8">
+                    <font>
+                        <Font size="12.0" />
+                    </font>
+                </Label>
+                <Label fx:id="lblOccupiedTables" text="0/30" textFill="WHITE">
+                    <font>
+                        <Font name="System Bold" size="28.0" />
+                    </font>
+                </Label>
+                <Label fx:id="lblTableStatus" text="Tables in Service" textFill="WHITE" style="-fx-font-size: 11px;" />
+            </VBox>
+        </GridPane>
+
+        <!-- Alert Section (Low Stock Warning) -->
+        <VBox fx:id="alertSection" spacing="10.0" style="-fx-background-color: #fff3cd; -fx-border-color: #ffc107; -fx-border-width: 2; -fx-background-radius: 10; -fx-border-radius: 10; -fx-padding: 15;" visible="false">
+            <HBox spacing="10.0" alignment="CENTER_LEFT">
+                <Label text="⚠️" style="-fx-font-size: 24px;" />
+                <VBox spacing="5.0">
+                    <Label text="Low Stock Warning" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #856404;" />
+                    <Label fx:id="lblLowStockWarning" text="There are 0 items running low!" style="-fx-text-fill: #856404;" />
+                </VBox>
+                <Region HBox.hgrow="ALWAYS" />
+                <Button text="View Details" onAction="#handleViewLowStock" style="-fx-background-color: #ffc107; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 5; -fx-font-weight: bold;" />
+            </HBox>
+        </VBox>
+
+        <!-- Main Content Area -->
+        <HBox spacing="20.0" VBox.vgrow="ALWAYS">
+            <!-- Left: Best Selling Products -->
+            <VBox spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 5);" HBox.hgrow="ALWAYS">
+                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                    <Label text="🔥 Best Selling Products" style="-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #2c3e50;" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <ComboBox fx:id="cbTimeFilter" onAction="#handleTimeFilter" style="-fx-pref-width: 120px;" value="Today">
+                        <items>
+                            <FXCollections fx:factory="observableArrayList">
+                                <String fx:value="Today" />
+                                <String fx:value="This Week" />
+                                <String fx:value="This Month" />
+                            </FXCollections>
+                        </items>
+                    </ComboBox>
+                </HBox>
+
+                <TableView fx:id="bestSellingTable" style="-fx-background-radius: 8;" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colRank" prefWidth="50.0" text="#" />
+                        <TableColumn fx:id="colProductName" prefWidth="200.0" text="Product" />
+                        <TableColumn fx:id="colQuantitySold" prefWidth="100.0" text="Sold" />
+                        <TableColumn fx:id="colRevenue" prefWidth="120.0" text="Revenue" />
+                    </columns>
+                </TableView>
+            </VBox>
+
+            <!-- Right: Recent Orders -->
+            <VBox spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 5);" HBox.hgrow="ALWAYS">
+                <Label text="📋 Recent Orders" style="-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #2c3e50;" />
+
+                <TableView fx:id="recentOrdersTable" style="-fx-background-radius: 8;" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colOrderId" prefWidth="80.0" text="Order ID" />
+                        <TableColumn fx:id="colTable" prefWidth="100.0" text="Table/Type" />
+                        <TableColumn fx:id="colStaff" prefWidth="120.0" text="Staff" />
+                        <TableColumn fx:id="colTotal" prefWidth="100.0" text="Total" />
+                        <TableColumn fx:id="colStatus" prefWidth="100.0" text="Status" />
+                    </columns>
+                </TableView>
+            </VBox>
+        </HBox>
+
+        <!-- Bottom Section: Quick Stats -->
+        <HBox spacing="20.0">
+            <!-- Staff Online -->
+            <VBox spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 5);" HBox.hgrow="ALWAYS">
+                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                    <Label text="👥" style="-fx-font-size: 24px;" />
+                    <VBox>
+                        <Label text="Staff Online" style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;" />
+                        <Label fx:id="lblStaffOnline" text="0/0" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
+                    </VBox>
+                </HBox>
+            </VBox>
+
+            <!-- Average Order Value -->
+            <VBox spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 5);" HBox.hgrow="ALWAYS">
+                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                    <Label text="💰" style="-fx-font-size: 24px;" />
+                    <VBox>
+                        <Label text="Average Order Value" style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;" />
+                        <Label fx:id="lblAvgOrderValue" text="0 đ" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
+                    </VBox>
+                </HBox>
+            </VBox>
+
+            <!-- Peak Hour -->
+            <VBox spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 5);" HBox.hgrow="ALWAYS">
+                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                    <Label text="⏰" style="-fx-font-size: 24px;" />
+                    <VBox>
+                        <Label text="Peak Hour" style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;" />
+                        <Label fx:id="lblPeakHour" text="--:-- - --:--" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
+                    </VBox>
+                </HBox>
+            </VBox>
+        </HBox>
+    </children>
+</VBox>
