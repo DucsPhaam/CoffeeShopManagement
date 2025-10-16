@@ -94,5 +94,5 @@ Example (Windows):
 ## Special thanks for the collaboration:
 > [bakugo2234](https://github.com/bakugo2234)</br>
 > [kitty1657](https://github.com/kitty1657)</br>
-
+> [TrungVD3006](https://github.com/TrungVD3006)</br>
 **© Copyright**
