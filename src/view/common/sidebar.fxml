@@ -147,13 +147,13 @@
                             </children>
                         </HBox>
 
-                        <!-- Inventory Management -->
+                        <!-- Inventory -->
                         <HBox fx:id="inventoryBox" alignment="CENTER_LEFT" prefHeight="55.0" style="-fx-background-radius: 10; -fx-cursor: hand;">
                             <padding>
                                 <Insets left="25.0" right="15.0" />
                             </padding>
                             <children>
-                                <Button fx:id="inventoryBtn" alignment="CENTER_LEFT" graphicTextGap="15" mnemonicParsing="false" onAction="#HandleInventoryClicked" prefHeight="50.0" prefWidth="240.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;" text="Inventory Management">
+                                <Button fx:id="inventoryBtn" alignment="CENTER_LEFT" graphicTextGap="15" mnemonicParsing="false" onAction="#HandleInventoryClicked" prefHeight="50.0" prefWidth="240.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;" text="Inventory">
                                     <graphic>
                                         <ImageView fitHeight="28.0" fitWidth="28.0" pickOnBounds="true" preserveRatio="true">
                                             <image>
@@ -283,4 +283,5 @@
     <center>
         <AnchorPane prefHeight="690.0" prefWidth="1070.0" style="-fx-background-color: #f8f9fa;" BorderPane.alignment="CENTER" />
     </center>
+
 </BorderPane>
