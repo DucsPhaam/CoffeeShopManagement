@@ -68,15 +68,7 @@ DB_NAME=coffeeshop
 DB_USER=your_user
 DB_PASS=your_pass
 ```
-### 3️⃣ Install JavaFX (Required)
-
-This project uses JavaFX 21 LTS.
-
-Download JavaFX SDK 21.0.8 (LTS) from:
-👉 https://gluonhq.com/products/javafx/
-Extract the archive and copy the lib/ or bin/ folder into your project (e.g. /javafx-sdk-21/lib).
-### 4️⃣ Configure JVM Run Options (IntelliJ IDEA)
-
+### 3️⃣ Configure JVM Run Options (IntelliJ IDEA)
 Go to:
 ```Run → Edit Configurations → VM Options```
 
