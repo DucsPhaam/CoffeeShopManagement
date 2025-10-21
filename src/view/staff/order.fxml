@@ -9,7 +9,7 @@
 <?import javafx.scene.image.Image?>
 <BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.staff.OrderController"
             style="-fx-background-color: #f5f7fa;">
-
+    
     <!-- Header -->
     <top>
         <VBox>
@@ -45,17 +45,17 @@
             <Region style="-fx-background-color: #764ba2; -fx-pref-height: 3;"/>
         </VBox>
     </top>
-
+    
     <center>
         <HBox spacing="20" style="-fx-padding: 25;">
             <!-- LEFT COLUMN -->
             <VBox spacing="15" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20;" HBox.hgrow="ALWAYS">
-
+                
                 <!-- Notification Area -->
                 <VBox fx:id="notificationPane" spacing="10" visible="false" managed="false" style="-fx-background-color: #edf2f7; -fx-background-radius: 10; -fx-padding: 15; -fx-border-color: #cbd5e0; -fx-border-radius: 10; -fx-border-width: 2;">
                     <Label fx:id="lblNotification" text="" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1a202c;"/>
                 </VBox>
-
+                
                 <!-- Order Type Selection -->
                 <VBox spacing="10">
                     <Label text="Order Type" style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #4a5568;"/>
@@ -66,16 +66,16 @@
                                       style="-fx-background-color: #f7fafc; -fx-text-fill: #718096; -fx-font-size: 14px; -fx-font-weight: 600; -fx-background-radius: 0 10 10 0; -fx-pref-width: 180; -fx-pref-height: 45;"/>
                     </HBox>
                 </VBox>
-
+                
                 <Region style="-fx-background-color: #e2e8f0; -fx-pref-height: 1;"/>
-
+                
                 <!-- Table Selection -->
                 <VBox fx:id="tableSelectionPane" spacing="12" VBox.vgrow="ALWAYS">
                     <HBox alignment="CENTER_LEFT" spacing="8">
                         <Label text="🪑" style="-fx-font-size: 18px;"/>
                         <Label text="Select Table" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2d3748;"/>
                     </HBox>
-
+                    
                     <TabPane fx:id="floorTabPane" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent;">
                         <tabs>
                             <Tab text="Floor 1">
@@ -108,7 +108,7 @@
                         </tabs>
                     </TabPane>
                 </VBox>
-
+                
                 <!-- Menu Section -->
                 <VBox fx:id="menuPane" spacing="12" visible="false" managed="false" VBox.vgrow="ALWAYS">
                     <HBox alignment="CENTER_LEFT" spacing="10">
@@ -116,7 +116,7 @@
                         <Label text="Menu" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2d3748;"/>
                         <Label fx:id="lblSelectedTable" text="" style="-fx-font-size: 13px; -fx-text-fill: white; -fx-background-color: #48bb78; -fx-padding: 4 12; -fx-background-radius: 12; -fx-font-weight: 600;"/>
                     </HBox>
-
+                    
                     <ScrollPane fitToWidth="true" fitToHeight="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent;">
                         <content>
                             <GridPane fx:id="menuGrid" hgap="12" vgap="12" style="-fx-padding: 15;"/>
@@ -124,24 +124,24 @@
                     </ScrollPane>
                 </VBox>
             </VBox>
-
+            
             <!-- RIGHT COLUMN -->
             <VBox spacing="20" style="-fx-background-color: #ffffff; -fx-background-radius: 20; -fx-padding: 25; -fx-border-color: #e2e8f0; -fx-border-radius: 20; -fx-border-width: 2;" prefWidth="500" HBox.hgrow="NEVER">
-
+                
                 <HBox alignment="CENTER_LEFT" spacing="12">
                     <Label text="🛒" style="-fx-font-size: 22px;"/>
                     <Label text="Order Details" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1a202c;"/>
                 </HBox>
-
+                
                 <!-- Order Items List -->
                 <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: #f7fafc; -fx-background-radius: 15; -fx-border-color: #e2e8f0; -fx-border-radius: 15; -fx-border-width: 2;">
                     <content>
                         <VBox fx:id="orderItemsContainer" spacing="10" style="-fx-padding: 20;"/>
                     </content>
                 </ScrollPane>
-
+                
                 <Region style="-fx-background-color: #e2e8f0; -fx-pref-height: 2;"/>
-
+                
                 <!-- Summary -->
                 <VBox spacing="15" style="-fx-background-color: #f7fafc; -fx-padding: 25; -fx-background-radius: 15; -fx-border-color: #e2e8f0; -fx-border-radius: 15; -fx-border-width: 2;">
                     <HBox alignment="CENTER">
@@ -161,7 +161,7 @@
                         <Label fx:id="lblTotal" text="0.00" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #48bb78;"/>
                     </HBox>
                 </VBox>
-
+                
                 <!-- Payment Button -->
                 <Button fx:id="btnPayment" text="💳 PROCEED TO PAYMENT" maxWidth="Infinity"
                         style="-fx-background-color: #48bb78; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-pref-height: 60; -fx-background-radius: 15;"
@@ -170,7 +170,7 @@
                         <Font size="16"/>
                     </font>
                 </Button>
-
+                
                 <!-- Action Buttons -->
                 <HBox spacing="15">
                     <Button fx:id="btnClearOrder" text="🗑️ Clear" maxWidth="Infinity" HBox.hgrow="ALWAYS"

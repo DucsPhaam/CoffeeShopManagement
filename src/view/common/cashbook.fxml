@@ -3,27 +3,31 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-<?import javafx.collections.FXCollections?>
-<?import java.lang.String?>
 
-<StackPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.common.CashbookController">
+<?import java.lang.String?>
+<?import javafx.collections.FXCollections?>
+<StackPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="controller.common.CashbookController"
+           stylesheets="@/resources/Stylesheet/CleanModern.css">
 
     <!-- Main Content -->
-    <VBox spacing="20.0" style="-fx-background-color: #f8f9fa;">
+    <VBox spacing="20.0" style="-fx-background-color: #f8fafc;">
         <padding>
             <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
         </padding>
         <children>
             <!-- Header with Date -->
             <HBox alignment="CENTER_LEFT" spacing="20.0">
-                <Label text="📒 Cashbook" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;">
+                <Label text="📒 Cashbook" style="-fx-text-fill: #1e293b; -fx-font-weight: 700;">
                     <font>
-                        <Font size="28.0" />
+                        <Font name="Segoe UI Bold" size="28.0" />
                     </font>
                 </Label>
                 <Region HBox.hgrow="ALWAYS" />
-                <Label fx:id="lblDate" text="Thursday, October 16, 2025" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;" />
-                <Button fx:id="btnRefresh" onAction="#handleRefresh" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 8; -fx-pref-height: 40px; -fx-pref-width: 120px;" text="🔄 Refresh" />
+                <Label fx:id="lblDate" text="Thursday, October 16, 2025" style="-fx-font-size: 14px; -fx-text-fill: #64748b; -fx-font-family: 'Segoe UI';" />
+                <Button fx:id="btnRefresh" onAction="#handleRefresh"
+                        style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 8; -fx-pref-height: 40px; -fx-pref-width: 120px; -fx-font-size: 14px; -fx-font-weight: 600; -fx-font-family: 'Segoe UI Semibold';"
+                        text="🔄 Refresh" />
             </HBox>
 
             <!-- Statistics Cards -->
@@ -35,146 +39,178 @@
                     <ColumnConstraints hgrow="SOMETIMES" minWidth="200.0" percentWidth="25.0" />
                 </columnConstraints>
 
-                <!-- Card 1: Total Income -->
-                <VBox spacing="12.0" style="-fx-background-color: linear-gradient(to bottom right, #667eea 0%, #764ba2 100%); -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 5);" GridPane.columnIndex="0">
+                <VBox spacing="12.0" GridPane.columnIndex="0">
+                    <style>
+                        -fx-background-color: linear-gradient(to bottom right, #667eea, #764ba2);
+                        -fx-background-radius: 15;
+                        -fx-padding: 25;
+                        -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 15, 0.0, 0, 5);
+                    </style>
                     <Label text="💵 TOTAL INCOME" textFill="#E8E8E8">
                         <font>
-                            <Font size="12.0" />
+                            <Font name="Segoe UI Semibold" size="12.0" />
                         </font>
                     </Label>
                     <Label fx:id="lblTotalIncome" text="0.00" textFill="WHITE">
                         <font>
-                            <Font name="System Bold" size="28.0" />
+                            <Font name="Segoe UI Bold" size="28.0" />
                         </font>
                     </Label>
                 </VBox>
 
                 <!-- Card 2: Total Expense -->
-                <VBox spacing="12.0" style="-fx-background-color: linear-gradient(to bottom right, #f093fb 0%, #f5576c 100%); -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 5);" GridPane.columnIndex="1">
+                <VBox spacing="12.0" style="-fx-background-color: linear-gradient(to bottom right, #f093fb 0%, #f5576c 100%); -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 15, 0.0, 0, 5);" GridPane.columnIndex="1">
                     <Label text="📉 TOTAL EXPENSE" textFill="#E8E8E8">
                         <font>
-                            <Font size="12.0" />
+                            <Font name="Segoe UI Semibold" size="12.0" />
                         </font>
                     </Label>
                     <Label fx:id="lblTotalExpense" text="0.00" textFill="WHITE">
                         <font>
-                            <Font name="System Bold" size="28.0" />
+                            <Font name="Segoe UI Bold" size="28.0" />
                         </font>
                     </Label>
                 </VBox>
 
                 <!-- Card 3: Profit/Loss -->
-                <VBox spacing="12.0" style="-fx-background-color: linear-gradient(to bottom right, #4facfe 0%, #00f2fe 100%); -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 5);" GridPane.columnIndex="2">
+                <VBox spacing="12.0" style="-fx-background-color: linear-gradient(to bottom right, #4facfe 0%, #00f2fe 100%); -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 15, 0.0, 0, 5);" GridPane.columnIndex="2">
                     <Label text="📊 PROFIT/LOSS" textFill="#E8E8E8">
                         <font>
-                            <Font size="12.0" />
+                            <Font name="Segoe UI Semibold" size="12.0" />
                         </font>
                     </Label>
                     <Label fx:id="lblProfitLoss" text="0.00" textFill="WHITE">
                         <font>
-                            <Font name="System Bold" size="28.0" />
+                            <Font name="Segoe UI Bold" size="28.0" />
                         </font>
                     </Label>
                 </VBox>
 
                 <!-- Card 4: Current Balance -->
-                <VBox spacing="12.0" style="-fx-background-color: linear-gradient(to bottom right, #fa709a 0%, #fee140 100%); -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 5);" GridPane.columnIndex="3">
-                    <Label text="💰 CURRENT BALANCE" textFill="#E8E8E8">
+                <VBox spacing="12.0" style="-fx-background-color: linear-gradient(to bottom right, #fa709a 0%, #fee140 100%); -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 15, 0.0, 0, 5);" GridPane.columnIndex="3">
+                    <Label text="💰 CURRENT BALANCE" textFill="#2d3748">
                         <font>
-                            <Font size="12.0" />
+                            <Font name="Segoe UI Semibold" size="12.0" />
                         </font>
                     </Label>
-                    <Label fx:id="lblCurrentBalance" text="0.00" textFill="WHITE">
+                    <Label fx:id="lblCurrentBalance" text="0.00" textFill="#2d3748">
                         <font>
-                            <Font name="System Bold" size="28.0" />
+                            <Font name="Segoe UI Bold" size="28.0" />
                         </font>
                     </Label>
                 </VBox>
             </GridPane>
 
             <!-- Search and Filter Bar -->
-            <HBox spacing="15.0" alignment="CENTER_LEFT" style="-fx-background-color: white; -fx-padding: 15.0; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 3);">
-                <Label text="From Date:" style="-fx-font-size: 14px; -fx-text-fill: #2c3e50;" />
-                <DatePicker fx:id="dpFromDate" onAction="#handleFilterDate" style="-fx-pref-width: 150px; -fx-font-size: 14px;" />
-                <Label text="To Date:" style="-fx-font-size: 14px; -fx-text-fill: #2c3e50;" />
-                <DatePicker fx:id="dpToDate" onAction="#handleFilterDate" style="-fx-pref-width: 150px; -fx-font-size: 14px;" />
-                <Label text="Type:" style="-fx-font-size: 14px; -fx-text-fill: #2c3e50;" />
-                <ComboBox fx:id="cmbFilterType" onAction="#handleFilter" style="-fx-pref-width: 150px; -fx-font-size: 14px;">
+            <HBox spacing="12.0" alignment="CENTER_LEFT" style="-fx-background-color: white; -fx-padding: 18.0; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 12, 0.0, 0, 3);">
+                <Label text="From:" style="-fx-font-size: 14px; -fx-text-fill: #475569; -fx-font-weight: 600; -fx-font-family: 'Segoe UI Semibold';" />
+                <DatePicker fx:id="dpFromDate" onAction="#handleFilterDate"
+                            style="-fx-pref-width: 150px; -fx-font-size: 13px; -fx-pref-height: 38px; -fx-font-family: 'Segoe UI';" />
+                <Label text="To:" style="-fx-font-size: 14px; -fx-text-fill: #475569; -fx-font-weight: 600; -fx-font-family: 'Segoe UI Semibold';" />
+                <DatePicker fx:id="dpToDate" onAction="#handleFilterDate"
+                            style="-fx-pref-width: 150px; -fx-font-size: 13px; -fx-pref-height: 38px; -fx-font-family: 'Segoe UI';" />
+                <Label text="Type:" style="-fx-font-size: 14px; -fx-text-fill: #475569; -fx-font-weight: 600; -fx-font-family: 'Segoe UI Semibold';" />
+                <ComboBox fx:id="cmbFilterType" onAction="#handleFilter"
+                          style="-fx-pref-width: 130px; -fx-font-size: 14px; -fx-pref-height: 38px; -fx-font-family: 'Segoe UI';">
                     <items>
                         <FXCollections fx:factory="observableArrayList">
-                            <String fx:value="All"/>
-                            <String fx:value="Income"/>
-                            <String fx:value="Expense"/>
+                            <String fx:value="All" />
+                            <String fx:value="Income" />
+                            <String fx:value="Expense" />
                         </FXCollections>
                     </items>
                 </ComboBox>
-                <TextField fx:id="txtSearch" promptText="🔍 Search by reason..." style="-fx-pref-width: 300px; -fx-font-size: 14px;" onKeyReleased="#handleSearch" />
-                <Button fx:id="btnAddTransaction" text="➕ Add Transaction" onAction="#handleAddTransaction"
-                        style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 8; -fx-pref-height: 40px; -fx-pref-width: 150px;" />
+                <TextField fx:id="txtSearch" promptText="🔍 Search by reason..."
+                           style="-fx-pref-width: 300px; -fx-font-size: 14px; -fx-padding: 10 14; -fx-background-radius: 8; -fx-border-color: #cbd5e0; -fx-border-radius: 8; -fx-border-width: 1.5; -fx-font-family: 'Segoe UI';"
+                           onKeyReleased="#handleSearch" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Button fx:id="btnAddTransaction" text="+ Add Transaction" onAction="#handleAddTransaction"
+                        style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 8; -fx-pref-height: 42px; -fx-pref-width: 160px; -fx-font-size: 14px; -fx-font-weight: 600; -fx-font-family: 'Segoe UI Semibold';" />
             </HBox>
 
             <!-- Transactions Table -->
-            <VBox VBox.vgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 20.0; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 5);">
-                <TableView fx:id="tableTransactions" VBox.vgrow="ALWAYS" style="-fx-font-size: 13px; -fx-background-radius: 8;">
+            <VBox VBox.vgrow="ALWAYS" styleClass="card" style="-fx-padding: 20;">
+                <TableView fx:id="tableTransactions" VBox.vgrow="ALWAYS">
                     <columns>
-                        <TableColumn fx:id="colId" text="ID" prefWidth="50.0" style="-fx-alignment: CENTER;" />
+                        <TableColumn fx:id="colId" text="ID" prefWidth="60.0" style="-fx-alignment: CENTER;" />
                         <TableColumn fx:id="colType" text="Type" prefWidth="100.0" style="-fx-alignment: CENTER;" />
                         <TableColumn fx:id="colAmount" text="Amount" prefWidth="120.0" style="-fx-alignment: CENTER;" />
-                        <TableColumn fx:id="colReason" text="Reason" prefWidth="250.0" />
-                        <TableColumn fx:id="colCreatedBy" text="Created By" prefWidth="150.0" style="-fx-alignment: CENTER;" />
-                        <TableColumn fx:id="colCreatedAt" text="Created At" prefWidth="150.0" style="-fx-alignment: CENTER;" />
-                        <TableColumn fx:id="colActions" text="Actions" prefWidth="150.0" style="-fx-alignment: CENTER;" />
+                        <TableColumn fx:id="colReason" text="Reason" prefWidth="280.0" />
+                        <TableColumn fx:id="colCreatedBy" text="Created By" prefWidth="120.0" style="-fx-alignment: CENTER;" />
+                        <TableColumn fx:id="colCreatedAt" text="Created At" prefWidth="160.0" style="-fx-alignment: CENTER;" />
+                        <TableColumn fx:id="colActions" text="Actions" prefWidth="180.0" style="-fx-alignment: CENTER;" />
                     </columns>
                 </TableView>
                 <HBox spacing="20.0" alignment="CENTER_LEFT" style="-fx-padding: 15.0 0 0 0;">
-                    <Label fx:id="lblTotalTransactions" text="Total: 0 transactions" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
-                    <Label fx:id="lblBalance" text="Balance: $0.00" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #27ae60;" />
+                    <Label fx:id="lblTotalTransactions" text="Total: 0 transactions" style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #1e293b; -fx-font-family: 'Segoe UI Semibold';" />
+                    <Label fx:id="lblBalance" text="Balance: $0.00" style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #10b981; -fx-font-family: 'Segoe UI Semibold';" />
                 </HBox>
             </VBox>
         </children>
     </VBox>
 
-    <!-- Dialog Overlay (This is the missing part!) -->
-    <Pane fx:id="overlay" visible="false" managed="false" style="-fx-background-color: rgba(0, 0, 0, 0.6);">
-        <VBox fx:id="dialogPane" alignment="CENTER" style="-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 30, 0, 0, 10); -fx-padding: 35; -fx-pref-width: 550; -fx-pref-height: 450;"
-              layoutX="400" layoutY="150">
+    <!-- Dialog Overlay -->
+    <Pane fx:id="overlay" visible="false" managed="false" style="-fx-background-color: rgba(0, 0, 0, 0.5);">
+        <VBox fx:id="dialogPane" alignment="CENTER"
+              style="-fx-background-color: white; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 24, 0.0, 0, 8); -fx-padding: 30; -fx-pref-width: 520; -fx-pref-height: 440;"
+              layoutX="415" layoutY="125">
 
             <!-- Dialog Header -->
-            <Label fx:id="dialogTitle" text="Add New Transaction" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-padding: 0 0 20 0;" />
+            <HBox alignment="CENTER_LEFT" spacing="12.0">
+                <Label fx:id="dialogTitle" text="Add New Transaction" style="-fx-font-size: 22px; -fx-font-weight: 700; -fx-text-fill: #1e293b; -fx-font-family: 'Segoe UI Bold';" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Button text="✕" onAction="#handleCloseDialog"
+                        style="-fx-background-color: transparent; -fx-text-fill: #64748b; -fx-font-size: 20px; -fx-cursor: hand; -fx-border-color: transparent; -fx-font-family: 'Segoe UI';" />
+            </HBox>
+
+            <Separator style="-fx-padding: 12 0;" />
 
             <!-- Dialog Form -->
-            <GridPane hgap="20.0" vgap="20.0" style="-fx-padding: 20 0 30 0;">
+            <GridPane hgap="18.0" vgap="18.0" style="-fx-padding: 10 0 20 0;">
                 <columnConstraints>
-                    <ColumnConstraints hgrow="NEVER" minWidth="120.0" />
-                    <ColumnConstraints hgrow="ALWAYS" minWidth="300.0" />
+                    <ColumnConstraints hgrow="NEVER" minWidth="110.0" />
+                    <ColumnConstraints hgrow="ALWAYS" minWidth="320.0" />
                 </columnConstraints>
 
                 <!-- Type -->
-                <Label text="Type:" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #34495e;" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                <ComboBox fx:id="cmbType" promptText="Select type..." style="-fx-pref-width: 300px; -fx-font-size: 14px;" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                <Label text="Type:" style="-fx-font-size: 15px; -fx-font-weight: 600; -fx-text-fill: #475569; -fx-font-family: 'Segoe UI Semibold';"
+                       GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                <ComboBox fx:id="cmbType" promptText="Select type..."
+                          style="-fx-pref-width: 320px; -fx-font-size: 14px; -fx-pref-height: 40px; -fx-font-family: 'Segoe UI';"
+                          GridPane.columnIndex="1" GridPane.rowIndex="0">
                     <items>
                         <FXCollections fx:factory="observableArrayList">
-                            <String fx:value="Income"/>
-                            <String fx:value="Expense"/>
+                            <String fx:value="Income" />
+                            <String fx:value="Expense" />
                         </FXCollections>
                     </items>
                 </ComboBox>
 
                 <!-- Amount -->
-                <Label text="Amount:" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #34495e;" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                <TextField fx:id="txtAmount" promptText="Enter amount..." style="-fx-pref-width: 300px; -fx-font-size: 14px; -fx-padding: 10;" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <Label text="Amount:" style="-fx-font-size: 15px; -fx-font-weight: 600; -fx-text-fill: #475569; -fx-font-family: 'Segoe UI Semibold';"
+                       GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <TextField fx:id="txtAmount" promptText="Enter amount..."
+                           style="-fx-pref-width: 320px; -fx-font-size: 14px; -fx-padding: 10 12; -fx-font-family: 'Segoe UI';"
+                           GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
                 <!-- Reason -->
-                <Label text="Reason:" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #34495e;" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-                <TextField fx:id="txtReason" promptText="Enter reason..." style="-fx-pref-width: 300px; -fx-font-size: 14px; -fx-padding: 10;" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                <Label text="Reason:" style="-fx-font-size: 15px; -fx-font-weight: 600; -fx-text-fill: #475569; -fx-font-family: 'Segoe UI Semibold';"
+                       GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                <TextField fx:id="txtReason" promptText="Enter reason..."
+                           style="-fx-pref-width: 320px; -fx-font-size: 14px; -fx-padding: 10 12; -fx-font-family: 'Segoe UI';"
+                           GridPane.columnIndex="1" GridPane.rowIndex="2" />
             </GridPane>
 
+            <Separator style="-fx-padding: 8 0;" />
+
             <!-- Dialog Buttons -->
-            <HBox spacing="15.0" alignment="CENTER" style="-fx-padding: 20 0 0 0;">
-                <Button text="❌ Cancel" onAction="#handleCloseDialog"
-                        style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 10; -fx-pref-height: 45px; -fx-pref-width: 140px; -fx-font-size: 15px; -fx-font-weight: bold;" />
-                <Button fx:id="btnSave" text="💾 Save" onAction="#handleSaveTransaction"
-                        style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 10; -fx-pref-height: 45px; -fx-pref-width: 140px; -fx-font-size: 15px; -fx-font-weight: bold;" />
+            <HBox spacing="12.0" alignment="CENTER" style="-fx-padding: 12 0 0 0;">
+                <Button text="Cancel" onAction="#handleCloseDialog"
+                        styleClass="button"
+                        style="-fx-pref-height: 42px; -fx-pref-width: 130px; -fx-font-size: 14px; -fx-font-weight: 600; -fx-font-family: 'Segoe UI Semibold';" />
+                <Button fx:id="btnSave" text="Save" onAction="#handleSaveTransaction"
+                        styleClass="button-success"
+                        style="-fx-pref-height: 42px; -fx-pref-width: 130px; -fx-font-size: 14px; -fx-font-weight: 600; -fx-font-family: 'Segoe UI Semibold';" />
             </HBox>
         </VBox>
     </Pane>

@@ -73,16 +73,74 @@ public class EmployeeController {
         });
 
         colActions.setCellFactory(col -> new TableCell<User, Void>() {
-            private final Button btnEdit = new Button("✏️ Edit");
-            private final Button btnDelete = new Button("🗑️ Delete");
-            private final Button btnManageShift = new Button("Manage Shift");
-            private final HBox actionBox = new HBox(10, btnEdit, btnManageShift, btnDelete);
+            private final Button btnEdit = new Button("Edit");
+            private final Button btnDelete = new Button("Delete");
+            private final Button btnManageShift = new Button("Shift");
+            private final HBox actionBox = new HBox(8);
 
             {
-                btnEdit.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-cursor: hand; -fx-font-size: 11px; -fx-background-radius: 5;");
-                btnDelete.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-cursor: hand; -fx-font-size: 11px; -fx-background-radius: 5;");
-                btnManageShift.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-cursor: hand; -fx-font-size: 11px; -fx-background-radius: 5;");
+                // EDIT BUTTON - Blue with clear text
+                btnEdit.getStyleClass().add("action-button-edit");
+                btnEdit.setFont(javafx.scene.text.Font.font("Segoe UI Semibold", 12));
+                btnEdit.setStyle(
+                    "-fx-background-color: #3b82f6; " +
+                    "-fx-text-fill: white; " +
+                    "-fx-font-size: 12px; " +
+                    "-fx-font-weight: 600; " +
+                    "-fx-padding: 6 14; " +
+                    "-fx-background-radius: 5; " +
+                    "-fx-border-color: transparent; " +
+                    "-fx-cursor: hand;"
+                );
+                btnEdit.setOnMouseEntered(e -> btnEdit.setStyle(
+                    btnEdit.getStyle() + "-fx-background-color: #2563eb;"
+                ));
+                btnEdit.setOnMouseExited(e -> btnEdit.setStyle(
+                    btnEdit.getStyle() + "-fx-background-color: #3b82f6;"
+                ));
+
+                // MANAGE SHIFT BUTTON - Green with clear text
+                btnManageShift.getStyleClass().add("action-button-view");
+                btnManageShift.setFont(javafx.scene.text.Font.font("Segoe UI Semibold", 12));
+                btnManageShift.setStyle(
+                    "-fx-background-color: #10b981; " +
+                    "-fx-text-fill: white; " +
+                    "-fx-font-size: 12px; " +
+                    "-fx-font-weight: 600; " +
+                    "-fx-padding: 6 14; " +
+                    "-fx-background-radius: 5; " +
+                    "-fx-border-color: transparent; " +
+                    "-fx-cursor: hand;"
+                );
+                btnManageShift.setOnMouseEntered(e -> btnManageShift.setStyle(
+                    btnManageShift.getStyle() + "-fx-background-color: #059669;"
+                ));
+                btnManageShift.setOnMouseExited(e -> btnManageShift.setStyle(
+                    btnManageShift.getStyle() + "-fx-background-color: #10b981;"
+                ));
+
+                // DELETE BUTTON - Red with clear text
+                btnDelete.getStyleClass().add("action-button-delete");
+                btnDelete.setFont(javafx.scene.text.Font.font("Segoe UI Semibold", 12));
+                btnDelete.setStyle(
+                    "-fx-background-color: #ef4444; " +
+                    "-fx-text-fill: white; " +
+                    "-fx-font-size: 12px; " +
+                    "-fx-font-weight: 600; " +
+                    "-fx-padding: 6 14; " +
+                    "-fx-background-radius: 5; " +
+                    "-fx-border-color: transparent; " +
+                    "-fx-cursor: hand;"
+                );
+                btnDelete.setOnMouseEntered(e -> btnDelete.setStyle(
+                    btnDelete.getStyle() + "-fx-background-color: #dc2626;"
+                ));
+                btnDelete.setOnMouseExited(e -> btnDelete.setStyle(
+                    btnDelete.getStyle() + "-fx-background-color: #ef4444;"
+                ));
+
                 actionBox.setAlignment(Pos.CENTER);
+                actionBox.getChildren().addAll(btnEdit, btnManageShift, btnDelete);
 
                 btnEdit.setOnAction(event -> {
                     User user = getTableView().getItems().get(getIndex());
@@ -293,13 +351,54 @@ public class EmployeeController {
         return true;
     }
 
-    private void showAlert(Alert.AlertType type, String title, String content) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
+  private void showAlert(Alert.AlertType type, String title, String content) {
+    Alert alert = new Alert(type);
+    alert.setTitle(title);
+    alert.setHeaderText(null);
+    alert.setContentText(content);
+    
+    // Enhanced alert styling
+    DialogPane dialogPane = alert.getDialogPane();
+    dialogPane.setStyle(
+        "-fx-background-color: white; " +
+        "-fx-font-family: 'Segoe UI'; " +
+        "-fx-font-size: 14px; " +
+        "-fx-padding: 20;"
+    );
+    
+    // Style the content text
+    dialogPane.lookup(".content.label").setStyle(
+        "-fx-font-size: 15px; " +
+        "-fx-text-fill: #1e293b; " +
+        "-fx-font-weight: 600; " +
+        "-fx-padding: 15 0;"
+    );
+    
+    // Style buttons
+    if (type == Alert.AlertType.INFORMATION) {
+        dialogPane.lookupButton(ButtonType.OK).setStyle(
+            "-fx-background-color: #10b981; " +
+            "-fx-text-fill: white; " +
+            "-fx-font-size: 14px; " +
+            "-fx-font-weight: 600; " +
+            "-fx-padding: 10 30; " +
+            "-fx-background-radius: 6; " +
+            "-fx-cursor: hand;"
+        );
+    } else if (type == Alert.AlertType.ERROR) {
+        dialogPane.lookupButton(ButtonType.OK).setStyle(
+            "-fx-background-color: #ef4444; " +
+            "-fx-text-fill: white; " +
+            "-fx-font-size: 14px; " +
+            "-fx-font-weight: 600; " +
+            "-fx-padding: 10 30; " +
+            "-fx-background-radius: 6; " +
+            "-fx-cursor: hand;"
+        );
     }
+    
+    alert.showAndWait();
+}
 
     @FXML
     private void handleStartShift() {
@@ -360,4 +459,4 @@ public class EmployeeController {
             btnEndShift.setDisable(currentStatus == null || currentStatus.equals("off-duty"));
         }
     }
-}
+        }

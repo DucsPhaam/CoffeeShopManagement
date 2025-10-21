@@ -109,7 +109,7 @@ public class ProductController {
         }
     }
 
-    private void setupTableColumns() {
+   private void setupTableColumns() {
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colName.setCellValueFactory(new PropertyValueFactory<>("name"));
         colPrice.setCellValueFactory(new PropertyValueFactory<>("price"));
@@ -125,6 +125,8 @@ public class ProductController {
                     setText(null);
                 } else {
                     setText(String.format("$%.2f", item));
+                    setFont(javafx.scene.text.Font.font("Segoe UI", 13));
+                    setStyle("-fx-text-fill: #1e293b;");
                 }
             }
         });
@@ -157,18 +159,76 @@ public class ProductController {
             }
         });
 
-        // Actions column
+        // Actions column with clear, readable buttons
         colActions.setCellFactory(col -> new TableCell<Product, Void>() {
-            private final Button btnEdit = new Button("✏️ Edit");
-            private final Button btnDelete = new Button("🗑️ Delete");
-            private final Button btnIngredients = new Button("📦 Ingredients");
-            private final HBox actionBox = new HBox(5, btnEdit, btnIngredients, btnDelete);
+            private final Button btnEdit = new Button("Edit");
+            private final Button btnDelete = new Button("Delete");
+            private final Button btnIngredients = new Button("Ingredients");
+            private final HBox actionBox = new HBox(8);
 
             {
-                btnEdit.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-cursor: hand; -fx-font-size: 11px; -fx-background-radius: 5;");
-                btnDelete.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-cursor: hand; -fx-font-size: 11px; -fx-background-radius: 5;");
-                btnIngredients.setStyle("-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-cursor: hand; -fx-font-size: 11px; -fx-background-radius: 5;");
+                // EDIT BUTTON - Blue
+                btnEdit.getStyleClass().add("action-button-edit");
+                btnEdit.setFont(javafx.scene.text.Font.font("Segoe UI Semibold", 12));
+                btnEdit.setStyle(
+                    "-fx-background-color: #3b82f6; " +
+                    "-fx-text-fill: white; " +
+                    "-fx-font-size: 12px; " +
+                    "-fx-font-weight: 600; " +
+                    "-fx-padding: 6 14; " +
+                    "-fx-background-radius: 5; " +
+                    "-fx-border-color: transparent; " +
+                    "-fx-cursor: hand;"
+                );
+                btnEdit.setOnMouseEntered(e -> btnEdit.setStyle(
+                    btnEdit.getStyle() + "-fx-background-color: #2563eb;"
+                ));
+                btnEdit.setOnMouseExited(e -> btnEdit.setStyle(
+                    btnEdit.getStyle() + "-fx-background-color: #3b82f6;"
+                ));
+
+                // INGREDIENTS BUTTON - Purple
+                btnIngredients.getStyleClass().add("action-button-view");
+                btnIngredients.setFont(javafx.scene.text.Font.font("Segoe UI Semibold", 12));
+                btnIngredients.setStyle(
+                    "-fx-background-color: #8b5cf6; " +
+                    "-fx-text-fill: white; " +
+                    "-fx-font-size: 12px; " +
+                    "-fx-font-weight: 600; " +
+                    "-fx-padding: 6 14; " +
+                    "-fx-background-radius: 5; " +
+                    "-fx-border-color: transparent; " +
+                    "-fx-cursor: hand;"
+                );
+                btnIngredients.setOnMouseEntered(e -> btnIngredients.setStyle(
+                    btnIngredients.getStyle() + "-fx-background-color: #7c3aed;"
+                ));
+                btnIngredients.setOnMouseExited(e -> btnIngredients.setStyle(
+                    btnIngredients.getStyle() + "-fx-background-color: #8b5cf6;"
+                ));
+
+                // DELETE BUTTON - Red
+                btnDelete.getStyleClass().add("action-button-delete");
+                btnDelete.setFont(javafx.scene.text.Font.font("Segoe UI Semibold", 12));
+                btnDelete.setStyle(
+                    "-fx-background-color: #ef4444; " +
+                    "-fx-text-fill: white; " +
+                    "-fx-font-size: 12px; " +
+                    "-fx-font-weight: 600; " +
+                    "-fx-padding: 6 14; " +
+                    "-fx-background-radius: 5; " +
+                    "-fx-border-color: transparent; " +
+                    "-fx-cursor: hand;"
+                );
+                btnDelete.setOnMouseEntered(e -> btnDelete.setStyle(
+                    btnDelete.getStyle() + "-fx-background-color: #dc2626;"
+                ));
+                btnDelete.setOnMouseExited(e -> btnDelete.setStyle(
+                    btnDelete.getStyle() + "-fx-background-color: #ef4444;"
+                ));
+
                 actionBox.setAlignment(Pos.CENTER);
+                actionBox.getChildren().addAll(btnEdit, btnIngredients, btnDelete);
 
                 btnEdit.setOnAction(event -> {
                     Product product = getTableView().getItems().get(getIndex());
@@ -197,7 +257,6 @@ public class ProductController {
             }
         });
     }
-
     private void setupIngredientsTable() {
         colIngredientName.setCellValueFactory(new PropertyValueFactory<>("ingredientName"));
         colIngredientQuantity.setCellValueFactory(new PropertyValueFactory<>("quantity"));

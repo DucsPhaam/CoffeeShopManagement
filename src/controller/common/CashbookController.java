@@ -60,15 +60,35 @@ public class CashbookController {
 
     @FXML
     public void initialize() {
-        transactionDAO = new TransactionDAO();
-
-        transactionList = FXCollections.observableArrayList();
-        filteredList = FXCollections.observableArrayList();
-
-        setupTableColumns();
-        loadTransactionData();
-        setupSearchAndFilter();
-        updateDateLabel();
+        try {
+            System.out.println("=== Initializing CashbookController ===");
+            
+            transactionDAO = new TransactionDAO();
+            System.out.println("✓ TransactionDAO initialized");
+            
+            transactionList = FXCollections.observableArrayList();
+            filteredList = FXCollections.observableArrayList();
+            System.out.println("✓ Observable lists initialized");
+            
+            setupTableColumns();
+            System.out.println("✓ Table columns setup complete");
+            
+            loadTransactionData();
+            System.out.println("✓ Transaction data loaded");
+            
+            setupSearchAndFilter();
+            System.out.println("✓ Search and filter setup complete");
+            
+            updateDateLabel();
+            System.out.println("✓ Date label updated");
+            
+            System.out.println("=== CashbookController initialized successfully ===");
+            
+        } catch (Exception e) {
+            System.err.println("!!! Error initializing CashbookController !!!");
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "Failed to initialize Cashbook interface: " + e.getMessage());
+        }
     }
 
     private void setupTableColumns() {
@@ -95,14 +115,53 @@ public class CashbookController {
 
         // Actions column (Edit/Delete)
         colActions.setCellFactory(col -> new TableCell<Transaction, Void>() {
-            private final Button btnEdit = new Button("✏️ Edit");
-            private final Button btnDelete = new Button("🗑️ Delete");
-            private final HBox actionBox = new HBox(10, btnEdit, btnDelete);
+            private final Button btnEdit = new Button("Edit");
+            private final Button btnDelete = new Button("Delete");
+            private final HBox actionBox = new HBox(10);
 
             {
-                btnEdit.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-cursor: hand; -fx-font-size: 11px; -fx-background-radius: 5;");
-                btnDelete.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-cursor: hand; -fx-font-size: 11px; -fx-background-radius: 5;");
+                // EDIT BUTTON - Blue with clear text
+                btnEdit.getStyleClass().add("action-button-edit");
+                btnEdit.setFont(javafx.scene.text.Font.font("Segoe UI Semibold", 12));
+                btnEdit.setStyle(
+                    "-fx-background-color: #3b82f6; " +
+                    "-fx-text-fill: white; " +
+                    "-fx-font-size: 12px; " +
+                    "-fx-font-weight: 600; " +
+                    "-fx-padding: 6 14; " +
+                    "-fx-background-radius: 5; " +
+                    "-fx-border-color: transparent; " +
+                    "-fx-cursor: hand;"
+                );
+                btnEdit.setOnMouseEntered(e -> btnEdit.setStyle(
+                    btnEdit.getStyle() + "-fx-background-color: #2563eb;"
+                ));
+                btnEdit.setOnMouseExited(e -> btnEdit.setStyle(
+                    btnEdit.getStyle() + "-fx-background-color: #3b82f6;"
+                ));
+
+                // DELETE BUTTON - Red with clear text
+                btnDelete.getStyleClass().add("action-button-delete");
+                btnDelete.setFont(javafx.scene.text.Font.font("Segoe UI Semibold", 12));
+                btnDelete.setStyle(
+                    "-fx-background-color: #ef4444; " +
+                    "-fx-text-fill: white; " +
+                    "-fx-font-size: 12px; " +
+                    "-fx-font-weight: 600; " +
+                    "-fx-padding: 6 14; " +
+                    "-fx-background-radius: 5; " +
+                    "-fx-border-color: transparent; " +
+                    "-fx-cursor: hand;"
+                );
+                btnDelete.setOnMouseEntered(e -> btnDelete.setStyle(
+                    btnDelete.getStyle() + "-fx-background-color: #dc2626;"
+                ));
+                btnDelete.setOnMouseExited(e -> btnDelete.setStyle(
+                    btnDelete.getStyle() + "-fx-background-color: #ef4444;"
+                ));
+
                 actionBox.setAlignment(Pos.CENTER);
+                actionBox.getChildren().addAll(btnEdit, btnDelete);
 
                 btnEdit.setOnAction(event -> {
                     Transaction transaction = getTableView().getItems().get(getIndex());

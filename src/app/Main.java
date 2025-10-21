@@ -1,5 +1,9 @@
 package app;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.sql.*;
 import dao.DatabaseConnection;
 import utils.SessionManager;
@@ -9,13 +13,19 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
+
 public class Main extends Application {
-    public static void main(String[] args) {
-        launch(args);
-    }
+ // Thêm method này vào Main.java hoặc một static initializer block
+
+
+// Gọi method này trong main() trước khi launch(args)
+public static void main(String[] args) {
+  // ← Thêm dòng này
+    launch(args);
+}
 
     /**
-     * Check and reset pending orders for current user
+     * Check and reset pending orders for current user\
      * Uses new database schema with 'users' table
      */
     void checkAndResetPendingOrders() {

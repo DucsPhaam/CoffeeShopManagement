@@ -15,7 +15,7 @@ import javafx.scene.layout.VBox;
 import model.Inventory;
 import model.Transaction;
 import utils.SessionManager;
-
+import javafx.scene.text.Font;
 import java.util.List;
 
 public class InventoryController {
@@ -73,98 +73,166 @@ public class InventoryController {
     }
 
     private void setupTableColumns() {
-        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
-        colName.setCellValueFactory(new PropertyValueFactory<>("name"));
-        colQuantity.setCellValueFactory(new PropertyValueFactory<>("quantity"));
-        colUnit.setCellValueFactory(new PropertyValueFactory<>("unit"));
-        colMinStock.setCellValueFactory(new PropertyValueFactory<>("minStock"));
+    colId.setCellValueFactory(new PropertyValueFactory<>("id"));
+    colName.setCellValueFactory(new PropertyValueFactory<>("name"));
+    colQuantity.setCellValueFactory(new PropertyValueFactory<>("quantity"));
+    colUnit.setCellValueFactory(new PropertyValueFactory<>("unit"));
+    colMinStock.setCellValueFactory(new PropertyValueFactory<>("minStock"));
 
-        // Status column
-        colStatus.setCellValueFactory(cellData -> {
-            Inventory inv = cellData.getValue();
-            String status = inv.getQuantity() <= inv.getMinStock() ? "Low Stock" : "Normal";
-            return new javafx.beans.property.SimpleStringProperty(status);
-        });
+    // Status column with clear text
+    colStatus.setCellValueFactory(cellData -> {
+        Inventory inv = cellData.getValue();
+        String status = inv.getQuantity() <= inv.getMinStock() ? "Low Stock" : "Normal";
+        return new javafx.beans.property.SimpleStringProperty(status);
+    });
 
-        colStatus.setCellFactory(col -> new TableCell<Inventory, String>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                    setStyle("");
+    colStatus.setCellFactory(col -> new TableCell<Inventory, String>() {
+        @Override
+        protected void updateItem(String item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty || item == null) {
+                setText(null);
+                setStyle("");
+            } else {
+                setText(item);
+                setFont(Font.font("Segoe UI Semibold", 12));
+                if (item.equals("Low Stock")) {
+                    setStyle("-fx-text-fill: #ef4444; -fx-font-weight: 700;");
                 } else {
-                    setText(item);
-                    setStyle(item.equals("Low Stock") ? "-fx-text-fill: #e74c3c;" : "-fx-text-fill: #27ae60;");
+                    setStyle("-fx-text-fill: #10b981; -fx-font-weight: 700;");
                 }
             }
-        });
+        }
+    });
+
 
         // Actions column
         colActions.setCellFactory(col -> new TableCell<Inventory, Void>() {
-            private final Button btnEdit = new Button("✏️ Edit");
-            private final Button btnDelete = new Button("🗑️ Delete");
-            private final Button btnAddStock = new Button("➕ Add Stock");
-            private final HBox actionBox = new HBox(10, btnEdit, btnAddStock, btnDelete);
+        private final Button btnEdit = new Button("Edit");
+        private final Button btnAddStock = new Button("Add Stock");
+        private final Button btnDelete = new Button("Delete");
+        private final HBox actionBox = new HBox(8);
 
-            {
-                btnEdit.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-cursor: hand; -fx-font-size: 11px; -fx-background-radius: 5;");
-                btnDelete.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-cursor: hand; -fx-font-size: 11px; -fx-background-radius: 5;");
-                btnAddStock.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-cursor: hand; -fx-font-size: 11px; -fx-background-radius: 5;");
-                actionBox.setAlignment(Pos.CENTER);
+        {
+            // EDIT BUTTON - Blue with clear text
+            btnEdit.getStyleClass().add("action-button-edit");
+            btnEdit.setFont(Font.font("Segoe UI Semibold", 12));
+            btnEdit.setStyle(
+                "-fx-background-color: #3b82f6; " +
+                "-fx-text-fill: white; " +
+                "-fx-font-size: 12px; " +
+                "-fx-font-weight: 600; " +
+                "-fx-padding: 6 14; " +
+                "-fx-background-radius: 5; " +
+                "-fx-border-color: transparent; " +
+                "-fx-cursor: hand;"
+            );
+            btnEdit.setOnMouseEntered(e -> btnEdit.setStyle(
+                btnEdit.getStyle() + "-fx-background-color: #2563eb;"
+            ));
+            btnEdit.setOnMouseExited(e -> btnEdit.setStyle(
+                btnEdit.getStyle() + "-fx-background-color: #3b82f6;"
+            ));
 
-                btnEdit.setOnAction(event -> {
-                    Inventory inv = getTableView().getItems().get(getIndex());
-                    handleEditInventory(inv);
-                });
+            // ADD STOCK BUTTON - Green with clear text
+            btnAddStock.getStyleClass().add("action-button-view");
+            btnAddStock.setFont(Font.font("Segoe UI Semibold", 12));
+            btnAddStock.setStyle(
+                "-fx-background-color: #10b981; " +
+                "-fx-text-fill: white; " +
+                "-fx-font-size: 12px; " +
+                "-fx-font-weight: 600; " +
+                "-fx-padding: 6 14; " +
+                "-fx-background-radius: 5; " +
+                "-fx-border-color: transparent; " +
+                "-fx-cursor: hand;"
+            );
+            btnAddStock.setOnMouseEntered(e -> btnAddStock.setStyle(
+                btnAddStock.getStyle() + "-fx-background-color: #059669;"
+            ));
+            btnAddStock.setOnMouseExited(e -> btnAddStock.setStyle(
+                btnAddStock.getStyle() + "-fx-background-color: #10b981;"
+            ));
 
-                btnAddStock.setOnAction(event -> {
-                    Inventory inv = getTableView().getItems().get(getIndex());
-                    handleAddStock(inv);
-                });
+            // DELETE BUTTON - Red with clear text
+            btnDelete.getStyleClass().add("action-button-delete");
+            btnDelete.setFont(Font.font("Segoe UI Semibold", 12));
+            btnDelete.setStyle(
+                "-fx-background-color: #ef4444; " +
+                "-fx-text-fill: white; " +
+                "-fx-font-size: 12px; " +
+                "-fx-font-weight: 600; " +
+                "-fx-padding: 6 14; " +
+                "-fx-background-radius: 5; " +
+                "-fx-border-color: transparent; " +
+                "-fx-cursor: hand;"
+            );
+            btnDelete.setOnMouseEntered(e -> btnDelete.setStyle(
+                btnDelete.getStyle() + "-fx-background-color: #dc2626;"
+            ));
+            btnDelete.setOnMouseExited(e -> btnDelete.setStyle(
+                btnDelete.getStyle() + "-fx-background-color: #ef4444;"
+            ));
 
-                btnDelete.setOnAction(event -> {
-                    Inventory inv = getTableView().getItems().get(getIndex());
-                    handleDeleteInventory(inv);
-                });
+            actionBox.setAlignment(Pos.CENTER);
+            actionBox.getChildren().addAll(btnEdit, btnAddStock, btnDelete);
+
+            btnEdit.setOnAction(event -> {
+                Inventory inv = getTableView().getItems().get(getIndex());
+                handleEditInventory(inv);
+            });
+
+            btnAddStock.setOnAction(event -> {
+                Inventory inv = getTableView().getItems().get(getIndex());
+                handleAddStock(inv);
+            });
+
+            btnDelete.setOnAction(event -> {
+                Inventory inv = getTableView().getItems().get(getIndex());
+                handleDeleteInventory(inv);
+            });
+        }
+
+        @Override
+        protected void updateItem(Void item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty) {
+                setGraphic(null);
+            } else {
+                setGraphic(actionBox);
             }
+        }
+    });
 
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) {
-                    setGraphic(null);
-                } else {
-                    setGraphic(actionBox);
-                }
+    // Format quantity and min stock with clear font
+    colQuantity.setCellFactory(col -> new TableCell<Inventory, Double>() {
+        @Override
+        protected void updateItem(Double item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty || item == null) {
+                setText(null);
+            } else {
+                setText(String.format("%.2f", item));
+                setFont(Font.font("Segoe UI", 13));
+                setStyle("-fx-text-fill: #1e293b;");
             }
-        });
+        }
+    });
 
-        // Format quantity and min stock
-        colQuantity.setCellFactory(col -> new TableCell<Inventory, Double>() {
-            @Override
-            protected void updateItem(Double item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    setText(String.format("%.2f", item));
-                }
+    colMinStock.setCellFactory(col -> new TableCell<Inventory, Double>() {
+        @Override
+        protected void updateItem(Double item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty || item == null) {
+                setText(null);
+            } else {
+                setText(String.format("%.2f", item));
+                setFont(Font.font("Segoe UI", 13));
+                setStyle("-fx-text-fill: #1e293b;");
             }
-        });
-
-        colMinStock.setCellFactory(col -> new TableCell<Inventory, Double>() {
-            @Override
-            protected void updateItem(Double item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    setText(String.format("%.2f", item));
-                }
-            }
-        });
-    }
+        }
+    });
+}
 
     private void loadInventoryData() {
         inventoryList.clear();

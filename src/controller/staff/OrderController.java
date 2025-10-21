@@ -119,7 +119,7 @@ public class OrderController implements Initializable {
             displayTables(floor2Grid, floorTables.get(2));
             displayTables(floor3Grid, floorTables.get(3));
         } catch (SQLException e) {
-            showNotification("error", "Lỗi: Không tải được danh sách bàn: " + e.getMessage());
+            showNotification("error", "Error: Failed to load table list: " + e.getMessage());
         }
     }
 
@@ -207,7 +207,7 @@ public class OrderController implements Initializable {
                 }
             }
         } catch (SQLException e) {
-            showNotification("error", "Lỗi: Không tải được danh sách sản phẩm: " + e.getMessage());
+            showNotification("error", "Error: Failed to load product list: " + e.getMessage());
         }
     }
 
@@ -244,7 +244,7 @@ public class OrderController implements Initializable {
             Image defaultImage = new Image(getClass().getResourceAsStream("/resources/img/temp_icon.png"));
             imgView.setImage(defaultImage);
         } catch (Exception e) {
-            System.err.println("Lỗi tải ảnh mặc định: " + e.getMessage());
+            System.err.println("Error loading default image: " + e.getMessage());
         }
     }
 
@@ -315,7 +315,7 @@ public class OrderController implements Initializable {
             updateOrderDisplay();
         });
         TextField noteField = new TextField(item.getNote());
-        noteField.setPromptText("Thêm ghi chú...");
+        noteField.setPromptText("Add note...");
         noteField.setStyle("-fx-font-size: 12px; -fx-pref-width: 150px;");
         noteField.textProperty().addListener((obs, oldVal, newVal) -> {
             item.setNote(newVal.trim());
@@ -357,11 +357,11 @@ public class OrderController implements Initializable {
     @FXML
     private void handlePayment(ActionEvent event) {
         if (orderItems.isEmpty()) {
-            showNotification("warning", "Cảnh báo: Không có món nào trong đơn hàng!");
+            showNotification("warning", "Warning: No items in the order!");
             return;
         }
         if (orderType.equals("dine-in") && selectedTableId == null) {
-            showNotification("warning", "Cảnh báo: Vui lòng chọn bàn!");
+            showNotification("warning", "Warning: Please select a table!");
             return;
         }
         ProductIngredientDAO piDAO = new ProductIngredientDAO();
@@ -370,7 +370,7 @@ public class OrderController implements Initializable {
             int orderId = orderDAO.createOrder(selectedTableId, currentStaffId, orderType);
             if (orderId == -1) {
                 conn.rollback();
-                showNotification("error", "Lỗi: Không tạo được đơn hàng!");
+                showNotification("error", "Error: Failed to create order!");
                 return;
             }
             // Collect ingredients needed
@@ -385,7 +385,7 @@ public class OrderController implements Initializable {
             boolean sufficient = piDAO.consumeIngredients(conn, totalIngredientsNeeded);
             if (!sufficient) {
                 conn.rollback();
-                showNotification("error", "Lỗi: Nguyên liệu không đủ để thực hiện đơn hàng!");
+                showNotification("error", "Error: Insufficient ingredients to fulfill the order!");
                 return;
             }
             // Add items to order_items
@@ -393,7 +393,7 @@ public class OrderController implements Initializable {
                 boolean success = orderDAO.addOrderItem(orderId, item.getProductId(), item.getDrinkType(), item.getQuantity(), item.getPrice(), item.getNote());
                 if (!success) {
                     conn.rollback();
-                    showNotification("error", "Lỗi: Không thêm được món vào đơn hàng!");
+                    showNotification("error", "Error: Failed to add item to order!");
                     return;
                 }
             }
@@ -413,16 +413,16 @@ public class OrderController implements Initializable {
             boolean paymentSuccess = orderDAO.processPayment(orderId, total, vat, amountReceived, changeReturned);
             if (!paymentSuccess) {
                 conn.rollback();
-                showNotification("error", "Lỗi: Không xử lý được thanh toán!");
+                showNotification("error", "Error: Failed to process payment!");
                 return;
             }
             conn.commit();
-            showNotification("success", "Thành công: Đơn hàng đã được tạo và thanh toán! Mã đơn hàng: " + orderId);
+            showNotification("success", "Success: Order created and paid! Order ID: " + orderId);
             clearOrder();
             loadTables();
         } catch (SQLException e) {
             e.printStackTrace();
-            showNotification("error", "Lỗi: Không tạo được đơn hàng: " + e.getMessage());
+            showNotification("error", "Error: Failed to create order: " + e.getMessage());
         }
     }
 
@@ -454,7 +454,7 @@ public class OrderController implements Initializable {
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
-            showNotification("error", "Lỗi: Không thể tải màn hình đăng nhập!");
+            showNotification("error", "Error: Failed to load login screen!");
         }
     }
 
@@ -475,7 +475,7 @@ public class OrderController implements Initializable {
 
     @FXML
     private void handleBack(ActionEvent event) {
-        System.out.println("Quay lại menu chính");
+        System.out.println("Return to main menu");
     }
 
     private void showNotification(String type, String message) {
@@ -512,6 +512,7 @@ public class OrderController implements Initializable {
         int floor;
         int seats;
         String status;
+
         TableData(int id, String name, int floor, int seats, String status) {
             this.id = id;
             this.name = name;
@@ -527,6 +528,7 @@ public class OrderController implements Initializable {
         double price;
         Set<String> drinkTypes;
         String image;
+
         ProductData(int id, String name, double price, Set<String> drinkTypes, String image) {
             this.id = id;
             this.name = name;

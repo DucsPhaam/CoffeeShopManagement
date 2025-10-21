@@ -11,7 +11,7 @@
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
-
+    
     <children>
         <!-- Header with Date -->
         <HBox alignment="CENTER_LEFT" spacing="20.0">
@@ -24,7 +24,7 @@
             <Label fx:id="lblDate" text="Thursday, 16/10/2025" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;" />
             <Button fx:id="btnRefresh" onAction="#handleRefresh" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 8; -fx-pref-height: 40px; -fx-pref-width: 120px;" text="🔄 Refresh" />
         </HBox>
-
+        
         <!-- Statistics Cards -->
         <GridPane hgap="20.0" vgap="20.0">
             <columnConstraints>
@@ -33,7 +33,7 @@
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="200.0" percentWidth="25.0" />
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="200.0" percentWidth="25.0" />
             </columnConstraints>
-
+            
             <!-- Card 1: Daily Revenue -->
             <VBox spacing="12.0" style="-fx-background-color: linear-gradient(to bottom right, #667eea 0%, #764ba2 100%); -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 5);" GridPane.columnIndex="0">
                 <Label text="💵 DAILY REVENUE" textFill="#E8E8E8">
@@ -48,7 +48,7 @@
                 </Label>
                 <Label fx:id="lblDailyChange" text="↑ +0% compared to yesterday" textFill="#A8F5A8" style="-fx-font-size: 11px;" />
             </VBox>
-
+            
             <!-- Card 2: Monthly Revenue -->
             <VBox spacing="12.0" style="-fx-background-color: linear-gradient(to bottom right, #f093fb 0%, #f5576c 100%); -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 5);" GridPane.columnIndex="1">
                 <Label text="📈 MONTHLY REVENUE" textFill="#E8E8E8">
@@ -63,7 +63,7 @@
                 </Label>
                 <Label fx:id="lblMonthlyChange" text="↑ +0% compared to last month" textFill="#A8F5A8" style="-fx-font-size: 11px;" />
             </VBox>
-
+            
             <!-- Card 3: Today Orders -->
             <VBox spacing="12.0" style="-fx-background-color: linear-gradient(to bottom right, #4facfe 0%, #00f2fe 100%); -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 5);" GridPane.columnIndex="2">
                 <Label text="📝 TODAY'S ORDERS" textFill="#E8E8E8">
@@ -81,7 +81,7 @@
                     <Label fx:id="lblUnpaidOrders" text="⏳ Unpaid: 0" textFill="#FFE66D" style="-fx-font-size: 11px;" />
                 </HBox>
             </VBox>
-
+            
             <!-- Card 4: Tables Status -->
             <VBox spacing="12.0" style="-fx-background-color: linear-gradient(to bottom right, #fa709a 0%, #fee140 100%); -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 5);" GridPane.columnIndex="3">
                 <Label text="🪑 TABLE STATUS" textFill="#E8E8E8">
@@ -97,7 +97,7 @@
                 <Label fx:id="lblTableStatus" text="Tables in Service" textFill="WHITE" style="-fx-font-size: 11px;" />
             </VBox>
         </GridPane>
-
+        
         <!-- Alert Section (Low Stock Warning) -->
         <VBox fx:id="alertSection" spacing="10.0" style="-fx-background-color: #fff3cd; -fx-border-color: #ffc107; -fx-border-width: 2; -fx-background-radius: 10; -fx-border-radius: 10; -fx-padding: 15;" visible="false">
             <HBox spacing="10.0" alignment="CENTER_LEFT">
@@ -110,7 +110,7 @@
                 <Button text="View Details" onAction="#handleViewLowStock" style="-fx-background-color: #ffc107; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 5; -fx-font-weight: bold;" />
             </HBox>
         </VBox>
-
+        
         <!-- Main Content Area -->
         <HBox spacing="20.0" VBox.vgrow="ALWAYS">
             <!-- Left: Best Selling Products -->
@@ -128,7 +128,7 @@
                         </items>
                     </ComboBox>
                 </HBox>
-
+                
                 <TableView fx:id="bestSellingTable" style="-fx-background-radius: 8;" VBox.vgrow="ALWAYS">
                     <columns>
                         <TableColumn fx:id="colRank" prefWidth="50.0" text="#" />
@@ -138,11 +138,11 @@
                     </columns>
                 </TableView>
             </VBox>
-
+            
             <!-- Right: Recent Orders -->
             <VBox spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 5);" HBox.hgrow="ALWAYS">
                 <Label text="📋 Recent Orders" style="-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #2c3e50;" />
-
+                
                 <TableView fx:id="recentOrdersTable" style="-fx-background-radius: 8;" VBox.vgrow="ALWAYS">
                     <columns>
                         <TableColumn fx:id="colOrderId" prefWidth="80.0" text="Order ID" />
@@ -154,7 +154,7 @@
                 </TableView>
             </VBox>
         </HBox>
-
+        
         <!-- Bottom Section: Quick Stats -->
         <HBox spacing="20.0">
             <!-- Staff Online -->
@@ -167,7 +167,7 @@
                     </VBox>
                 </HBox>
             </VBox>
-
+            
             <!-- Average Order Value -->
             <VBox spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 5);" HBox.hgrow="ALWAYS">
                 <HBox alignment="CENTER_LEFT" spacing="10.0">
@@ -178,7 +178,7 @@
                     </VBox>
                 </HBox>
             </VBox>
-
+            
             <!-- Peak Hour -->
             <VBox spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 5);" HBox.hgrow="ALWAYS">
                 <HBox alignment="CENTER_LEFT" spacing="10.0">
