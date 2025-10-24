@@ -30,6 +30,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 public class ProductController {
 
@@ -109,7 +110,7 @@ public class ProductController {
         }
     }
 
-   private void setupTableColumns() {
+    private void setupTableColumns() {
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colName.setCellValueFactory(new PropertyValueFactory<>("name"));
         colPrice.setCellValueFactory(new PropertyValueFactory<>("price"));
@@ -144,17 +145,48 @@ public class ProductController {
             @Override
             protected void updateItem(String imagePath, boolean empty) {
                 super.updateItem(imagePath, empty);
-                if (empty || imagePath == null) {
+                if (empty || imagePath == null || imagePath.trim().isEmpty()) {
                     setGraphic(null);
                 } else {
                     try {
-                        Image image = new Image("file:" + imagePath);
-                        imageView.setImage(image);
-                        setGraphic(imageView);
+                        // Chuẩn hóa đường dẫn
+                        Path path = Paths.get(imagePath);
+                        String fullPath = path.toAbsolutePath().toString();
+                        if (Files.exists(path)) {
+                            Image image = new Image("file:" + fullPath);
+                            if (!image.isError()) {
+                                imageView.setImage(image);
+                                setGraphic(imageView);
+                            } else {
+                                System.out.println("Image error for path: " + fullPath);
+                                loadDefaultImage();
+                            }
+                        } else {
+                            System.out.println("Image file not found: " + fullPath);
+                            loadDefaultImage();
+                        }
                     } catch (Exception e) {
-                        imageView.setImage(new Image("file:img/temp_icon.png"));
-                        setGraphic(imageView);
+                        System.out.println("Error loading image: " + imagePath + ", Error: " + e.getMessage());
+                        loadDefaultImage();
                     }
+                }
+            }
+
+            private void loadDefaultImage() {
+                String defaultImagePath = "img/temp_icon.png";
+                try {
+                    Path defaultPath = Paths.get(defaultImagePath);
+                    if (Files.exists(defaultPath)) {
+                        Image defaultImage = new Image("file:" + defaultPath.toAbsolutePath().toString());
+                        imageView.setImage(defaultImage);
+                        setGraphic(imageView);
+                    } else {
+                        System.out.println("Default image not found: " + defaultImagePath);
+                        setGraphic(null);
+                    }
+                } catch (Exception e) {
+                    System.out.println("Error loading default image: " + e.getMessage());
+                    setGraphic(null);
                 }
             }
         });
@@ -171,60 +203,60 @@ public class ProductController {
                 btnEdit.getStyleClass().add("action-button-edit");
                 btnEdit.setFont(javafx.scene.text.Font.font("Segoe UI Semibold", 12));
                 btnEdit.setStyle(
-                    "-fx-background-color: #3b82f6; " +
-                    "-fx-text-fill: white; " +
-                    "-fx-font-size: 12px; " +
-                    "-fx-font-weight: 600; " +
-                    "-fx-padding: 6 14; " +
-                    "-fx-background-radius: 5; " +
-                    "-fx-border-color: transparent; " +
-                    "-fx-cursor: hand;"
+                        "-fx-background-color: #3b82f6; " +
+                                "-fx-text-fill: white; " +
+                                "-fx-font-size: 12px; " +
+                                "-fx-font-weight: 600; " +
+                                "-fx-padding: 6 14; " +
+                                "-fx-background-radius: 5; " +
+                                "-fx-border-color: transparent; " +
+                                "-fx-cursor: hand;"
                 );
                 btnEdit.setOnMouseEntered(e -> btnEdit.setStyle(
-                    btnEdit.getStyle() + "-fx-background-color: #2563eb;"
+                        btnEdit.getStyle() + "-fx-background-color: #2563eb;"
                 ));
                 btnEdit.setOnMouseExited(e -> btnEdit.setStyle(
-                    btnEdit.getStyle() + "-fx-background-color: #3b82f6;"
+                        btnEdit.getStyle() + "-fx-background-color: #3b82f6;"
                 ));
 
                 // INGREDIENTS BUTTON - Purple
                 btnIngredients.getStyleClass().add("action-button-view");
                 btnIngredients.setFont(javafx.scene.text.Font.font("Segoe UI Semibold", 12));
                 btnIngredients.setStyle(
-                    "-fx-background-color: #8b5cf6; " +
-                    "-fx-text-fill: white; " +
-                    "-fx-font-size: 12px; " +
-                    "-fx-font-weight: 600; " +
-                    "-fx-padding: 6 14; " +
-                    "-fx-background-radius: 5; " +
-                    "-fx-border-color: transparent; " +
-                    "-fx-cursor: hand;"
+                        "-fx-background-color: #8b5cf6; " +
+                                "-fx-text-fill: white; " +
+                                "-fx-font-size: 12px; " +
+                                "-fx-font-weight: 600; " +
+                                "-fx-padding: 6 14; " +
+                                "-fx-background-radius: 5; " +
+                                "-fx-border-color: transparent; " +
+                                "-fx-cursor: hand;"
                 );
                 btnIngredients.setOnMouseEntered(e -> btnIngredients.setStyle(
-                    btnIngredients.getStyle() + "-fx-background-color: #7c3aed;"
+                        btnIngredients.getStyle() + "-fx-background-color: #7c3aed;"
                 ));
                 btnIngredients.setOnMouseExited(e -> btnIngredients.setStyle(
-                    btnIngredients.getStyle() + "-fx-background-color: #8b5cf6;"
+                        btnIngredients.getStyle() + "-fx-background-color: #8b5cf6;"
                 ));
 
                 // DELETE BUTTON - Red
                 btnDelete.getStyleClass().add("action-button-delete");
                 btnDelete.setFont(javafx.scene.text.Font.font("Segoe UI Semibold", 12));
                 btnDelete.setStyle(
-                    "-fx-background-color: #ef4444; " +
-                    "-fx-text-fill: white; " +
-                    "-fx-font-size: 12px; " +
-                    "-fx-font-weight: 600; " +
-                    "-fx-padding: 6 14; " +
-                    "-fx-background-radius: 5; " +
-                    "-fx-border-color: transparent; " +
-                    "-fx-cursor: hand;"
+                        "-fx-background-color: #ef4444; " +
+                                "-fx-text-fill: white; " +
+                                "-fx-font-size: 12px; " +
+                                "-fx-font-weight: 600; " +
+                                "-fx-padding: 6 14; " +
+                                "-fx-background-radius: 5; " +
+                                "-fx-border-color: transparent; " +
+                                "-fx-cursor: hand;"
                 );
                 btnDelete.setOnMouseEntered(e -> btnDelete.setStyle(
-                    btnDelete.getStyle() + "-fx-background-color: #dc2626;"
+                        btnDelete.getStyle() + "-fx-background-color: #dc2626;"
                 ));
                 btnDelete.setOnMouseExited(e -> btnDelete.setStyle(
-                    btnDelete.getStyle() + "-fx-background-color: #ef4444;"
+                        btnDelete.getStyle() + "-fx-background-color: #ef4444;"
                 ));
 
                 actionBox.setAlignment(Pos.CENTER);
@@ -257,6 +289,7 @@ public class ProductController {
             }
         });
     }
+
     private void setupIngredientsTable() {
         colIngredientName.setCellValueFactory(new PropertyValueFactory<>("ingredientName"));
         colIngredientQuantity.setCellValueFactory(new PropertyValueFactory<>("quantity"));
@@ -413,20 +446,37 @@ public class ProductController {
         File selectedFile = fileChooser.showOpenDialog(btnUploadImage.getScene().getWindow());
         if (selectedFile != null) {
             try {
-                // Create img directory if not exists
-                Path imgDir = Paths.get("img");
+                // Define the target directory: src/resources/img/product/
+                Path projectDir = Paths.get(System.getProperty("user.dir"));
+                Path imgDir = projectDir.resolve("src/resources/img/product");
+
+                // Create the directory if it doesn't exist
                 if (!Files.exists(imgDir)) {
                     Files.createDirectories(imgDir);
+                    System.out.println("Created directory: " + imgDir.toAbsolutePath());
                 }
 
-                // Copy file to img directory
-                String fileName = System.currentTimeMillis() + "_" + selectedFile.getName();
-                Path destPath = imgDir.resolve(fileName);
+                // Generate a unique file name to avoid conflicts
+                String originalFileName = selectedFile.getName();
+                String fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
+                String uniqueFileName = UUID.randomUUID().toString() + fileExtension;
+                Path destPath = imgDir.resolve(uniqueFileName);
+
+                // Copy the file to the target directory
                 Files.copy(selectedFile.toPath(), destPath, StandardCopyOption.REPLACE_EXISTING);
 
-                selectedImagePath = "img/" + fileName;
-                imgPreview.setImage(new Image("file:" + destPath.toString()));
+                System.out.println("Image saved to: " + destPath.toAbsolutePath());
+
+                // Store the relative path for use in the application
+                selectedImagePath = "img/product/" + uniqueFileName;
+
+                // Update the image preview
+                imgPreview.setImage(new Image("file:" + destPath.toAbsolutePath().toString()));
+
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Image uploaded successfully!");
+
             } catch (IOException e) {
+                e.printStackTrace();
                 showAlert(Alert.AlertType.ERROR, "Error", "Failed to upload image: " + e.getMessage());
             }
         }
