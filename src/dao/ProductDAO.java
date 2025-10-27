@@ -29,7 +29,10 @@ public class ProductDAO {
                     drinkTypes.add(type.trim().toLowerCase());
                 }
                 product.setDrinkTypes(drinkTypes);
-                product.setImage(rs.getString("image"));
+                String imagePath = rs.getString("image");
+                if (imagePath != null && imagePath.startsWith("src/resources/")) {
+                    imagePath = imagePath.replace("src/resources/", "");
+                }
                 products.add(product);
             }
         } catch (SQLException e) {

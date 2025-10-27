@@ -25,8 +25,11 @@ import javafx.util.Duration;
 import model.OrderItem;
 import utils.SessionManager;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -43,15 +46,24 @@ import java.util.*;
 public class OrderController implements Initializable {
 
     // FXML Components
-    @FXML private Label lblStaffName, lblDateTime, lblSelectedTable, lblItemCount;
-    @FXML private Label lblSubtotal, lblVAT, lblTotal, lblNotification;
-    @FXML private ToggleButton btnDineIn, btnTakeaway;
-    @FXML private VBox tableSelectionPane, menuPane, orderItemsContainer, notificationPane;
-    @FXML private TabPane floorTabPane;
-    @FXML private GridPane floor1Grid, floor2Grid, floor3Grid, menuGrid;
-    @FXML private TextField txtSearchProduct;
-    @FXML private Button btnPayment, btnClearOrder, btnPrintBill, btnViewOrders, btnDashboard, btnLogout;
-    @FXML private BorderPane mainBorderPane;
+    @FXML
+    private Label lblStaffName, lblDateTime, lblSelectedTable, lblItemCount;
+    @FXML
+    private Label lblSubtotal, lblVAT, lblTotal, lblNotification;
+    @FXML
+    private ToggleButton btnDineIn, btnTakeaway;
+    @FXML
+    private VBox tableSelectionPane, menuPane, orderItemsContainer, notificationPane;
+    @FXML
+    private TabPane floorTabPane;
+    @FXML
+    private GridPane floor1Grid, floor2Grid, floor3Grid, menuGrid;
+    @FXML
+    private TextField txtSearchProduct;
+    @FXML
+    private Button btnPayment, btnClearOrder, btnPrintBill, btnViewOrders, btnDashboard, btnLogout;
+    @FXML
+    private BorderPane mainBorderPane;
 
     // Data Members
     private ToggleGroup orderTypeGroup;
@@ -131,7 +143,8 @@ public class OrderController implements Initializable {
     }
 
     private void setupSearchFilter() {
-        txtSearchProduct.textProperty().addListener((obs, oldVal, newVal) -> filterProducts(newVal.trim().toLowerCase()));
+        txtSearchProduct.textProperty()
+                .addListener((obs, oldVal, newVal) -> filterProducts(newVal.trim().toLowerCase()));
     }
 
     private void filterProducts(String searchText) {
@@ -172,8 +185,7 @@ public class OrderController implements Initializable {
                         rs.getString("name"),
                         floor,
                         rs.getInt("seats"),
-                        rs.getString("status")
-                );
+                        rs.getString("status"));
                 floorTables.computeIfAbsent(floor, k -> new ArrayList<>()).add(table);
             }
 
@@ -186,7 +198,8 @@ public class OrderController implements Initializable {
     }
 
     private void displayTables(GridPane grid, List<TableData> tables) {
-        if (tables == null) return;
+        if (tables == null)
+            return;
         grid.getChildren().clear();
         int col = 0, row = 0;
 
@@ -245,8 +258,7 @@ public class OrderController implements Initializable {
 
         card.setStyle(String.format(
                 "-fx-background-color: white; -fx-background-radius: 18; -fx-border-color: %s; -fx-border-width: 3; -fx-border-radius: 18; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 12, 0, 0, 3);",
-                borderColor
-        ));
+                borderColor));
 
         ImageView tableIcon = new ImageView();
         try {
@@ -268,8 +280,7 @@ public class OrderController implements Initializable {
         Label lblName = new Label(table.name);
         lblName.setStyle(String.format(
                 "-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: %s;",
-                textColor
-        ));
+                textColor));
 
         HBox seatsBox = new HBox(5);
         seatsBox.setAlignment(Pos.CENTER);
@@ -278,15 +289,13 @@ public class OrderController implements Initializable {
         Label lblSeats = new Label(table.seats + " seats");
         lblSeats.setStyle(String.format(
                 "-fx-font-size: 13px; -fx-text-fill: %s; -fx-font-weight: 600;",
-                textColor
-        ));
+                textColor));
         seatsBox.getChildren().addAll(seatsIcon, lblSeats);
 
         Label lblStatus = new Label(table.status.toUpperCase());
         lblStatus.setStyle(String.format(
                 "-fx-font-size: 10px; -fx-text-fill: %s; -fx-font-weight: 700; -fx-background-color: %s; -fx-padding: 4 10; -fx-background-radius: 12;",
-                textColor, statusBadgeColor
-        ));
+                textColor, statusBadgeColor));
 
         card.getChildren().addAll(tableIcon, lblName, seatsBox, lblStatus);
 
@@ -294,12 +303,10 @@ public class OrderController implements Initializable {
             card.setOnMouseClicked(e -> selectTable(table));
             card.setOnMouseEntered(e -> card.setStyle(String.format(
                     "-fx-background-color: %s; -fx-background-radius: 18; -fx-border-color: %s; -fx-border-width: 3; -fx-border-radius: 18; -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.3), 16, 0, 0, 4); -fx-cursor: hand; -fx-scale-x: 1.05; -fx-scale-y: 1.05;",
-                    bgColor, borderColor
-            )));
+                    bgColor, borderColor)));
             card.setOnMouseExited(e -> card.setStyle(String.format(
                     "-fx-background-color: white; -fx-background-radius: 18; -fx-border-color: %s; -fx-border-width: 3; -fx-border-radius: 18; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 12, 0, 0, 3); -fx-scale-x: 1.0; -fx-scale-y: 1.0;",
-                    borderColor
-            )));
+                    borderColor)));
         } else {
             card.setOpacity(0.7);
         }
@@ -330,14 +337,13 @@ public class OrderController implements Initializable {
 
             while (rs.next()) {
                 String drinkTypesStr = rs.getString("drink_types");
-                String[] drinkTypes = drinkTypesStr != null ? drinkTypesStr.split(",") : new String[]{"hot"};
+                String[] drinkTypes = drinkTypesStr != null ? drinkTypesStr.split(",") : new String[] { "hot" };
                 ProductData product = new ProductData(
                         rs.getInt("id"),
                         rs.getString("name"),
                         rs.getDouble("price"),
                         new HashSet<>(Arrays.asList(drinkTypes)),
-                        rs.getString("image")
-                );
+                        rs.getString("image"));
                 allProducts.add(product);
             }
         } catch (SQLException e) {
@@ -361,62 +367,69 @@ public class OrderController implements Initializable {
     }
 
     private VBox createProductCard(ProductData product) {
-        VBox box = new VBox(12);
+        VBox box = new VBox(8);
         box.setAlignment(Pos.CENTER);
-        box.setPadding(new Insets(16));
-        box.setPrefSize(160, 220);
-        box.setStyle(
-                "-fx-background-color: white; -fx-background-radius: 16; " +
-                        "-fx-border-color: #e5e7eb; -fx-border-width: 2; -fx-border-radius: 16; " +
-                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 8, 0, 0, 2); -fx-cursor: hand;"
-        );
+        box.setPadding(new Insets(10));
+        box.setStyle("-fx-background-color: white; -fx-background-radius: 8; -fx-cursor: hand; -fx-border-color: #BDC3C7; -fx-border-radius: 8; -fx-border-width: 1;");
+        box.setPrefSize(150, 200);
 
         ImageView imgView = new ImageView();
         String imagePath = product.image != null && !product.image.isEmpty() ? product.image : "img/temp_icon.png";
+        String fullPath = Paths.get("src/resources/" + imagePath).toAbsolutePath().toString();
         try {
-            Image image = new Image(getClass().getResourceAsStream("/resources/" + imagePath));
-            imgView.setImage(image);
+            System.out.println("Loading image from file: " + fullPath);
+            File file = new File(fullPath);
+            if (file.exists()) {
+                Image image = new Image("file:" + fullPath);
+                if (!image.isError()) {
+                    imgView.setImage(image);
+                } else {
+                    System.err.println("Error loading image: " + fullPath);
+                    loadDefaultImage(imgView);
+                }
+            } else {
+                System.err.println("File not found: " + fullPath);
+                loadDefaultImage(imgView);
+            }
         } catch (Exception e) {
+            System.err.println("Error loading image: " + fullPath + ", Error: " + e.getMessage());
             loadDefaultImage(imgView);
         }
-        imgView.setFitWidth(90);
-        imgView.setFitHeight(90);
+
+        imgView.setFitWidth(80);
+        imgView.setFitHeight(80);
         imgView.setPreserveRatio(true);
 
         Label lblName = new Label(product.name);
-        lblName.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;");
+        lblName.setStyle("-fx-font-size: 13px; -fx-font-weight: bold;");
         lblName.setWrapText(true);
         lblName.setAlignment(Pos.CENTER);
-        lblName.setMaxWidth(140);
 
-        Label lblPrice = new Label("$" + df.format(product.price));
-        lblPrice.setStyle("-fx-font-size: 15px; -fx-font-weight: 600; -fx-text-fill: #667eea;");
-
-        box.getChildren().addAll(imgView, lblName, lblPrice);
-
-        box.setOnMouseClicked(e -> {
-            String drinkType = product.drinkTypes.iterator().next();
-            String note = "";
-            addToOrder(product, drinkType, product.price, note);
-            showNotification("success", "✓ " + product.name + " added!");
-        });
-
-        box.setOnMouseEntered(e -> box.setStyle(
-                box.getStyle() + "-fx-background-color: #f9fafb; -fx-scale-x: 1.03; -fx-scale-y: 1.03;"
-        ));
-        box.setOnMouseExited(e -> box.setStyle(
-                box.getStyle() + "-fx-background-color: white; -fx-scale-x: 1.0; -fx-scale-y: 1.0;"
-        ));
+        box.getChildren().addAll(imgView, lblName);
+        box.setOnMouseClicked(e -> addToOrder(product, product.drinkTypes.iterator().next(), product.price, ""));
+        box.setOnMouseEntered(e -> box.setStyle(box.getStyle() + "-fx-background-color: #ECF0F1;"));
+        box.setOnMouseExited(e -> box.setStyle(box.getStyle() + "-fx-background-color: white;"));
 
         return box;
     }
 
     private void loadDefaultImage(ImageView imgView) {
+        String defaultImagePath = "src/resources/img/temp_icon.png";
         try {
-            Image defaultImage = new Image(getClass().getResourceAsStream("/resources/img/temp_icon.png"));
-            imgView.setImage(defaultImage);
+            System.out.println("Loading default image from file: " + defaultImagePath);
+            File file = new File(defaultImagePath);
+            if (file.exists()) {
+                Image defaultImage = new Image("file:" + defaultImagePath);
+                if (!defaultImage.isError()) {
+                    imgView.setImage(defaultImage);
+                } else {
+                    System.err.println("Error loading default image: " + defaultImagePath);
+                }
+            } else {
+                System.err.println("Default image not found: " + defaultImagePath);
+            }
         } catch (Exception e) {
-            System.err.println("Error loading default image: " + e.getMessage());
+            System.err.println("Error loading default image: " + defaultImagePath + ", Error: " + e.getMessage());
         }
     }
 
@@ -461,25 +474,43 @@ public class OrderController implements Initializable {
     }
 
     private HBox createOrderItemBox(OrderItem item) {
-        HBox box = new HBox(12);
-        box.setAlignment(Pos.CENTER_LEFT);
-        box.setPadding(new Insets(12));
-        box.setStyle(
-                "-fx-background-color: white; -fx-background-radius: 12; " +
-                        "-fx-border-color: #e5e7eb; -fx-border-width: 2; -fx-border-radius: 12;"
-        );
+        HBox box = new HBox(10);
+        box.setAlignment(Pos.TOP_LEFT);
+        box.setPadding(new Insets(10));
+        box.setStyle("-fx-background-color: #ECF0F1; -fx-background-radius: 5;");
 
         ImageView imgView = new ImageView();
-        String imagePath = item.getImage() != null && !item.getImage().isEmpty() ?
-                item.getImage() : "img/temp_icon.png";
+        String imagePath = item.getImage() != null && !item.getImage().isEmpty() ? item.getImage() : "img/temp_icon.png";
+        String resourcePath = imagePath.startsWith("/") ? imagePath : "/" + imagePath;
         try {
-            Image image = new Image(getClass().getResourceAsStream("/resources/" + imagePath));
-            imgView.setImage(image);
+            System.out.println("Loading image from resource: " + resourcePath);
+            InputStream stream = getClass().getResourceAsStream(resourcePath);
+            if (stream == null) {
+                System.err.println("Resource not found: " + resourcePath);
+                String filePath = "src/resources/" + imagePath.replaceFirst("^/", "");
+                File file = new File(filePath);
+                if (file.exists()) {
+                    System.out.println("Loading image from file: " + filePath);
+                    imgView.setImage(new Image(file.toURI().toString()));
+                } else {
+                    loadDefaultImage(imgView);
+                }
+            } else {
+                Image image = new Image(stream);
+                if (image.isError()) {
+                    System.err.println("Error loading image: " + resourcePath);
+                    loadDefaultImage(imgView);
+                } else {
+                    imgView.setImage(image);
+                }
+            }
         } catch (Exception e) {
+            System.err.println("Error loading image: " + resourcePath + ", Error: " + e.getMessage());
             loadDefaultImage(imgView);
         }
-        imgView.setFitWidth(60);
-        imgView.setFitHeight(60);
+
+        imgView.setFitWidth(50);
+        imgView.setFitHeight(50);
         imgView.setPreserveRatio(true);
 
         VBox infoBox = new VBox(4);
@@ -536,8 +567,7 @@ public class OrderController implements Initializable {
 
         Button btnMinus = new Button("-");
         btnMinus.setStyle(
-                "-fx-background-color: #fee; -fx-text-fill: #e53e3e; -fx-font-size: 16px; -fx-font-weight: bold; -fx-pref-width: 36; -fx-pref-height: 36; -fx-background-radius: 8; -fx-cursor: hand;"
-        );
+                "-fx-background-color: #fee; -fx-text-fill: #e53e3e; -fx-font-size: 16px; -fx-font-weight: bold; -fx-pref-width: 36; -fx-pref-height: 36; -fx-background-radius: 8; -fx-cursor: hand;");
         btnMinus.setOnAction(e -> {
             if (item.getQuantity() > 1) {
                 item.setQuantity(item.getQuantity() - 1);
@@ -552,8 +582,7 @@ public class OrderController implements Initializable {
 
         Button btnPlus = new Button("+");
         btnPlus.setStyle(
-                "-fx-background-color: #d1fae5; -fx-text-fill: #10b981; -fx-font-size: 16px; -fx-font-weight: bold; -fx-pref-width: 36; -fx-pref-height: 36; -fx-background-radius: 8; -fx-cursor: hand;"
-        );
+                "-fx-background-color: #d1fae5; -fx-text-fill: #10b981; -fx-font-size: 16px; -fx-font-weight: bold; -fx-pref-width: 36; -fx-pref-height: 36; -fx-background-radius: 8; -fx-cursor: hand;");
         btnPlus.setOnAction(e -> {
             item.setQuantity(item.getQuantity() + 1);
             updateOrderDisplay();
@@ -563,8 +592,7 @@ public class OrderController implements Initializable {
 
         Button btnDelete = new Button("🗑");
         btnDelete.setStyle(
-                "-fx-background-color: #fee; -fx-text-fill: #e53e3e; -fx-font-size: 16px; -fx-pref-width: 40; -fx-pref-height: 40; -fx-background-radius: 10; -fx-cursor: hand;"
-        );
+                "-fx-background-color: #fee; -fx-text-fill: #e53e3e; -fx-font-size: 16px; -fx-pref-width: 40; -fx-pref-height: 40; -fx-background-radius: 10; -fx-cursor: hand;");
         btnDelete.setOnAction(e -> {
             String key = findItemKey(item);
             if (key != null) {
@@ -615,8 +643,7 @@ public class OrderController implements Initializable {
         paymentCard.setMaxWidth(500);
         paymentCard.setMaxHeight(650);
         paymentCard.setStyle(
-                "-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 20, 0, 0, 0);"
-        );
+                "-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 20, 0, 0, 0);");
 
         // Header
         HBox header = new HBox(10);
@@ -640,7 +667,8 @@ public class OrderController implements Initializable {
         Label staffLabel = new Label("Staff: " + lblStaffName.getText());
         staffLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #4a5568;");
 
-        Label dateLabel = new Label("Date: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+        Label dateLabel = new Label(
+                "Date: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
         dateLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #4a5568;");
 
         orderInfo.getChildren().addAll(orderTypeLabel, tableLabel, staffLabel, dateLabel);
@@ -649,7 +677,8 @@ public class OrderController implements Initializable {
         ScrollPane itemsScroll = new ScrollPane();
         itemsScroll.setFitToWidth(true);
         itemsScroll.setPrefHeight(200);
-        itemsScroll.setStyle("-fx-background: transparent; -fx-background-color: #f9fafb; -fx-border-color: #e5e7eb; -fx-border-radius: 10; -fx-background-radius: 10;");
+        itemsScroll.setStyle(
+                "-fx-background: transparent; -fx-background-color: #f9fafb; -fx-border-color: #e5e7eb; -fx-border-radius: 10; -fx-background-radius: 10;");
 
         VBox itemsList = new VBox(8);
         itemsList.setPadding(new Insets(10));
@@ -777,10 +806,14 @@ public class OrderController implements Initializable {
         ewalletBtn.setToggleGroup(paymentToggleGroup);
         qrBtn.setToggleGroup(paymentToggleGroup);
 
-        if (paymentMethod.equals("cash")) cashBtn.setSelected(true);
-        else if (paymentMethod.equals("card")) cardBtn.setSelected(true);
-        else if (paymentMethod.equals("e-wallet")) ewalletBtn.setSelected(true);
-        else if (paymentMethod.equals("qr-code")) qrBtn.setSelected(true);
+        if (paymentMethod.equals("cash"))
+            cashBtn.setSelected(true);
+        else if (paymentMethod.equals("card"))
+            cardBtn.setSelected(true);
+        else if (paymentMethod.equals("e-wallet"))
+            ewalletBtn.setSelected(true);
+        else if (paymentMethod.equals("qr-code"))
+            qrBtn.setSelected(true);
 
         cashBtn.setStyle(paymentMethod.equals("cash") ? selectedStyle : unselectedStyle);
         cardBtn.setStyle(paymentMethod.equals("card") ? selectedStyle : unselectedStyle);
@@ -811,9 +844,8 @@ public class OrderController implements Initializable {
                 double total = initialTotal - discount;
                 double change = received - total;
                 changeLabel.setText("Change: $" + df.format(Math.max(0, change)));
-                changeLabel.setStyle(change >= 0 ?
-                        "-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #10b981;" :
-                        "-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #ef4444;");
+                changeLabel.setStyle(change >= 0 ? "-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #10b981;"
+                        : "-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #ef4444;");
             } catch (NumberFormatException e) {
                 changeLabel.setText("Change: $0.00");
                 changeLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #6b7280;");
@@ -832,9 +864,12 @@ public class OrderController implements Initializable {
             } else {
                 cashPaymentBox.setVisible(false);
                 cashPaymentBox.setManaged(false);
-                if (newVal == cardBtn) paymentMethod = "card";
-                else if (newVal == ewalletBtn) paymentMethod = "e-wallet";
-                else if (newVal == qrBtn) paymentMethod = "qr-code";
+                if (newVal == cardBtn)
+                    paymentMethod = "card";
+                else if (newVal == ewalletBtn)
+                    paymentMethod = "e-wallet";
+                else if (newVal == qrBtn)
+                    paymentMethod = "qr-code";
             }
 
             cashBtn.setStyle(newVal == cashBtn ? selectedStyle : unselectedStyle);
@@ -849,8 +884,7 @@ public class OrderController implements Initializable {
 
         Button confirmBtn = new Button("Process Payment");
         confirmBtn.setStyle(
-                "-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-pref-width: 180; -fx-pref-height: 45; -fx-background-radius: 10; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.3), 8, 0, 0, 2);"
-        );
+                "-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-pref-width: 180; -fx-pref-height: 45; -fx-background-radius: 10; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.3), 8, 0, 0, 2);");
         confirmBtn.setOnAction(e -> {
             double paidAmount;
             double discount;
@@ -891,8 +925,7 @@ public class OrderController implements Initializable {
 
         Button cancelBtn = new Button("Cancel");
         cancelBtn.setStyle(
-                "-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-pref-width: 120; -fx-pref-height: 45; -fx-background-radius: 10; -fx-cursor: hand;"
-        );
+                "-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-pref-width: 120; -fx-pref-height: 45; -fx-background-radius: 10; -fx-cursor: hand;");
         cancelBtn.setOnAction(e -> hidePaymentOverlay());
 
         buttonBox.getChildren().addAll(confirmBtn, cancelBtn);
@@ -900,8 +933,7 @@ public class OrderController implements Initializable {
         paymentCard.getChildren().addAll(
                 header, sep1, orderInfo, itemsScroll, sep2,
                 financialBox, paymentMethodLabel, paymentMethodBox,
-                cashPaymentBox, buttonBox
-        );
+                cashPaymentBox, buttonBox);
 
         paymentOverlay.getChildren().add(paymentCard);
 
@@ -959,8 +991,7 @@ public class OrderController implements Initializable {
             for (OrderItem item : orderItems.values()) {
                 boolean success = orderDAO.addOrderItem(
                         orderId, item.getProductId(), item.getDrinkType(),
-                        item.getQuantity(), item.getPrice(), item.getNote()
-                );
+                        item.getQuantity(), item.getPrice(), item.getNote());
                 if (!success) {
                     conn.rollback();
                     showNotification("error", "✗ Failed to add items!");
@@ -982,8 +1013,7 @@ public class OrderController implements Initializable {
             double changeReturned = paymentMethod.equals("cash") ? paidAmount - total : 0;
 
             boolean paymentSuccess = orderDAO.processPayment(
-                    orderId, total, vat, paidAmount, changeReturned
-            );
+                    orderId, total, vat, paidAmount, changeReturned);
 
             if (!paymentSuccess) {
                 conn.rollback();
@@ -1013,8 +1043,7 @@ public class OrderController implements Initializable {
         confirmCard.setPadding(new Insets(40));
         confirmCard.setMaxWidth(450);
         confirmCard.setStyle(
-                "-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 20, 0, 0, 0);"
-        );
+                "-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 20, 0, 0, 0);");
 
         Label successIcon = new Label("✓");
         successIcon.setStyle("-fx-font-size: 80px; -fx-text-fill: #10b981; -fx-font-weight: bold;");
@@ -1023,7 +1052,8 @@ public class OrderController implements Initializable {
         titleLabel.setStyle("-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;");
 
         Label orderIdLabel = new Label("Order #" + orderId);
-        orderIdLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: 600; -fx-text-fill: #667eea; -fx-background-color: #e0e7ff; -fx-padding: 8 20; -fx-background-radius: 20;");
+        orderIdLabel.setStyle(
+                "-fx-font-size: 18px; -fx-font-weight: 600; -fx-text-fill: #667eea; -fx-background-color: #e0e7ff; -fx-padding: 8 20; -fx-background-radius: 20;");
 
         Separator sep = new Separator();
         sep.setMaxWidth(300);
@@ -1053,8 +1083,7 @@ public class OrderController implements Initializable {
 
         Button closeBtn = new Button("Done");
         closeBtn.setStyle(
-                "-fx-background-color: #667eea; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-pref-width: 200; -fx-pref-height: 50; -fx-background-radius: 12; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(102, 126, 234, 0.3), 10, 0, 0, 3);"
-        );
+                "-fx-background-color: #667eea; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-pref-width: 200; -fx-pref-height: 50; -fx-background-radius: 12; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(102, 126, 234, 0.3), 10, 0, 0, 3);");
         closeBtn.setOnAction(e -> hideSuccessConfirmation());
 
         confirmCard.getChildren().addAll(successIcon, titleLabel, orderIdLabel, sep, detailsBox, closeBtn);
@@ -1116,7 +1145,8 @@ public class OrderController implements Initializable {
         for (OrderItem item : orderItems.values()) {
             HBox itemLine = new HBox();
             itemLine.setSpacing(10);
-            Label itemLabel = new Label(item.getQuantity() + " x " + item.getProductName() + " (" + item.getDrinkType() + ")");
+            Label itemLabel = new Label(
+                    item.getQuantity() + " x " + item.getProductName() + " (" + item.getDrinkType() + ")");
             itemLabel.setPrefWidth(200);
             Label priceLabel = new Label("$" + df.format(item.getPrice() * item.getQuantity()));
             priceLabel.setStyle("-fx-font-weight: bold;");
@@ -1191,8 +1221,7 @@ public class OrderController implements Initializable {
         confirmBox.setPadding(new Insets(30));
         confirmBox.setMaxWidth(400);
         confirmBox.setStyle(
-                "-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 20, 0, 0, 0);"
-        );
+                "-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 20, 0, 0, 0);");
 
         Label icon = new Label("⚠️");
         icon.setStyle("-fx-font-size: 60px;");
@@ -1210,8 +1239,7 @@ public class OrderController implements Initializable {
 
         Button confirmBtn = new Button("Yes, Clear");
         confirmBtn.setStyle(
-                "-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-pref-width: 140; -fx-pref-height: 45; -fx-background-radius: 10; -fx-cursor: hand;"
-        );
+                "-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-pref-width: 140; -fx-pref-height: 45; -fx-background-radius: 10; -fx-cursor: hand;");
         confirmBtn.setOnAction(e -> {
             clearOrder();
             StackPane root = (StackPane) confirmOverlay.getParent();
@@ -1221,8 +1249,7 @@ public class OrderController implements Initializable {
 
         Button cancelBtn = new Button("Cancel");
         cancelBtn.setStyle(
-                "-fx-background-color: #e5e7eb; -fx-text-fill: #4a5568; -fx-font-size: 14px; -fx-font-weight: bold; -fx-pref-width: 140; -fx-pref-height: 45; -fx-background-radius: 10; -fx-cursor: hand;"
-        );
+                "-fx-background-color: #e5e7eb; -fx-text-fill: #4a5568; -fx-font-size: 14px; -fx-font-weight: bold; -fx-pref-width: 140; -fx-pref-height: 45; -fx-background-radius: 10; -fx-cursor: hand;");
         cancelBtn.setOnAction(e -> {
             StackPane root = (StackPane) confirmOverlay.getParent();
             root.getChildren().remove(confirmOverlay);
@@ -1301,8 +1328,7 @@ public class OrderController implements Initializable {
         logoutBox.setPadding(new Insets(30));
         logoutBox.setMaxWidth(400);
         logoutBox.setStyle(
-                "-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 20, 0, 0, 0);"
-        );
+                "-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 20, 0, 0, 0);");
 
         Label icon = new Label("🚪");
         icon.setStyle("-fx-font-size: 60px;");
@@ -1320,8 +1346,7 @@ public class OrderController implements Initializable {
 
         Button confirmBtn = new Button("Yes, Logout");
         confirmBtn.setStyle(
-                "-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-pref-width: 140; -fx-pref-height: 45; -fx-background-radius: 10; -fx-cursor: hand;"
-        );
+                "-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-pref-width: 140; -fx-pref-height: 45; -fx-background-radius: 10; -fx-cursor: hand;");
         confirmBtn.setOnAction(e -> {
             try {
                 SessionManager.logout();
@@ -1339,8 +1364,7 @@ public class OrderController implements Initializable {
 
         Button cancelBtn = new Button("Cancel");
         cancelBtn.setStyle(
-                "-fx-background-color: #e5e7eb; -fx-text-fill: #4a5568; -fx-font-size: 14px; -fx-font-weight: bold; -fx-pref-width: 140; -fx-pref-height: 45; -fx-background-radius: 10; -fx-cursor: hand;"
-        );
+                "-fx-background-color: #e5e7eb; -fx-text-fill: #4a5568; -fx-font-size: 14px; -fx-font-weight: bold; -fx-pref-width: 140; -fx-pref-height: 45; -fx-background-radius: 10; -fx-cursor: hand;");
         cancelBtn.setOnAction(e -> {
             StackPane root = (StackPane) logoutOverlay.getParent();
             root.getChildren().remove(logoutOverlay);
@@ -1382,8 +1406,8 @@ public class OrderController implements Initializable {
         lblNotification.setText(message);
         lblNotification.setStyle("-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: 600;");
         notificationPane.setStyle(
-                "-fx-background-color: " + bgColor + "; -fx-background-radius: 12; -fx-padding: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 4);"
-        );
+                "-fx-background-color: " + bgColor
+                        + "; -fx-background-radius: 12; -fx-padding: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 4);");
 
         notificationPane.setVisible(true);
         notificationPane.setManaged(true);

@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.text.Font?>
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controller.manager.ProductController"
+            stylesheets="@/resources/Stylesheet/CleanModern.css"
+            style="-fx-background-color: #f8fafc;">
+
+    <VBox spacing="20.0" AnchorPane.topAnchor="20.0" AnchorPane.leftAnchor="20.0"
+          AnchorPane.rightAnchor="20.0" AnchorPane.bottomAnchor="20.0">
+        <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+        </padding>
+
+        <!-- Header -->
+        <HBox alignment="CENTER_LEFT" spacing="20.0">
+            <HBox spacing="10.0" alignment="CENTER_LEFT">
+                <ImageView fitWidth="28" fitHeight="28" preserveRatio="true">
+                    <image><Image url="/resources/img/box-solid-full.png"/></image>
+                </ImageView>
+                <Label text="Product Management" style="-fx-text-fill: #1e293b; -fx-font-weight: 700;">
+                    <font>
+                        <Font name="Segoe UI Bold" size="28.0" />
+                    </font>
+                </Label>
+            </HBox>
+            <Region HBox.hgrow="ALWAYS" />
+            <Label fx:id="lblDate" text="Thursday, 16/10/2025" style="-fx-font-size: 14px; -fx-text-fill: #64748b; -fx-font-family: 'Segoe UI';" />
+            <Button fx:id="btnRefresh" onAction="#handleRefresh"
+                    style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 8; -fx-pref-height: 40px; -fx-pref-width: 120px; -fx-font-size: 14px; -fx-font-weight: 600; -fx-font-family: 'Segoe UI Semibold';">
+                <graphic>
+                    <HBox spacing="8" alignment="CENTER">
+                        <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                            <image><Image url="/resources/img/rotate-right-solid-full.png"/></image>
+                        </ImageView>
+                        <Label text="Refresh" textFill="white" style="-fx-font-weight: 600;"/>
+                    </HBox>
+                </graphic>
+            </Button>
+        </HBox>
+
+        <!-- Search and Filter Bar -->
+        <HBox spacing="12.0" alignment="CENTER_LEFT" style="-fx-background-color: white; -fx-padding: 18.0; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 12, 0, 0, 3);">
+            <HBox spacing="8" alignment="CENTER_LEFT" style="-fx-background-color: #f3f4f6; -fx-background-radius: 8; -fx-padding: 8 12; -fx-border-color: #cbd5e0; -fx-border-radius: 8; -fx-border-width: 1.5;">
+                <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                    <image><Image url="/resources/img/magnifying-glass-solid-full.png"/></image>
+                </ImageView>
+                <TextField fx:id="txtSearch" promptText="Search products..."
+                           style="-fx-background-color: transparent; -fx-pref-width: 300px; -fx-font-size: 14px; -fx-font-family: 'Segoe UI';"
+                           onKeyReleased="#handleSearch" />
+            </HBox>
+            <Label text="Type:" style="-fx-font-size: 14px; -fx-text-fill: #475569; -fx-font-weight: 600; -fx-font-family: 'Segoe UI Semibold';" />
+            <ComboBox fx:id="cmbFilterType" promptText="All" onAction="#handleFilter"
+                      style="-fx-pref-width: 140px; -fx-font-size: 14px; -fx-pref-height: 38px; -fx-font-family: 'Segoe UI';">
+                <items>
+                    <FXCollections fx:factory="observableArrayList">
+                        <String fx:value="All"/>
+                        <String fx:value="Hot"/>
+                        <String fx:value="Iced"/>
+                        <String fx:value="Frappe"/>
+                    </FXCollections>
+                </items>
+            </ComboBox>
+            <Region HBox.hgrow="ALWAYS" />
+            <Button fx:id="btnAddProduct" onAction="#handleAddProduct"
+                    style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 8; -fx-pref-height: 42px; -fx-pref-width: 150px; -fx-font-size: 14px; -fx-font-weight: 600; -fx-font-family: 'Segoe UI Semibold';">
+                <graphic>
+                    <HBox spacing="8" alignment="CENTER">
+                        <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                            <image><Image url="/resources/img/plus-solid-full.png"/></image>
+                        </ImageView>
+                        <Label text="Add Product" textFill="white" style="-fx-font-weight: 600;"/>
+                    </HBox>
+                </graphic>
+            </Button>
+        </HBox>
+
+        <!-- Products Table -->
+        <VBox VBox.vgrow="ALWAYS" styleClass="card" style="-fx-padding: 20;">
+            <TableView fx:id="tableProducts" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="colId" text="ID" prefWidth="60.0" style="-fx-alignment: CENTER;" />
+                    <TableColumn fx:id="colImage" text="Image" prefWidth="80.0" style="-fx-alignment: CENTER;" />
+                    <TableColumn fx:id="colName" text="Product Name" prefWidth="220.0" />
+                    <TableColumn fx:id="colPrice" text="Price" prefWidth="100.0" style="-fx-alignment: CENTER;" />
+                    <TableColumn fx:id="colDrinkTypes" text="Types" prefWidth="160.0" style="-fx-alignment: CENTER;" />
+                    <TableColumn fx:id="colActions" text="Actions" prefWidth="300.0" style="-fx-alignment: CENTER;" />
+                </columns>
+            </TableView>
+            <HBox spacing="20.0" alignment="CENTER_LEFT" style="-fx-padding: 15.0 0 0 0;">
+                <Label fx:id="lblTotalProducts" text="Total: 0 products" style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #1e293b; -fx-font-family: 'Segoe UI Semibold';" />
+            </HBox>
+        </VBox>
+
+    </VBox>
+
+    <!-- Overlay for Dialogs -->
+    <Pane fx:id="overlay" visible="false" managed="false"
+          style="-fx-background-color: rgba(0,0,0,0.5);"
+          AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0"
+          AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0"/>
+
+    <!-- Add/Edit Product Dialog -->
+    <VBox fx:id="dialogPane" visible="false" managed="false" spacing="16.0"
+          style="-fx-background-color: white; -fx-padding: 28.0; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 24, 0, 0, 8);"
+          AnchorPane.topAnchor="60.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="150.0">
+
+        <HBox alignment="CENTER_LEFT" spacing="12.0">
+            <Label fx:id="dialogTitle" text="Add New Product" style="-fx-font-weight: 700; -fx-text-fill: #1e293b; -fx-font-family: 'Segoe UI Bold';">
+                <font>
+                    <Font size="22.0" />
+                </font>
+            </Label>
+            <Region HBox.hgrow="ALWAYS" />
+            <Button onAction="#handleCloseDialog"
+                    style="-fx-background-color: transparent; -fx-font-size: 20px; -fx-cursor: hand; -fx-text-fill: #64748b; -fx-border-color: transparent; -fx-font-family: 'Segoe UI';">
+                <graphic>
+                    <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
+                        <image><Image url="/resources/img/xmark-solid-full.png"/></image>
+                    </ImageView>
+                </graphic>
+            </Button>
+        </HBox>
+
+        <Separator style="-fx-background-color: #e2e8f0;" />
+
+        <HBox spacing="20.0">
+            <!-- Left: Image Preview -->
+            <VBox spacing="12.0" alignment="TOP_CENTER" style="-fx-padding: 10.0;">
+                <Label text="Product Image" style="-fx-font-weight: 600; -fx-text-fill: #475569; -fx-font-size: 14px; -fx-font-family: 'Segoe UI Semibold';" />
+                <ImageView fx:id="imgPreview" fitWidth="150.0" fitHeight="150.0" preserveRatio="true"
+                           style="-fx-border-color: #e2e8f0; -fx-border-width: 2; -fx-background-radius: 10;" />
+                <Button fx:id="btnUploadImage" onAction="#handleUploadImage"
+                        styleClass="button-primary"
+                        style="-fx-pref-height: 38px; -fx-pref-width: 150px; -fx-font-size: 13px; -fx-font-weight: 600; -fx-font-family: 'Segoe UI Semibold';">
+                    <graphic>
+                        <HBox spacing="6" alignment="CENTER">
+                            <ImageView fitWidth="14" fitHeight="14" preserveRatio="true">
+                                <image><Image url="/resources/img/camera-solid-full.png"/></image>
+                            </ImageView>
+                            <Label text="Upload Image" style="-fx-font-weight: 600;"/>
+                        </HBox>
+                    </graphic>
+                </Button>
+            </VBox>
+
+            <!-- Right: Product Details -->
+            <GridPane hgap="16.0" vgap="16.0" HBox.hgrow="ALWAYS">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="120.0" />
+                    <ColumnConstraints minWidth="320.0" hgrow="ALWAYS" />
+                </columnConstraints>
+
+                <Label text="Product Name:" GridPane.rowIndex="0" style="-fx-font-weight: 600; -fx-text-fill: #475569; -fx-font-size: 15px; -fx-font-family: 'Segoe UI Semibold';" />
+                <TextField fx:id="txtProductName" promptText="Enter product name" GridPane.columnIndex="1" GridPane.rowIndex="0"
+                           style="-fx-font-size: 14px; -fx-padding: 10 12; -fx-background-radius: 8; -fx-font-family: 'Segoe UI';" />
+
+                <Label text="Price ($):" GridPane.rowIndex="1" style="-fx-font-weight: 600; -fx-text-fill: #475569; -fx-font-size: 15px; -fx-font-family: 'Segoe UI Semibold';" />
+                <TextField fx:id="txtPrice" promptText="0.00" GridPane.columnIndex="1" GridPane.rowIndex="1"
+                           style="-fx-font-size: 14px; -fx-padding: 10 12; -fx-background-radius: 8; -fx-font-family: 'Segoe UI';" />
+
+                <Label text="Drink Types:" GridPane.rowIndex="2" style="-fx-font-weight: 600; -fx-text-fill: #475569; -fx-font-size: 15px; -fx-font-family: 'Segoe UI Semibold';" />
+                <HBox spacing="16.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                    <CheckBox fx:id="chkHot" text="Hot" style="-fx-font-size: 14px; -fx-font-family: 'Segoe UI';" />
+                    <CheckBox fx:id="chkIced" text="Iced" style="-fx-font-size: 14px; -fx-font-family: 'Segoe UI';" />
+                    <CheckBox fx:id="chkFrappe" text="Frappe" style="-fx-font-size: 14px; -fx-font-family: 'Segoe UI';" />
+                </HBox>
+
+                <Label text="Note:" GridPane.rowIndex="3" GridPane.columnSpan="2" style="-fx-text-fill: #64748b; -fx-font-size: 12px; -fx-font-family: 'Segoe UI';" />
+                <Label text="Select at least one drink type. You can manage ingredients after creating the product."
+                       GridPane.rowIndex="4" GridPane.columnSpan="2" style="-fx-text-fill: #64748b; -fx-font-size: 12px; -fx-wrap-text: true; -fx-font-family: 'Segoe UI';" />
+            </GridPane>
+        </HBox>
+
+        <Separator style="-fx-background-color: #e2e8f0;" />
+
+        <HBox spacing="12.0" alignment="CENTER_RIGHT">
+            <Button text="Cancel" onAction="#handleCloseDialog"
+                    styleClass="button"
+                    style="-fx-pref-height: 42px; -fx-pref-width: 120px; -fx-font-size: 14px; -fx-font-weight: 600; -fx-font-family: 'Segoe UI Semibold';" />
+            <Button fx:id="btnSave" text="Save" onAction="#handleSaveProduct"
+                    styleClass="button-success"
+                    style="-fx-pref-height: 42px; -fx-pref-width: 120px; -fx-font-size: 14px; -fx-font-weight: 600; -fx-font-family: 'Segoe UI Semibold';" />
+        </HBox>
+    </VBox>
+
+    <!-- Ingredients Management Dialog -->
+    <VBox fx:id="ingredientsPane" visible="false" managed="false" spacing="16.0"
+          style="-fx-background-color: white; -fx-padding: 28.0; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 24, 0, 0, 8);"
+          AnchorPane.topAnchor="40.0" AnchorPane.leftAnchor="120.0" AnchorPane.rightAnchor="120.0">
+
+        <HBox alignment="CENTER_LEFT" spacing="12.0">
+            <Label text="Manage Product Ingredients" style="-fx-font-weight: 700; -fx-text-fill: #1e293b; -fx-font-family: 'Segoe UI Bold';">
+                <font>
+                    <Font size="22.0" />
+                </font>
+            </Label>
+            <Region HBox.hgrow="ALWAYS" />
+            <Button onAction="#handleCloseIngredientsDialog"
+                    style="-fx-background-color: transparent; -fx-font-size: 20px; -fx-cursor: hand; -fx-text-fill: #64748b; -fx-border-color: transparent; -fx-font-family: 'Segoe UI';">
+                <graphic>
+                    <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
+                        <image><Image url="/resources/img/xmark-solid-full.png"/></image>
+                    </ImageView>
+                </graphic>
+            </Button>
+        </HBox>
+
+        <Separator style="-fx-background-color: #e2e8f0;" />
+
+        <!-- Add Ingredient Section -->
+        <VBox spacing="12.0" style="-fx-background-color: #f8fafc; -fx-padding: 18.0; -fx-background-radius: 10; -fx-border-color: #e2e8f0; -fx-border-width: 1.5; -fx-border-radius: 10;">
+            <Label text="Add Ingredient" style="-fx-font-weight: 600; -fx-font-size: 15px; -fx-text-fill: #1e293b; -fx-font-family: 'Segoe UI Semibold';" />
+            <HBox spacing="12.0" alignment="CENTER_LEFT">
+                <Label text="Ingredient:" style="-fx-font-size: 14px; -fx-text-fill: #475569; -fx-font-weight: 600; -fx-font-family: 'Segoe UI Semibold';" />
+                <ComboBox fx:id="cmbInventory" promptText="Select ingredient" prefWidth="220.0"
+                          style="-fx-font-size: 14px; -fx-pref-height: 38px; -fx-font-family: 'Segoe UI';" />
+                <Label text="Quantity:" style="-fx-font-size: 14px; -fx-text-fill: #475569; -fx-font-weight: 600; -fx-font-family: 'Segoe UI Semibold';" />
+                <TextField fx:id="txtIngredientQuantity" promptText="0.00" prefWidth="100.0"
+                           style="-fx-font-size: 14px; -fx-padding: 10 12; -fx-background-radius: 8; -fx-font-family: 'Segoe UI';" />
+                <Button fx:id="btnAddIngredient" onAction="#handleAddIngredient"
+                        styleClass="button-success"
+                        style="-fx-pref-height: 38px; -fx-pref-width: 90px; -fx-font-size: 13px; -fx-font-weight: 600; -fx-font-family: 'Segoe UI Semibold';">
+                    <graphic>
+                        <HBox spacing="6" alignment="CENTER">
+                            <ImageView fitWidth="12" fitHeight="12" preserveRatio="true">
+                                <image><Image url="/resources/img/plus-solid-full.png"/></image>
+                            </ImageView>
+                            <Label text="Add" style="-fx-font-weight: 600;"/>
+                        </HBox>
+                    </graphic>
+                </Button>
+            </HBox>
+        </VBox>
+
+        <!-- Ingredients Table -->
+        <VBox VBox.vgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 16.0; -fx-background-radius: 10; -fx-border-color: #e2e8f0; -fx-border-width: 1.5; -fx-border-radius: 10;">
+            <Label text="Current Ingredients" style="-fx-font-weight: 600; -fx-font-size: 16px; -fx-text-fill: #1e293b; -fx-padding: 0 0 12.0 0; -fx-font-family: 'Segoe UI Semibold';" />
+            <TableView fx:id="tableIngredients" VBox.vgrow="ALWAYS" prefHeight="250.0">
+                <columns>
+                    <TableColumn fx:id="colIngredientName" text="Ingredient Name" prefWidth="280.0" />
+                    <TableColumn fx:id="colIngredientQuantity" text="Quantity" prefWidth="120.0" style="-fx-alignment: CENTER;" />
+                    <TableColumn fx:id="colIngredientUnit" text="Unit" prefWidth="100.0" style="-fx-alignment: CENTER;" />
+                    <TableColumn fx:id="colIngredientActions" text="Actions" prefWidth="120.0" style="-fx-alignment: CENTER;" />
+                </columns>
+            </TableView>
+        </VBox>
+
+        <Separator style="-fx-background-color: #e2e8f0;" />
+
+        <HBox spacing="12.0" alignment="CENTER_RIGHT">
+            <Button text="Cancel" onAction="#handleCloseIngredientsDialog"
+                    styleClass="button"
+                    style="-fx-pref-height: 42px; -fx-pref-width: 120px; -fx-font-size: 14px; -fx-font-weight: 600; -fx-font-family: 'Segoe UI Semibold';" />
+            <Button text="Save Ingredients" onAction="#handleSaveIngredients"
+                    styleClass="button-success"
+                    style="-fx-pref-height: 42px; -fx-pref-width: 160px; -fx-font-size: 14px; -fx-font-weight: 600; -fx-font-family: 'Segoe UI Semibold';" />
+        </HBox>
+    </VBox>
+
+</AnchorPane>
