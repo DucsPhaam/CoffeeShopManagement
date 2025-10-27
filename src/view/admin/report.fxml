@@ -6,6 +6,8 @@
 <?import javafx.collections.FXCollections?>
 <?import java.lang.String?>
 <?import javafx.scene.chart.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 
 <StackPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="controller.manager.ReportController">
@@ -19,11 +21,16 @@
 
             <!-- Header -->
             <HBox alignment="CENTER_LEFT" spacing="20.0">
-                <Label text="📊 Reports and Analytics" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;">
-                    <font>
-                        <Font size="32.0" />
-                    </font>
-                </Label>
+                <HBox spacing="10.0" alignment="CENTER_LEFT">
+                    <ImageView fitWidth="32" fitHeight="32" preserveRatio="true">
+                        <image><Image url="/resources/img/chart-simple-solid-full.png"/></image>
+                    </ImageView>
+                    <Label text="Reports and Analytics" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;">
+                        <font>
+                            <Font size="32.0" />
+                        </font>
+                    </Label>
+                </HBox>
                 <Region HBox.hgrow="ALWAYS" />
                 <Label fx:id="lblCurrentDate" text="Thursday, October 16, 2025"
                        style="-fx-font-size: 15px; -fx-text-fill: #7f8c8d;" />
@@ -31,7 +38,12 @@
 
             <!-- Filter Section -->
             <VBox spacing="20.0" style="-fx-background-color: white; -fx-padding: 25; -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 5);">
-                <Label text="📅 Report Filters" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
+                <HBox spacing="8" alignment="CENTER_LEFT">
+                    <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
+                        <image><Image url="/resources/img/calendar-days-solid-full.png"/></image>
+                    </ImageView>
+                    <Label text="Report Filters" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
+                </HBox>
 
                 <GridPane hgap="20.0" vgap="15.0">
                     <columnConstraints>
@@ -76,9 +88,18 @@
                         </items>
                     </ComboBox>
 
-                    <Button fx:id="btnGenerateReport" text="🔍 Generate" onAction="#handleGenerateReport"
+                    <Button fx:id="btnGenerateReport" onAction="#handleGenerateReport"
                             style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 10; -fx-pref-height: 40px; -fx-pref-width: 150px; -fx-font-size: 15px; -fx-font-weight: bold;"
-                            GridPane.columnIndex="4" GridPane.rowIndex="0" />
+                            GridPane.columnIndex="4" GridPane.rowIndex="0">
+                        <graphic>
+                            <HBox spacing="8" alignment="CENTER">
+                                <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                                    <image><Image url="/resources/img/magnifying-glass-solid-full.png"/></image>
+                                </ImageView>
+                                <Label text="Generate" textFill="white" style="-fx-font-weight: bold;"/>
+                            </HBox>
+                        </graphic>
+                    </Button>
 
                     <!-- Custom Date Range -->
                     <Label fx:id="lblFromDate" text="From Date:" visible="false" managed="false"
@@ -109,43 +130,68 @@
                 <!-- Total Revenue Card -->
                 <VBox spacing="15.0" style="-fx-background-color: linear-gradient(to bottom right, #667eea 0%, #764ba2 100%); -fx-background-radius: 18; -fx-padding: 30; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 18, 0, 0, 6);"
                       GridPane.columnIndex="0">
-                    <Label text="💰 TOTAL REVENUE" textFill="#E8E8E8">
-                        <font>
-                            <Font size="13.0" />
-                        </font>
-                    </Label>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <ImageView fitWidth="14" fitHeight="14" preserveRatio="true">
+                            <image><Image url="/resources/img/money-bill-wave-solid-full.png"/></image>
+                        </ImageView>
+                        <Label text="TOTAL REVENUE" textFill="#E8E8E8">
+                            <font>
+                                <Font size="13.0" />
+                            </font>
+                        </Label>
+                    </HBox>
                     <Label fx:id="lblTotalRevenue" text="0.00" textFill="WHITE">
                         <font>
                             <Font name="System Bold" size="32.0" />
                         </font>
                     </Label>
-                    <Label fx:id="lblRevenueChange" text="↑ +0% from last period" textFill="#E8F5E9" style="-fx-font-size: 12px;" />
+                    <HBox spacing="6" alignment="CENTER_LEFT">
+                        <ImageView fitWidth="12" fitHeight="12" preserveRatio="true">
+                            <image><Image url="/resources/img/arrow-trend-up-solid-full.png"/></image>
+                        </ImageView>
+                        <Label fx:id="lblRevenueChange" text="+0% from last period" textFill="#E8F5E9" style="-fx-font-size: 12px;" />
+                    </HBox>
                 </VBox>
 
                 <!-- Total Orders Card -->
                 <VBox spacing="15.0" style="-fx-background-color: linear-gradient(to bottom right, #f093fb 0%, #f5576c 100%); -fx-background-radius: 18; -fx-padding: 30; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 18, 0, 0, 6);"
                       GridPane.columnIndex="1">
-                    <Label text="🛒 TOTAL ORDERS" textFill="#E8E8E8">
-                        <font>
-                            <Font size="13.0" />
-                        </font>
-                    </Label>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <ImageView fitWidth="14" fitHeight="14" preserveRatio="true">
+                            <image><Image url="/resources/img/cart-shopping-solid-full.png"/></image>
+                        </ImageView>
+                        <Label text="TOTAL ORDERS" textFill="#E8E8E8">
+                            <font>
+                                <Font size="13.0" />
+                            </font>
+                        </Label>
+                    </HBox>
                     <Label fx:id="lblTotalOrders" text="0" textFill="WHITE">
                         <font>
                             <Font name="System Bold" size="32.0" />
                         </font>
                     </Label>
-                    <Label fx:id="lblOrdersChange" text="↑ +0% from last period" textFill="#E8F5E9" style="-fx-font-size: 12px;" />
+                    <HBox spacing="6" alignment="CENTER_LEFT">
+                        <ImageView fitWidth="12" fitHeight="12" preserveRatio="true">
+                            <image><Image url="/resources/img/arrow-trend-up-solid-full.png"/></image>
+                        </ImageView>
+                        <Label fx:id="lblOrdersChange" text="+0% from last period" textFill="#E8F5E9" style="-fx-font-size: 12px;" />
+                    </HBox>
                 </VBox>
 
                 <!-- Profit Card -->
                 <VBox spacing="15.0" style="-fx-background-color: linear-gradient(to bottom right, #4facfe 0%, #00f2fe 100%); -fx-background-radius: 18; -fx-padding: 30; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 18, 0, 0, 6);"
                       GridPane.columnIndex="2">
-                    <Label text="📈 NET PROFIT" textFill="#E8E8E8">
-                        <font>
-                            <Font size="13.0" />
-                        </font>
-                    </Label>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <ImageView fitWidth="14" fitHeight="14" preserveRatio="true">
+                            <image><Image url="/resources/img/chart-simple-solid-full.png"/></image>
+                        </ImageView>
+                        <Label text="NET PROFIT" textFill="#E8E8E8">
+                            <font>
+                                <Font size="13.0" />
+                            </font>
+                        </Label>
+                    </HBox>
                     <Label fx:id="lblNetProfit" text="0.00" textFill="WHITE">
                         <font>
                             <Font name="System Bold" size="32.0" />
@@ -157,17 +203,27 @@
                 <!-- Average Order Value Card -->
                 <VBox spacing="15.0" style="-fx-background-color: linear-gradient(to bottom right, #fa709a 0%, #fee140 100%); -fx-background-radius: 18; -fx-padding: 30; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 18, 0, 0, 6);"
                       GridPane.columnIndex="3">
-                    <Label text="🎯 AVG ORDER VALUE" textFill="#2c3e50">
-                        <font>
-                            <Font size="13.0" />
-                        </font>
-                    </Label>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <ImageView fitWidth="14" fitHeight="14" preserveRatio="true">
+                            <image><Image url="/resources/img/bullseye-solid-full.png"/></image>
+                        </ImageView>
+                        <Label text="AVG ORDER VALUE" textFill="#2c3e50">
+                            <font>
+                                <Font size="13.0" />
+                            </font>
+                        </Label>
+                    </HBox>
                     <Label fx:id="lblAvgOrderValue" text="0.00" textFill="#2c3e50">
                         <font>
                             <Font name="System Bold" size="32.0" />
                         </font>
                     </Label>
-                    <Label fx:id="lblAvgChange" text="↑ +0% from last period" textFill="#34495e" style="-fx-font-size: 12px;" />
+                    <HBox spacing="6" alignment="CENTER_LEFT">
+                        <ImageView fitWidth="12" fitHeight="12" preserveRatio="true">
+                            <image><Image url="/resources/img/arrow-trend-up-solid-full.png"/></image>
+                        </ImageView>
+                        <Label fx:id="lblAvgChange" text="+0% from last period" textFill="#34495e" style="-fx-font-size: 12px;" />
+                    </HBox>
                 </VBox>
             </GridPane>
 
@@ -177,11 +233,25 @@
                 <VBox spacing="15.0" HBox.hgrow="ALWAYS"
                       style="-fx-background-color: white; -fx-padding: 25; -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 5);">
                     <HBox alignment="CENTER_LEFT" spacing="15.0">
-                        <Label fx:id="lblChartTitle" text="📊 Revenue Trend"
-                               style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
+                        <HBox spacing="8" alignment="CENTER_LEFT">
+                            <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
+                                <image><Image url="/resources/img/chart-simple-solid-full.png"/></image>
+                            </ImageView>
+                            <Label fx:id="lblChartTitle" text="Revenue Trend"
+                                   style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
+                        </HBox>
                         <Region HBox.hgrow="ALWAYS" />
-                        <Button text="📥 Export" onAction="#handleExportChart"
-                                style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 8; -fx-pref-height: 35px; -fx-font-size: 13px;" />
+                        <Button onAction="#handleExportChart"
+                                style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 8; -fx-pref-height: 35px; -fx-font-size: 13px;">
+                            <graphic>
+                                <HBox spacing="6" alignment="CENTER">
+                                    <ImageView fitWidth="14" fitHeight="14" preserveRatio="true">
+                                        <image><Image url="/resources/img/download-solid-full.png"/></image>
+                                    </ImageView>
+                                    <Label text="Export" textFill="white" style="-fx-font-weight: 600;"/>
+                                </HBox>
+                            </graphic>
+                        </Button>
                     </HBox>
                     <BarChart fx:id="mainChart" prefHeight="400" style="-fx-font-size: 12px;">
                         <xAxis>
@@ -196,8 +266,13 @@
                 <!-- Pie Chart -->
                 <VBox spacing="15.0" prefWidth="400"
                       style="-fx-background-color: white; -fx-padding: 25; -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 5);">
-                    <Label text="🥧 Revenue Distribution"
-                           style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
+                            <image><Image url="/resources/img/chart-pie-solid-full.png"/></image>
+                        </ImageView>
+                        <Label text="Revenue Distribution"
+                               style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
+                    </HBox>
                     <PieChart fx:id="pieChart" prefHeight="400" legendVisible="true"
                               style="-fx-font-size: 12px;" />
                 </VBox>
@@ -206,16 +281,44 @@
             <!-- Data Table -->
             <VBox spacing="15.0" style="-fx-background-color: white; -fx-padding: 25; -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 5);">
                 <HBox alignment="CENTER_LEFT" spacing="15.0">
-                    <Label fx:id="lblTableTitle" text="📋 Detailed Report"
-                           style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
+                            <image><Image url="/resources/img/clipboard-list-solid-full.png"/></image>
+                        </ImageView>
+                        <Label fx:id="lblTableTitle" text="Detailed Report"
+                               style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
+                    </HBox>
                     <Region HBox.hgrow="ALWAYS" />
-                    <TextField fx:id="txtTableSearch" promptText="🔍 Search..."
-                               style="-fx-pref-width: 250px; -fx-font-size: 14px;"
-                               onKeyReleased="#handleTableSearch" />
-                    <Button text="📄 Export CSV" onAction="#handleExportCSV"
-                            style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 8; -fx-pref-height: 35px; -fx-font-size: 13px;" />
-                    <Button text="📑 Export PDF" onAction="#handleExportPDF"
-                            style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 8; -fx-pref-height: 35px; -fx-font-size: 13px;" />
+                    <HBox spacing="8" alignment="CENTER_LEFT" style="-fx-background-color: #f3f4f6; -fx-background-radius: 8; -fx-padding: 8 12;">
+                        <ImageView fitWidth="14" fitHeight="14" preserveRatio="true">
+                            <image><Image url="/resources/img/magnifying-glass-solid-full.png"/></image>
+                        </ImageView>
+                        <TextField fx:id="txtTableSearch" promptText="Search..."
+                                   style="-fx-background-color: transparent; -fx-pref-width: 230px; -fx-font-size: 14px;"
+                                   onKeyReleased="#handleTableSearch" />
+                    </HBox>
+                    <Button onAction="#handleExportCSV"
+                            style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 8; -fx-pref-height: 35px; -fx-font-size: 13px;">
+                        <graphic>
+                            <HBox spacing="6" alignment="CENTER">
+                                <ImageView fitWidth="14" fitHeight="14" preserveRatio="true">
+                                    <image><Image url="/resources/img/file-csv-solid-full.png"/></image>
+                                </ImageView>
+                                <Label text="Export CSV" textFill="white" style="-fx-font-weight: 600;"/>
+                            </HBox>
+                        </graphic>
+                    </Button>
+                    <Button onAction="#handleExportPDF"
+                            style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 8; -fx-pref-height: 35px; -fx-font-size: 13px;">
+                        <graphic>
+                            <HBox spacing="6" alignment="CENTER">
+                                <ImageView fitWidth="14" fitHeight="14" preserveRatio="true">
+                                    <image><Image url="/resources/img/file-pdf-solid-full.png"/></image>
+                                </ImageView>
+                                <Label text="Export PDF" textFill="white" style="-fx-font-weight: 600;"/>
+                            </HBox>
+                        </graphic>
+                    </Button>
                 </HBox>
 
                 <TableView fx:id="tableReport" prefHeight="350" style="-fx-font-size: 13px;">

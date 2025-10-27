@@ -4,8 +4,10 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 <?import javafx.collections.FXCollections?>
-
 <?import java.lang.String?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+
 <AnchorPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="controller.manager.TableController"
             style="-fx-background-color: #f8f9fa;">
@@ -18,18 +20,37 @@
 
         <!-- Header -->
         <HBox alignment="CENTER_LEFT" spacing="20.0">
-            <Label text="🪑 Table Management" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;">
-                <font>
-                    <Font size="28.0" />
-                </font>
-            </Label>
+            <HBox spacing="10.0" alignment="CENTER_LEFT">
+                <ImageView fitWidth="28" fitHeight="28" preserveRatio="true">
+                    <image><Image url="@../resources/img/chair-solid-full.png"/></image>
+                </ImageView>
+                <Label text="Table Management" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;">
+                    <font>
+                        <Font size="28.0" />
+                    </font>
+                </Label>
+            </HBox>
             <Region HBox.hgrow="ALWAYS" />
-            <Button fx:id="btnRefresh" onAction="#handleRefresh" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 8; -fx-pref-height: 40px; -fx-pref-width: 120px;" text="🔄 Refresh" />
+            <Button fx:id="btnRefresh" onAction="#handleRefresh" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 8; -fx-pref-height: 40px; -fx-pref-width: 120px;">
+                <graphic>
+                    <HBox spacing="8" alignment="CENTER">
+                        <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                            <image><Image url="@../resources/img/rotate-right-solid-full.png"/></image>
+                        </ImageView>
+                        <Label text="Refresh" textFill="white" style="-fx-font-weight: 600;"/>
+                    </HBox>
+                </graphic>
+            </Button>
         </HBox>
 
         <!-- Search and Filter Bar -->
         <HBox spacing="15.0" alignment="CENTER_LEFT" style="-fx-background-color: white; -fx-padding: 15.0; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 3);">
-            <TextField fx:id="txtSearch" promptText="🔍 Search tables..." style="-fx-pref-width: 300px; -fx-font-size: 14px;" onKeyReleased="#handleSearch" />
+            <HBox spacing="8" alignment="CENTER_LEFT" style="-fx-background-color: #f3f4f6; -fx-background-radius: 8; -fx-padding: 8 12;">
+                <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                    <image><Image url="@../resources/img/magnifying-glass-solid-full.png"/></image>
+                </ImageView>
+                <TextField fx:id="txtSearch" promptText="Search tables..." style="-fx-background-color: transparent; -fx-pref-width: 280px; -fx-font-size: 14px;" onKeyReleased="#handleSearch" />
+            </HBox>
             <Label text="Filter by Status:" style="-fx-font-size: 14px; -fx-text-fill: #2c3e50;" />
             <ComboBox fx:id="cmbFilterStatus" onAction="#handleFilter" style="-fx-pref-width: 150px; -fx-font-size: 14px;">
                 <items>
@@ -43,19 +64,52 @@
                 </items>
             </ComboBox>
             <Region HBox.hgrow="ALWAYS" />
-            <Button fx:id="btnAddTable" text="➕ Add Table" onAction="#handleAddTable"
-                    style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 8; -fx-pref-height: 40px; -fx-pref-width: 150px;" />
+            <Button fx:id="btnAddTable" onAction="#handleAddTable"
+                    style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 8; -fx-pref-height: 40px; -fx-pref-width: 150px;">
+                <graphic>
+                    <HBox spacing="8" alignment="CENTER">
+                        <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                            <image><Image url="@../resources/img/plus-solid-full.png"/></image>
+                        </ImageView>
+                        <Label text="Add Table" textFill="white" style="-fx-font-weight: 600;"/>
+                    </HBox>
+                </graphic>
+            </Button>
         </HBox>
 
         <!-- TabPane for Floors -->
         <TabPane fx:id="floorTabPane" VBox.vgrow="ALWAYS" style="-fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 5);">
-            <Tab text="Floor 1" style="-fx-font-size: 14px;">
+            <Tab style="-fx-font-size: 14px;">
+                <graphic>
+                    <HBox spacing="6" alignment="CENTER">
+                        <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                            <image><Image url="@../resources/img/building-solid-full.png"/></image>
+                        </ImageView>
+                        <Label text="Floor 1"/>
+                    </HBox>
+                </graphic>
                 <Pane fx:id="floor1Pane" style="-fx-background-color: #f8f9fa;" />
             </Tab>
-            <Tab text="Floor 2" style="-fx-font-size: 14px;">
+            <Tab style="-fx-font-size: 14px;">
+                <graphic>
+                    <HBox spacing="6" alignment="CENTER">
+                        <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                            <image><Image url="@../resources/img/building-solid-full.png"/></image>
+                        </ImageView>
+                        <Label text="Floor 2"/>
+                    </HBox>
+                </graphic>
                 <Pane fx:id="floor2Pane" style="-fx-background-color: #f8f9fa;" />
             </Tab>
-            <Tab text="Floor 3" style="-fx-font-size: 14px;">
+            <Tab style="-fx-font-size: 14px;">
+                <graphic>
+                    <HBox spacing="6" alignment="CENTER">
+                        <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                            <image><Image url="@../resources/img/building-solid-full.png"/></image>
+                        </ImageView>
+                        <Label text="Floor 3"/>
+                    </HBox>
+                </graphic>
                 <Pane fx:id="floor3Pane" style="-fx-background-color: #f8f9fa;" />
             </Tab>
         </TabPane>
@@ -85,8 +139,14 @@
                 </font>
             </Label>
             <Region HBox.hgrow="ALWAYS" />
-            <Button text="✕" onAction="#handleCloseDialog"
-                    style="-fx-background-color: transparent; -fx-font-size: 20px; -fx-cursor: hand; -fx-text-fill: #7f8c8d;" />
+            <Button onAction="#handleCloseDialog"
+                    style="-fx-background-color: transparent; -fx-font-size: 20px; -fx-cursor: hand; -fx-text-fill: #7f8c8d;">
+                <graphic>
+                    <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
+                        <image><Image url="@../resources/img/xmark-solid-full.png"/></image>
+                    </ImageView>
+                </graphic>
+            </Button>
         </HBox>
 
         <Separator style="-fx-background-color: #e0e0e0;" />

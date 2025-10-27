@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-
-<?import java.lang.String?>
 <?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+
 <StackPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="controller.common.CashbookController"
            stylesheets="@/resources/Stylesheet/CleanModern.css">
@@ -18,16 +21,29 @@
         <children>
             <!-- Header with Date -->
             <HBox alignment="CENTER_LEFT" spacing="20.0">
-                <Label text="📒 Cashbook" style="-fx-text-fill: #1e293b; -fx-font-weight: 700;">
-                    <font>
-                        <Font name="Segoe UI Bold" size="28.0" />
-                    </font>
-                </Label>
+                <HBox spacing="10.0" alignment="CENTER_LEFT">
+                    <ImageView fitWidth="28" fitHeight="28" preserveRatio="true">
+                        <image><Image url="/resources/img/book-solid-full.png"/></image>
+                    </ImageView>
+                    <Label text="Cashbook" style="-fx-text-fill: #1e293b; -fx-font-weight: 700;">
+                        <font>
+                            <Font name="Segoe UI Bold" size="28.0" />
+                        </font>
+                    </Label>
+                </HBox>
                 <Region HBox.hgrow="ALWAYS" />
-                <Label fx:id="lblDate" text="Thursday, October 16, 2025" style="-fx-font-size: 14px; -fx-text-fill: #64748b; -fx-font-family: 'Segoe UI';" />
+                <Label fx:id="lblDate" text="Wednesday, October 22, 2025" style="-fx-font-size: 14px; -fx-text-fill: #64748b; -fx-font-family: 'Segoe UI';" />
                 <Button fx:id="btnRefresh" onAction="#handleRefresh"
-                        style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 8; -fx-pref-height: 40px; -fx-pref-width: 120px; -fx-font-size: 14px; -fx-font-weight: 600; -fx-font-family: 'Segoe UI Semibold';"
-                        text="🔄 Refresh" />
+                        style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 8; -fx-pref-height: 40px; -fx-pref-width: 120px; -fx-font-size: 14px; -fx-font-weight: 600; -fx-font-family: 'Segoe UI Semibold';">
+                    <graphic>
+                        <HBox spacing="8" alignment="CENTER">
+                            <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                                <image><Image url="/resources/img/rotate-right-solid-full.png"/></image>
+                            </ImageView>
+                            <Label text="Refresh" textFill="white" style="-fx-font-weight: 600;"/>
+                        </HBox>
+                    </graphic>
+                </Button>
             </HBox>
 
             <!-- Statistics Cards -->
@@ -39,6 +55,7 @@
                     <ColumnConstraints hgrow="SOMETIMES" minWidth="200.0" percentWidth="25.0" />
                 </columnConstraints>
 
+                <!-- TOTAL INCOME -->
                 <VBox spacing="12.0" GridPane.columnIndex="0">
                     <style>
                         -fx-background-color: linear-gradient(to bottom right, #667eea, #764ba2);
@@ -46,11 +63,16 @@
                         -fx-padding: 25;
                         -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 15, 0.0, 0, 5);
                     </style>
-                    <Label text="💵 TOTAL INCOME" textFill="#E8E8E8">
-                        <font>
-                            <Font name="Segoe UI Semibold" size="12.0" />
-                        </font>
-                    </Label>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <ImageView fitWidth="14" fitHeight="14" preserveRatio="true">
+                            <image><Image url="/resources/img/money-bill-wave-solid-full.png"/></image>
+                        </ImageView>
+                        <Label text="TOTAL INCOME" textFill="#E8E8E8">
+                            <font>
+                                <Font name="Segoe UI Semibold" size="12.0" />
+                            </font>
+                        </Label>
+                    </HBox>
                     <Label fx:id="lblTotalIncome" text="0.00" textFill="WHITE">
                         <font>
                             <Font name="Segoe UI Bold" size="28.0" />
@@ -58,13 +80,18 @@
                     </Label>
                 </VBox>
 
-                <!-- Card 2: Total Expense -->
+                <!-- TOTAL EXPENSE -->
                 <VBox spacing="12.0" style="-fx-background-color: linear-gradient(to bottom right, #f093fb 0%, #f5576c 100%); -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 15, 0.0, 0, 5);" GridPane.columnIndex="1">
-                    <Label text="📉 TOTAL EXPENSE" textFill="#E8E8E8">
-                        <font>
-                            <Font name="Segoe UI Semibold" size="12.0" />
-                        </font>
-                    </Label>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <ImageView fitWidth="14" fitHeight="14" preserveRatio="true">
+                            <image><Image url="/resources/img/arrow-trend-down-solid-full.png"/></image>
+                        </ImageView>
+                        <Label text="TOTAL EXPENSE" textFill="#E8E8E8">
+                            <font>
+                                <Font name="Segoe UI Semibold" size="12.0" />
+                            </font>
+                        </Label>
+                    </HBox>
                     <Label fx:id="lblTotalExpense" text="0.00" textFill="WHITE">
                         <font>
                             <Font name="Segoe UI Bold" size="28.0" />
@@ -72,13 +99,18 @@
                     </Label>
                 </VBox>
 
-                <!-- Card 3: Profit/Loss -->
+                <!-- PROFIT/LOSS -->
                 <VBox spacing="12.0" style="-fx-background-color: linear-gradient(to bottom right, #4facfe 0%, #00f2fe 100%); -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 15, 0.0, 0, 5);" GridPane.columnIndex="2">
-                    <Label text="📊 PROFIT/LOSS" textFill="#E8E8E8">
-                        <font>
-                            <Font name="Segoe UI Semibold" size="12.0" />
-                        </font>
-                    </Label>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <ImageView fitWidth="14" fitHeight="14" preserveRatio="true">
+                            <image><Image url="/resources/img/chart-simple-solid-full.png"/></image>
+                        </ImageView>
+                        <Label text="PROFIT/LOSS" textFill="#E8E8E8">
+                            <font>
+                                <Font name="Segoe UI Semibold" size="12.0" />
+                            </font>
+                        </Label>
+                    </HBox>
                     <Label fx:id="lblProfitLoss" text="0.00" textFill="WHITE">
                         <font>
                             <Font name="Segoe UI Bold" size="28.0" />
@@ -86,13 +118,18 @@
                     </Label>
                 </VBox>
 
-                <!-- Card 4: Current Balance -->
+                <!-- CURRENT BALANCE -->
                 <VBox spacing="12.0" style="-fx-background-color: linear-gradient(to bottom right, #fa709a 0%, #fee140 100%); -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 15, 0.0, 0, 5);" GridPane.columnIndex="3">
-                    <Label text="💰 CURRENT BALANCE" textFill="#2d3748">
-                        <font>
-                            <Font name="Segoe UI Semibold" size="12.0" />
-                        </font>
-                    </Label>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <ImageView fitWidth="14" fitHeight="14" preserveRatio="true">
+                            <image><Image url="/resources/img/wallet-solid-full.png"/></image>
+                        </ImageView>
+                        <Label text="CURRENT BALANCE" textFill="#2d3748">
+                            <font>
+                                <Font name="Segoe UI Semibold" size="12.0" />
+                            </font>
+                        </Label>
+                    </HBox>
                     <Label fx:id="lblCurrentBalance" text="0.00" textFill="#2d3748">
                         <font>
                             <Font name="Segoe UI Bold" size="28.0" />
@@ -103,13 +140,13 @@
 
             <!-- Search and Filter Bar -->
             <HBox spacing="12.0" alignment="CENTER_LEFT" style="-fx-background-color: white; -fx-padding: 18.0; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 12, 0.0, 0, 3);">
-                <Label text="From:" style="-fx-font-size: 14px; -fx-text-fill: #475569; -fx-font-weight: 600; -fx-font-family: 'Segoe UI Semibold';" />
+                <Label text="From:" style="-fx-font-size: 14px; -fx-text-fill: #475569; -fx-font-weight: bold; -fx-font-family: 'Segoe UI Semibold';" />
                 <DatePicker fx:id="dpFromDate" onAction="#handleFilterDate"
-                            style="-fx-pref-width: 150px; -fx-font-size: 13px; -fx-pref-height: 38px; -fx-font-family: 'Segoe UI';" />
-                <Label text="To:" style="-fx-font-size: 14px; -fx-text-fill: #475569; -fx-font-weight: 600; -fx-font-family: 'Segoe UI Semibold';" />
+                            style="-fx-pref-width: 120px; -fx-font-size: 13px; -fx-pref-height: 38px; -fx-font-family: 'Segoe UI';" />
+                <Label text="To:" style="-fx-font-size: 14px; -fx-text-fill: #475569; -fx-font-weight: bold; -fx-font-family: 'Segoe UI Semibold';" />
                 <DatePicker fx:id="dpToDate" onAction="#handleFilterDate"
-                            style="-fx-pref-width: 150px; -fx-font-size: 13px; -fx-pref-height: 38px; -fx-font-family: 'Segoe UI';" />
-                <Label text="Type:" style="-fx-font-size: 14px; -fx-text-fill: #475569; -fx-font-weight: 600; -fx-font-family: 'Segoe UI Semibold';" />
+                            style="-fx-pref-width: 120px; -fx-font-size: 13px; -fx-pref-height: 38px; -fx-font-family: 'Segoe UI';" />
+                <Label text="Type:" style="-fx-font-size: 14px; -fx-text-fill: #475569; -fx-font-weight: bold; -fx-font-family: 'Segoe UI Semibold';" />
                 <ComboBox fx:id="cmbFilterType" onAction="#handleFilter"
                           style="-fx-pref-width: 130px; -fx-font-size: 14px; -fx-pref-height: 38px; -fx-font-family: 'Segoe UI';">
                     <items>
@@ -120,12 +157,29 @@
                         </FXCollections>
                     </items>
                 </ComboBox>
-                <TextField fx:id="txtSearch" promptText="🔍 Search by reason..."
-                           style="-fx-pref-width: 300px; -fx-font-size: 14px; -fx-padding: 10 14; -fx-background-radius: 8; -fx-border-color: #cbd5e0; -fx-border-radius: 8; -fx-border-width: 1.5; -fx-font-family: 'Segoe UI';"
-                           onKeyReleased="#handleSearch" />
+
+                <!-- SEARCH BOX WITH ICON (Fixed) -->
+                <HBox spacing="8" alignment="CENTER_LEFT" style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #cbd5e0; -fx-border-radius: 8; -fx-border-width: 1.5; -fx-padding: 10 0; -fx-pref-width: 300px;">
+                    <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                        <image><Image url="/resources/img/magnifying-glass-solid-full.png"/></image>
+                    </ImageView>
+                    <TextField fx:id="txtSearch" promptText="Search by reason..."
+                               style="-fx-background-color: transparent; -fx-font-size: 14px; -fx-font-family: 'Segoe UI'; -fx-pref-width: 300px;"
+                               onKeyReleased="#handleSearch" />
+                </HBox>
+
                 <Region HBox.hgrow="ALWAYS" />
-                <Button fx:id="btnAddTransaction" text="+ Add Transaction" onAction="#handleAddTransaction"
-                        style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 8; -fx-pref-height: 42px; -fx-pref-width: 160px; -fx-font-size: 14px; -fx-font-weight: 600; -fx-font-family: 'Segoe UI Semibold';" />
+                <Button fx:id="btnAddTransaction" onAction="#handleAddTransaction"
+                        style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 8; -fx-pref-height: 42px; -fx-pref-width: 160px; -fx-font-size: 14px; -fx-font-weight: 600; -fx-font-family: 'Segoe UI Semibold';">
+                    <graphic>
+                        <HBox spacing="8" alignment="CENTER">
+                            <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                                <image><Image url="/resources/img/plus-solid-full.png"/></image>
+                            </ImageView>
+                            <Label text="Add Transaction" textFill="white" style="-fx-font-weight: 600;"/>
+                        </HBox>
+                    </graphic>
+                </Button>
             </HBox>
 
             <!-- Transactions Table -->
@@ -141,8 +195,13 @@
                         <TableColumn fx:id="colActions" text="Actions" prefWidth="180.0" style="-fx-alignment: CENTER;" />
                     </columns>
                 </TableView>
-                <HBox spacing="20.0" alignment="CENTER_LEFT" style="-fx-padding: 15.0 0 0 0;">
+                <HBox alignment="CENTER" style="-fx-padding: 15.0 0 0 0;">
                     <Label fx:id="lblTotalTransactions" text="Total: 0 transactions" style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #1e293b; -fx-font-family: 'Segoe UI Semibold';" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button fx:id="btnViewMore" text="View More" onAction="#handleViewMore"
+                            style="-fx-background-color: #e2e8f0; -fx-text-fill: #1e293b; -fx-cursor: hand; -fx-background-radius: 8; -fx-pref-height: 40px; -fx-pref-width: 120px; -fx-font-size: 14px; -fx-font-weight: 600; -fx-font-family: 'Segoe UI Semibold'; -fx-border-color: #cbd5e0; -fx-border-width: 1; -fx-border-radius: 8;"
+                            visible="false" managed="false" />
+                    <Region HBox.hgrow="ALWAYS" />
                     <Label fx:id="lblBalance" text="Balance: $0.00" style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #10b981; -fx-font-family: 'Segoe UI Semibold';" />
                 </HBox>
             </VBox>
@@ -159,8 +218,14 @@
             <HBox alignment="CENTER_LEFT" spacing="12.0">
                 <Label fx:id="dialogTitle" text="Add New Transaction" style="-fx-font-size: 22px; -fx-font-weight: 700; -fx-text-fill: #1e293b; -fx-font-family: 'Segoe UI Bold';" />
                 <Region HBox.hgrow="ALWAYS" />
-                <Button text="✕" onAction="#handleCloseDialog"
-                        style="-fx-background-color: transparent; -fx-text-fill: #64748b; -fx-font-size: 20px; -fx-cursor: hand; -fx-border-color: transparent; -fx-font-family: 'Segoe UI';" />
+                <Button onAction="#handleCloseDialog"
+                        style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 0;">
+                    <graphic>
+                        <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
+                            <image><Image url="/resources/img/xmark-solid-full.png"/></image>
+                        </ImageView>
+                    </graphic>
+                </Button>
             </HBox>
 
             <Separator style="-fx-padding: 12 0;" />
@@ -210,7 +275,13 @@
                         style="-fx-pref-height: 42px; -fx-pref-width: 130px; -fx-font-size: 14px; -fx-font-weight: 600; -fx-font-family: 'Segoe UI Semibold';" />
                 <Button fx:id="btnSave" text="Save" onAction="#handleSaveTransaction"
                         styleClass="button-success"
-                        style="-fx-pref-height: 42px; -fx-pref-width: 130px; -fx-font-size: 14px; -fx-font-weight: 600; -fx-font-family: 'Segoe UI Semibold';" />
+                        style="-fx-pref-height: 42px; -fx-pref-width: 130px; -fx-font-size: 14px; -fx-font-weight: 600; -fx-font-family: 'Segoe UI Semibold';">
+                    <graphic>
+                        <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                            <image><Image url="/resources/img/circle-check-solid-full.png"/></image>
+                        </ImageView>
+                    </graphic>
+                </Button>
             </HBox>
         </VBox>
     </Pane>
