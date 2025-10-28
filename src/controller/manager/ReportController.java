@@ -189,8 +189,8 @@ public class ReportController {
             tableReport.setItems(filteredData);
             lblTableSummary.setText("Showing " + filteredData.size() + " records");
 
-            lblChartTitle.setText("📊 Revenue Trend");
-            lblTableTitle.setText("📋 Revenue by Date Details");
+            lblChartTitle.setText("Revenue Trend");
+            lblTableTitle.setText("Revenue by Date Details");
 
         } catch (SQLException e) {
             e.printStackTrace();
