@@ -68,9 +68,6 @@
                     </font>
                 </Label>
                 <HBox spacing="6" alignment="CENTER_LEFT">
-                    <ImageView fitWidth="12" fitHeight="12" preserveRatio="true">
-                        <image><Image url="/resources/img/arrow-trend-up-solid-full.png"/></image>
-                    </ImageView>
                     <Label fx:id="lblDailyChange" text="+0% compared to yesterday" textFill="#A8F5A8" style="-fx-font-size: 11px;" />
                 </HBox>
             </VBox>
@@ -93,9 +90,6 @@
                     </font>
                 </Label>
                 <HBox spacing="6" alignment="CENTER_LEFT">
-                    <ImageView fitWidth="12" fitHeight="12" preserveRatio="true">
-                        <image><Image url="/resources/img/arrow-trend-up-solid-full.png"/></image>
-                    </ImageView>
                     <Label fx:id="lblMonthlyChange" text="+0% compared to last month" textFill="#A8F5A8" style="-fx-font-size: 11px;" />
                 </HBox>
             </VBox>

@@ -173,9 +173,7 @@ public class TableController {
             Image icon = new Image(getClass().getResourceAsStream("/resources/img/table-icon.png"));
             tableIcon.setImage(icon);
         } catch (Exception e) {
-            Label fallbackIcon = new Label("🪑");
-            fallbackIcon.setStyle("-fx-font-size: 32px;");
-            card.getChildren().add(fallbackIcon);
+            System.err.println("Failed to load table icon");
         }
 
         tableIcon.setFitWidth(50);
@@ -193,8 +191,18 @@ public class TableController {
 
         HBox seatsBox = new HBox(5);
         seatsBox.setAlignment(Pos.CENTER);
-        Label seatsIcon = new Label("👥");
-        seatsIcon.setStyle("-fx-font-size: 14px;");
+
+        ImageView seatsIcon = new ImageView();
+        try {
+            Image icon = new Image(getClass().getResourceAsStream("/resources/img/user-group-solid-full.png.png"));
+            seatsIcon.setImage(icon);
+            seatsIcon.setFitWidth(14);
+            seatsIcon.setFitHeight(14);
+            seatsIcon.setPreserveRatio(true);
+        } catch (Exception e) {
+            System.err.println("Failed to load people icon");
+        }
+
         Label lblSeats = new Label(table.getSeats() + " seats");
         lblSeats.setStyle(String.format(
                 "-fx-font-size: 13px; " +

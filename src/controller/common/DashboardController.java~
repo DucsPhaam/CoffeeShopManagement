@@ -30,8 +30,6 @@ import model.Inventory;
 import model.ProductSales;
 import utils.SessionManager;
 import dao.DatabaseConnection;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 
 public class DashboardController implements Initializable {
 
@@ -151,11 +149,7 @@ public class DashboardController implements Initializable {
             if (rs.next()) {
                 double previousRevenue = rs.getDouble("total");
                 double change = (previousRevenue > 0) ? ((currentRevenue - previousRevenue) / previousRevenue) * 100 : 0;
-
-                // Load icon
-                ImageView arrow = loadArrowIcon(change >= 0);
-                lblDailyChange.setGraphic(arrow);
-                lblDailyChange.setText((change >= 0 ? "+" : "") + df.format(change) + "% compared to yesterday");
+                lblDailyChange.setText((change >= 0 ? "↑ +" : "↓ ") + df.format(change) + "% compared to yesterday");
                 lblDailyChange.setTextFill(change >= 0 ? javafx.scene.paint.Color.web("#A8F5A8") : javafx.scene.paint.Color.web("#FF6B6B"));
             }
         } catch (SQLException e) {
@@ -188,11 +182,7 @@ public class DashboardController implements Initializable {
             if (rs.next()) {
                 double previousRevenue = rs.getDouble("total");
                 double change = (previousRevenue > 0) ? ((currentRevenue - previousRevenue) / previousRevenue) * 100 : 0;
-
-                // Load icon
-                ImageView arrow = loadArrowIcon(change >= 0);
-                lblMonthlyChange.setGraphic(arrow);
-                lblMonthlyChange.setText((change >= 0 ? "+" : "") + df.format(change) + "% compared to last month");
+                lblMonthlyChange.setText((change >= 0 ? "↑ +" : "↓ ") + df.format(change) + "% compared to last month");
                 lblMonthlyChange.setTextFill(change >= 0 ? javafx.scene.paint.Color.web("#A8F5A8") : javafx.scene.paint.Color.web("#FF6B6B"));
             }
         } catch (SQLException e) {
@@ -411,20 +401,5 @@ public class DashboardController implements Initializable {
     private void handleViewLowStock(ActionEvent event) {
         // Placeholder for viewing low stock details
         System.out.println("View low stock details");
-    }
-
-    private ImageView loadArrowIcon(boolean isUp) {
-        ImageView arrow = new ImageView();
-        try {
-            String path = isUp ? "/resources/img/arrow-trend-up-solid-full.png" : "/resources/img/arrow-trend-down-solid-full.png";
-            Image icon = new Image(getClass().getResourceAsStream(path));
-            arrow.setImage(icon);
-            arrow.setFitWidth(14);
-            arrow.setFitHeight(14);
-            arrow.setPreserveRatio(true);
-        } catch (Exception e) {
-            System.err.println("Failed to load arrow icon");
-        }
-        return arrow;
     }
 }

@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+
+<StackPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="controller.staff.OrderController">
+
+    <BorderPane fx:id="mainBorderPane" style="-fx-background-color: #f0f2f5;">
+
+        <!-- Modern Header -->
+        <top>
+            <VBox>
+                <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: #667eea; -fx-padding: 20 30;">
+                    <VBox spacing="4">
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <ImageView fitWidth="32" fitHeight="32" preserveRatio="true">
+                                <image><Image url="/resources/img/mug-hot-solid-full.png"/></image>
+                            </ImageView>
+                            <Label text="Point of Sale" textFill="white"
+                                   style="-fx-font-size: 32px; -fx-font-weight: bold;"/>
+                        </HBox>
+                        <Label text="Fast and Easy Order Management" textFill="#C7D2FE"
+                               style="-fx-font-size: 14px;"/>
+                    </VBox>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <VBox alignment="CENTER_RIGHT" spacing="8">
+                        <HBox spacing="12" alignment="CENTER_RIGHT">
+                            <ImageView fitWidth="18" fitHeight="18" preserveRatio="true">
+                                <image><Image url="/resources/img/user-solid-full.png"/></image>
+                            </ImageView>
+                            <Label fx:id="lblStaffName" text="Staff Name" textFill="white"
+                                   style="-fx-font-size: 15px; -fx-font-weight: 600;"/>
+                        </HBox>
+                        <HBox spacing="12" alignment="CENTER_RIGHT">
+                            <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                                <image><Image url="/resources/img/clock-solid-full.png"/></image>
+                            </ImageView>
+                            <Label fx:id="lblDateTime" text="DateTime" textFill="#E0E7FF"
+                                   style="-fx-font-size: 13px;"/>
+                        </HBox>
+                        <HBox spacing="10" alignment="CENTER_RIGHT">
+                            <Button fx:id="btnDashboard" onAction="#handleDashboard"
+                                    style="-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: 600; -fx-background-radius: 8; -fx-padding: 8 16; -fx-cursor: hand;">
+                                <graphic>
+                                    <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                                        <image><Image url="/resources/img/chart-simple-solid-full.png"/></image>
+                                    </ImageView>
+                                </graphic>
+                                <text>Dashboard</text>
+                            </Button>
+                            <Button fx:id="btnLogout" onAction="#handleLogout"
+                                    style="-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: 600; -fx-background-radius: 8; -fx-padding: 8 16; -fx-cursor: hand;">
+                                <graphic>
+                                    <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                                        <image><Image url="/resources/img/right-from-bracket-solid-full.png"/></image>
+                                    </ImageView>
+                                </graphic>
+                                <text>Logout</text>
+                            </Button>
+                        </HBox>
+                    </VBox>
+                </HBox>
+                <Region style="-fx-background-color: #764ba2; -fx-pref-height: 4;"/>
+            </VBox>
+        </top>
+
+        <center>
+            <HBox spacing="20" style="-fx-padding: 20;">
+                <!-- LEFT: Menu & Tables -->
+                <VBox spacing="20" style="-fx-background-color: white; -fx-background-radius: 20; -fx-padding: 24; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 4);" HBox.hgrow="ALWAYS">
+
+                    <!-- Notification -->
+                    <VBox fx:id="notificationPane" spacing="10" visible="false" managed="false"
+                          style="-fx-background-color: #48bb78; -fx-background-radius: 12; -fx-padding: 16;">
+                        <Label fx:id="lblNotification" text=""
+                               style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: white;"/>
+                    </VBox>
+
+                    <!-- Order Type Selector -->
+                    <VBox spacing="12">
+                        <Label text="Order Type"
+                               style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;"/>
+                        <HBox spacing="12">
+                            <ToggleButton fx:id="btnDineIn" text="Dine In" selected="true"
+                                          style="-fx-background-color: #667eea; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: 600; -fx-background-radius: 12; -fx-pref-width: 200; -fx-pref-height: 50; -fx-cursor: hand;">
+                                <graphic>
+                                    <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
+                                        <image><Image url="/resources/img/utensils-solid-full.png"/></image>
+                                    </ImageView>
+                                </graphic>
+                            </ToggleButton>
+                            <ToggleButton fx:id="btnTakeaway" text="Takeaway"
+                                          style="-fx-background-color: #e5e7eb; -fx-text-fill: #4a5568; -fx-font-size: 15px; -fx-font-weight: 600; -fx-background-radius: 12; -fx-pref-width: 200; -fx-pref-height: 50; -fx-cursor: hand;">
+                                <graphic>
+                                    <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
+                                        <image><Image url="/resources/img/bag-shopping-solid-full.png"/></image>
+                                    </ImageView>
+                                </graphic>
+                            </ToggleButton>
+                        </HBox>
+                    </VBox>
+
+                    <Separator/>
+
+                    <!-- Table Selection -->
+                    <VBox fx:id="tableSelectionPane" spacing="16" VBox.vgrow="ALWAYS">
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label text="Select Table"
+                                   style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button onAction="#handleRefreshTables"
+                                    style="-fx-background-color: #f3f4f6; -fx-text-fill: #4a5568; -fx-font-size: 13px; -fx-font-weight: 600; -fx-background-radius: 10; -fx-padding: 8 16; -fx-cursor: hand;">
+                                <graphic>
+                                    <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                                        <image><Image url="/resources/img/rotate-right-solid-full.png"/></image>
+                                    </ImageView>
+                                </graphic>
+                                <text>Refresh</text>
+                            </Button>
+                        </HBox>
+
+                        <TabPane fx:id="floorTabPane" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS"
+                                 style="-fx-background-color: transparent;">
+                            <tabs>
+                                <Tab text="Floor 1">
+                                    <content>
+                                        <ScrollPane fitToWidth="true" fitToHeight="true"
+                                                    style="-fx-background-color: transparent; -fx-background: transparent;">
+                                            <content>
+                                                <GridPane fx:id="floor1Grid" hgap="15" vgap="15"
+                                                          style="-fx-padding: 10;"/>
+                                            </content>
+                                        </ScrollPane>
+                                    </content>
+                                </Tab>
+                                <Tab text="Floor 2">
+                                    <content>
+                                        <ScrollPane fitToWidth="true" fitToHeight="true"
+                                                    style="-fx-background-color: transparent; -fx-background: transparent;">
+                                            <content>
+                                                <GridPane fx:id="floor2Grid" hgap="15" vgap="15"
+                                                          style="-fx-padding: 10;"/>
+                                            </content>
+                                        </ScrollPane>
+                                    </content>
+                                </Tab>
+                                <Tab text="Floor 3">
+                                    <content>
+                                        <ScrollPane fitToWidth="true" fitToHeight="true"
+                                                    style="-fx-background-color: transparent; -fx-background: transparent;">
+                                            <content>
+                                                <GridPane fx:id="floor3Grid" hgap="15" vgap="15"
+                                                          style="-fx-padding: 10;"/>
+                                            </content>
+                                        </ScrollPane>
+                                    </content>
+                                </Tab>
+                            </tabs>
+                        </TabPane>
+                    </VBox>
+
+                    <!-- Menu Section -->
+                    <VBox fx:id="menuPane" spacing="16" visible="false" managed="false" VBox.vgrow="ALWAYS">
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+                            <ImageView fitWidth="24" fitHeight="24" preserveRatio="true">
+                                <image><Image url="/resources/img/mug-hot-solid-full.png"/></image>
+                            </ImageView>
+                            <Label text="Menu"
+                                   style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;"/>
+                            <Label fx:id="lblSelectedTable" text=""
+                                   style="-fx-font-size: 13px; -fx-text-fill: white; -fx-background-color: #667eea; -fx-padding: 6 14; -fx-background-radius: 20; -fx-font-weight: 600;"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+
+                            <!-- Search Field with Icon -->
+                            <HBox spacing="8" alignment="CENTER_LEFT" style="-fx-background-color: #f3f4f6; -fx-background-radius: 10; -fx-padding: 8 0; -fx-pref-width: 200;">
+                                <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                                    <image><Image url="/resources/img/magnifying-glass-solid-full.png"/></image>
+                                </ImageView>
+                                <TextField fx:id="txtSearchProduct" promptText="Search products..."
+                                           style="-fx-background-color: transparent; -fx-font-size: 13px; -fx-pref-width: 180;"/>
+                            </HBox>
+                        </HBox>
+
+                        <ScrollPane fitToWidth="true" fitToHeight="true" VBox.vgrow="ALWAYS"
+                                    style="-fx-background-color: transparent; -fx-background: transparent;">
+                            <content>
+                                <GridPane fx:id="menuGrid" hgap="16" vgap="16" style="-fx-padding: 10;"/>
+                            </content>
+                        </ScrollPane>
+                    </VBox>
+                </VBox>
+
+                <!-- RIGHT: Order Cart & Payment -->
+                <VBox spacing="20" prefWidth="480"
+                      style="-fx-background-color: white; -fx-background-radius: 20; -fx-padding: 24; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 4);">
+
+                    <!-- Cart Header -->
+                    <HBox alignment="CENTER_LEFT" spacing="12">
+                        <ImageView fitWidth="26" fitHeight="26" preserveRatio="true">
+                            <image><Image url="/resources/img/cart-shopping-solid-full.png"/></image>
+                        </ImageView>
+                        <Label text="Order Cart"
+                               style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="lblItemCount" text="0 items"
+                               style="-fx-font-size: 14px; -fx-text-fill: #6b7280; -fx-font-weight: 600;"/>
+                    </HBox>
+
+                    <!-- Order Items Scrollable List -->
+                    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                                style="-fx-background-color: #f9fafb; -fx-background-radius: 16; -fx-border-color: #e5e7eb; -fx-border-radius: 16; -fx-border-width: 1;">
+                        <content>
+                            <VBox fx:id="orderItemsContainer" spacing="12" style="-fx-padding: 16;"/>
+                        </content>
+                    </ScrollPane>
+
+                    <Separator/>
+
+                    <!-- Summary Section -->
+                    <VBox spacing="16" style="-fx-background-color: #f9fafb; -fx-padding: 20; -fx-background-radius: 16;">
+                        <HBox alignment="CENTER">
+                            <Label text="Subtotal" style="-fx-font-size: 15px; -fx-text-fill: #6b7280;"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Label fx:id="lblSubtotal" text="0.00"
+                                   style="-fx-font-size: 16px; -fx-font-weight: 600; -fx-text-fill: #1a1a1a;"/>
+                        </HBox>
+                        <HBox alignment="CENTER">
+                            <Label text="VAT (10%)" style="-fx-font-size: 15px; -fx-text-fill: #6b7280;"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Label fx:id="lblVAT" text="0.00"
+                                   style="-fx-font-size: 16px; -fx-font-weight: 600; -fx-text-fill: #1a1a1a;"/>
+                        </HBox>
+                        <Separator style="-fx-background-color: #d1d5db;"/>
+                        <HBox alignment="CENTER">
+                            <Label text="TOTAL"
+                                   style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Label fx:id="lblTotal" text="0.00"
+                                   style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #667eea;"/>
+                        </HBox>
+                    </VBox>
+
+                    <!-- Action Buttons -->
+                    <VBox spacing="12">
+                        <Button fx:id="btnPayment" maxWidth="Infinity"
+                                style="-fx-background-color: #667eea; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: bold; -fx-pref-height: 56; -fx-background-radius: 14; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(102,126,234,0.4), 10, 0, 0, 4);"
+                                onAction="#handlePayment">
+                            <graphic>
+                                <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
+                                    <image><Image url="/resources/img/money-bill-wave-solid-full.png"/></image>
+                                </ImageView>
+                            </graphic>
+                            <text>PAYMENT</text>
+                            <font><Font size="17"/></font>
+                        </Button>
+
+                        <HBox spacing="12">
+                            <Button fx:id="btnPrintBill" maxWidth="Infinity" HBox.hgrow="ALWAYS"
+                                    style="-fx-background-color: #f3f4f6; -fx-text-fill: #4a5568; -fx-font-size: 14px; -fx-font-weight: 600; -fx-pref-height: 48; -fx-background-radius: 12; -fx-cursor: hand;"
+                                    onAction="#handlePrintBill">
+                                <graphic>
+                                    <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                                        <image><Image url="/resources/img/print-solid-full.png"/></image>
+                                    </ImageView>
+                                </graphic>
+                                <text>Print Bill</text>
+                            </Button>
+                            <Button fx:id="btnClearOrder" maxWidth="Infinity" HBox.hgrow="ALWAYS"
+                                    style="-fx-background-color: #fee; -fx-text-fill: #e53e3e; -fx-font-size: 14px; -fx-font-weight: 600; -fx-pref-height: 48; -fx-background-radius: 12; -fx-border-color: #fecaca; -fx-border-radius: 12; -fx-border-width: 2; -fx-cursor: hand;"
+                                    onAction="#handleClearOrder">
+                                <graphic>
+                                    <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                                        <image><Image url="/resources/img/trash-can-solid-full.png"/></image>
+                                    </ImageView>
+                                </graphic>
+                                <text>Clear</text>
+                            </Button>
+                        </HBox>
+
+                        <Button fx:id="btnViewOrders" maxWidth="Infinity"
+                                style="-fx-background-color: #f59e0b; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: 600; -fx-pref-height: 48; -fx-background-radius: 12; -fx-cursor: hand;"
+                                onAction="#handleViewOrders">
+                            <graphic>
+                                <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                                    <image><Image url="/resources/img/clipboard-list-solid-full.png"/></image>
+                                </ImageView>
+                            </graphic>
+                            <text>View All Orders</text>
+                        </Button>
+                    </VBox>
+                </VBox>
+            </HBox>
+        </center>
+    </BorderPane>
+
+</StackPane>

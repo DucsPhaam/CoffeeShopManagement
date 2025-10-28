@@ -298,7 +298,7 @@ public class OrderController implements Initializable {
 
         ImageView seatsIcon = new ImageView();
         try {
-            Image icon = new Image(getClass().getResourceAsStream("/resources/img/user-solid-full.png"));
+            Image icon = new Image(getClass().getResourceAsStream("/resources/img/people-icon.png"));
             seatsIcon.setImage(icon);
             seatsIcon.setFitWidth(12); // Giảm từ 14 xuống 12
             seatsIcon.setFitHeight(12);

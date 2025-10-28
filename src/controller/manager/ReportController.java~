@@ -22,8 +22,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.Date;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 
 public class ReportController {
 
@@ -807,33 +805,10 @@ public class ReportController {
         lblNetProfit.setText(currencyFormat.format(profit));
         lblProfitMargin.setText("Margin: " + percentFormat.format(totalRevenue > 0 ? profit / totalRevenue : 0));
 
-        // Set icons và text
-        lblRevenueChange.setGraphic(loadArrowIcon(true));
-        lblRevenueChange.setText("+12.5% from last period");
-        lblRevenueChange.setStyle("-fx-text-fill: #10b981; -fx-font-weight: 600;");
-
-        lblOrdersChange.setGraphic(loadArrowIcon(true));
-        lblOrdersChange.setText("+8.3% from last period");
-        lblOrdersChange.setStyle("-fx-text-fill: #10b981; -fx-font-weight: 600;");
-
-        lblAvgChange.setGraphic(loadArrowIcon(true));
-        lblAvgChange.setText("+3.7% from last period");
-        lblAvgChange.setStyle("-fx-text-fill: #10b981; -fx-font-weight: 600;");
-    }
-
-    private ImageView loadArrowIcon(boolean isUp) {
-        ImageView arrow = new ImageView();
-        try {
-            String path = isUp ? "/resources/img/arrow-trend-up-solid-full.png" : "/resources/img/arrow-trend-down-solid-full.png";
-            Image icon = new Image(getClass().getResourceAsStream(path));
-            arrow.setImage(icon);
-            arrow.setFitWidth(14);
-            arrow.setFitHeight(14);
-            arrow.setPreserveRatio(true);
-        } catch (Exception e) {
-            System.err.println("Failed to load arrow icon");
-        }
-        return arrow;
+        // Mock change percentages
+        lblRevenueChange.setText("↑ +12.5% from last period");
+        lblOrdersChange.setText("↑ +8.3% from last period");
+        lblAvgChange.setText("↑ +3.7% from last period");
     }
 
     private DateRange getDateRange() {

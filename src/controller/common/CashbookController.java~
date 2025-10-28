@@ -210,7 +210,7 @@ public class CashbookController {
             hasMoreRecords = false;
         }
         transactionList.addAll(newTransactions);
-        // Không cần sort vì SQL đã sort sẵn theo created_at DESC
+        transactionList.sort((t1, t2) -> Integer.compare(t2.getDisplayOrder(), t1.getDisplayOrder()));
         filteredList.setAll(transactionList);
         currentPage++;
         updateStatistics();
@@ -236,8 +236,7 @@ public class CashbookController {
             }
         }
 
-        // Sắp xếp theo created_at DESC (mới nhất trước)
-        filteredList.sort((t1, t2) -> t2.getCreatedAt().compareTo(t1.getCreatedAt()));
+        filteredList.sort((t1, t2) -> Integer.compare(t2.getDisplayOrder(), t1.getDisplayOrder()));
         tableTransactions.setItems(filteredList);
         updateStatistics();
         updateViewMoreButton();
