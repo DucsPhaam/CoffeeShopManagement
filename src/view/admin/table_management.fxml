@@ -22,7 +22,7 @@
         <HBox alignment="CENTER_LEFT" spacing="20.0">
             <HBox spacing="10.0" alignment="CENTER_LEFT">
                 <ImageView fitWidth="28" fitHeight="28" preserveRatio="true">
-                    <image><Image url="@../resources/img/chair-solid-full.png"/></image>
+                    <image><Image url="/resources/img/chair-solid-full.png"/></image>
                 </ImageView>
                 <Label text="Table Management" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;">
                     <font>
@@ -35,7 +35,7 @@
                 <graphic>
                     <HBox spacing="8" alignment="CENTER">
                         <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
-                            <image><Image url="@../resources/img/rotate-right-solid-full.png"/></image>
+                            <image><Image url="/resources/img/rotate-right-solid-full.png"/></image>
                         </ImageView>
                         <Label text="Refresh" textFill="white" style="-fx-font-weight: 600;"/>
                     </HBox>
@@ -47,7 +47,7 @@
         <HBox spacing="15.0" alignment="CENTER_LEFT" style="-fx-background-color: white; -fx-padding: 15.0; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 3);">
             <HBox spacing="8" alignment="CENTER_LEFT" style="-fx-background-color: #f3f4f6; -fx-background-radius: 8; -fx-padding: 8 12;">
                 <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
-                    <image><Image url="@../resources/img/magnifying-glass-solid-full.png"/></image>
+                    <image><Image url="/resources/img/magnifying-glass-solid-full.png"/></image>
                 </ImageView>
                 <TextField fx:id="txtSearch" promptText="Search tables..." style="-fx-background-color: transparent; -fx-pref-width: 280px; -fx-font-size: 14px;" onKeyReleased="#handleSearch" />
             </HBox>
@@ -69,7 +69,7 @@
                 <graphic>
                     <HBox spacing="8" alignment="CENTER">
                         <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
-                            <image><Image url="@../resources/img/plus-solid-full.png"/></image>
+                            <image><Image url="/resources/img/plus-solid-full.png"/></image>
                         </ImageView>
                         <Label text="Add Table" textFill="white" style="-fx-font-weight: 600;"/>
                     </HBox>
@@ -83,7 +83,7 @@
                 <graphic>
                     <HBox spacing="6" alignment="CENTER">
                         <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
-                            <image><Image url="@../resources/img/building-solid-full.png"/></image>
+                            <image><Image url="/resources/img/building-solid-full.png"/></image>
                         </ImageView>
                         <Label text="Floor 1"/>
                     </HBox>
@@ -94,7 +94,7 @@
                 <graphic>
                     <HBox spacing="6" alignment="CENTER">
                         <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
-                            <image><Image url="@../resources/img/building-solid-full.png"/></image>
+                            <image><Image url="/resources/img/building-solid-full.png"/></image>
                         </ImageView>
                         <Label text="Floor 2"/>
                     </HBox>
@@ -105,7 +105,7 @@
                 <graphic>
                     <HBox spacing="6" alignment="CENTER">
                         <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
-                            <image><Image url="@../resources/img/building-solid-full.png"/></image>
+                            <image><Image url="/resources/img/building-solid-full.png"/></image>
                         </ImageView>
                         <Label text="Floor 3"/>
                     </HBox>
@@ -143,7 +143,7 @@
                     style="-fx-background-color: transparent; -fx-font-size: 20px; -fx-cursor: hand; -fx-text-fill: #7f8c8d;">
                 <graphic>
                     <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
-                        <image><Image url="@../resources/img/xmark-solid-full.png"/></image>
+                        <image><Image url="/resources/img/xmark-solid-full.png"/></image>
                     </ImageView>
                 </graphic>
             </Button>
