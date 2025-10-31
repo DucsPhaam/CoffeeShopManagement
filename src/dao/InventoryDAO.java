@@ -123,4 +123,34 @@ public class InventoryDAO {
 
         return null;
     }
+
+    public List<Inventory> getInventoryPage(int page, int size) {
+        List<Inventory> result = new ArrayList<>();
+        String sql = "SELECT id, name, quantity, unit, min_stock, cost_per_unit FROM inventory " +
+                "ORDER BY id LIMIT ? OFFSET ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, size);
+            stmt.setInt(2, page * size);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Inventory inv = new Inventory(
+                            rs.getInt("id"),
+                            rs.getString("name"),
+                            rs.getDouble("quantity"),
+                            rs.getString("unit"),
+                            rs.getDouble("min_stock"),
+                            rs.getDouble("cost_per_unit")
+                    );
+                    result.add(inv);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
 }
