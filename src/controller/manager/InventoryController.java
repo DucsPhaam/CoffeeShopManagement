@@ -16,6 +16,8 @@ import model.Inventory;
 import model.Transaction;
 import utils.SessionManager;
 import javafx.scene.text.Font;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class InventoryController {
@@ -48,6 +50,11 @@ public class InventoryController {
     @FXML private TextField txtAddQuantity;
     @FXML private TextField txtAddCostPerUnit;
     @FXML private Button btnAddStock;
+    @FXML private Button btnViewMore;
+
+    private int currentPage = 0;
+    private static final int PAGE_SIZE = 10;  // hoặc 20 nếu muốn
+    private boolean hasMoreData = true;
 
     private InventoryDAO inventoryDAO;
     private TransactionDAO transactionDAO;
@@ -235,16 +242,47 @@ public class InventoryController {
 }
 
     private void loadInventoryData() {
+        currentPage = 0;
+        hasMoreData = true;
         inventoryList.clear();
-        inventoryList.addAll(inventoryDAO.getAllInventory());
-        filteredList.setAll(inventoryList);
+        filteredList.clear();
+
+        List<Inventory> firstPage = inventoryDAO.getInventoryPage(currentPage, PAGE_SIZE);
+        inventoryList.addAll(firstPage);
+        filteredList.setAll(firstPage);
+
         tableInventory.setItems(filteredList);
         updateStatistics();
+        updateViewMoreButton();
+    }
+    @FXML
+    private void handleLoadMore() {
+        if (!hasMoreData) return;
+
+        currentPage++;
+        List<Inventory> nextPage = inventoryDAO.getInventoryPage(currentPage, PAGE_SIZE);
+
+        if (nextPage.isEmpty()) {
+            hasMoreData = false;
+        } else {
+            inventoryList.addAll(nextPage);
+            applyFilters(); // Áp dụng lại filter
+        }
+
+        updateViewMoreButton();
+    }
+
+    private void updateViewMoreButton() {
+        btnViewMore.setVisible(hasMoreData);
+        btnViewMore.setManaged(hasMoreData);
     }
 
     private void updateStatistics() {
         int total = filteredList.size();
-        int lowStock = (int) filteredList.stream().filter(inv -> inv.getQuantity() <= inv.getMinStock()).count();
+        int lowStock = (int) filteredList.stream()
+                .filter(inv -> inv.getQuantity() <= inv.getMinStock())
+                .count();
+
         lblTotalItems.setText("Total: " + total + " items");
         lblLowStockItems.setText("Low Stock: " + lowStock);
     }
@@ -270,9 +308,7 @@ public class InventoryController {
         filteredList.clear();
 
         for (Inventory inv : inventoryList) {
-            boolean matchSearch = searchText.isEmpty() ||
-                    inv.getName().toLowerCase().contains(searchText);
-
+            boolean matchSearch = searchText.isEmpty() || inv.getName().toLowerCase().contains(searchText);
             boolean matchStock = stockFilter.equals("All") ||
                     (stockFilter.equals("Low Stock") && inv.getQuantity() <= inv.getMinStock());
 
@@ -283,6 +319,7 @@ public class InventoryController {
 
         tableInventory.setItems(filteredList);
         updateStatistics();
+        updateViewMoreButton();
     }
 
     @FXML
