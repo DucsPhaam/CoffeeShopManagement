@@ -194,7 +194,7 @@ public class TableController {
 
         ImageView seatsIcon = new ImageView();
         try {
-            Image icon = new Image(getClass().getResourceAsStream("/resources/img/user-group-solid-full.png.png"));
+            Image icon = new Image(getClass().getResourceAsStream("/resources/img/user-group-solid-full.png"));
             seatsIcon.setImage(icon);
             seatsIcon.setFitWidth(14);
             seatsIcon.setFitHeight(14);
