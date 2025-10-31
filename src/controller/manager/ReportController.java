@@ -10,10 +10,7 @@ import javafx.geometry.Pos;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import model.*;
@@ -34,6 +31,8 @@ import javafx.print.PrinterJob;
 import javafx.print.PageLayout;
 import javafx.print.PageOrientation;
 import javafx.print.Paper;
+import utils.SweetAlert;
+import javafx.application.Platform;
 
 public class ReportController {
 
@@ -95,7 +94,50 @@ public class ReportController {
         mainChart.setBarGap(3);
         mainChart.setCategoryGap(20);
 
-        handleGenerateReport();
+        // Defer report generation until after scene is set
+        Platform.runLater(this::handleGenerateReport);
+    }
+
+    private void showAlert(Alert.AlertType type, String title, String message) {
+        // Convert AlertType to SweetAlert.AlertType
+        SweetAlert.AlertType sweetType;
+        switch (type) {
+            case INFORMATION:
+                sweetType = SweetAlert.AlertType.SUCCESS;
+                break;
+            case ERROR:
+                sweetType = SweetAlert.AlertType.ERROR;
+                break;
+            case WARNING:
+                sweetType = SweetAlert.AlertType.WARNING;
+                break;
+            case CONFIRMATION:
+                sweetType = SweetAlert.AlertType.QUESTION;
+                break;
+            default:
+                sweetType = SweetAlert.AlertType.INFO;
+        }
+
+        showSweetAlert(sweetType, title, message);
+    }
+
+    private void showSweetAlert(SweetAlert.AlertType type, String title, String message) {
+        try {
+            if (tableReport.getScene() == null) {
+                throw new NullPointerException("Scene is null - falling back to standard alert");
+            }
+            Pane rootPane = (Pane) tableReport.getScene().getRoot();
+            // Removed wrapping logic to avoid changing root during event handling
+            SweetAlert.showAlert(rootPane, type, title, message);
+        } catch (Exception e) {
+            System.err.println("Failed to show SweetAlert: " + e.getMessage());
+            // Fallback to regular alert
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle(title);
+            alert.setHeaderText(null);
+            alert.setContentText(message);
+            alert.showAndWait();
+        }
     }
 
     private void updateCurrentDate() {
@@ -222,7 +264,7 @@ public class ReportController {
 
         } catch (SQLException e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Error", "Failed to generate report: " + e.getMessage());
+            showSweetAlert(SweetAlert.AlertType.ERROR, "Error", "Failed to generate report: " + e.getMessage());
         }
     }
 
@@ -1072,7 +1114,7 @@ public class ReportController {
     @FXML
     private void handleExportCSV() {
         if (reportData.isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "No Data", "No data to export!");
+            showSweetAlert(SweetAlert.AlertType.WARNING, "No Data", "No data to export!");
             return;
         }
 
@@ -1127,13 +1169,13 @@ public class ReportController {
                 writer.flush();
                 writer.close();
 
-                showAlert(Alert.AlertType.INFORMATION, "Export Successful",
+                showSweetAlert(SweetAlert.AlertType.SUCCESS, "Export Successful",
                         "Data exported successfully to:\n" + file.getAbsolutePath());
             }
 
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Export Failed",
+            showSweetAlert(SweetAlert.AlertType.ERROR, "Export Failed",
                     "Failed to export CSV: " + e.getMessage());
         }
     }
@@ -1141,7 +1183,7 @@ public class ReportController {
     @FXML
     private void handleExportPDF() {
         if (reportData.isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "No Data", "No data to export!");
+            showSweetAlert(SweetAlert.AlertType.WARNING, "No Data", "No data to export!");
             return;
         }
 
@@ -1152,8 +1194,8 @@ public class ReportController {
         PrinterJob printerJob = PrinterJob.createPrinterJob();
 
         if (printerJob == null) {
-            showAlert(Alert.AlertType.ERROR, "Printer Error",
-                    "No printer available! Please check your printer settings.");
+            showSweetAlert(SweetAlert.AlertType.ERROR, "Print Failed",
+                    "Failed to print the report. Please try again.");
             return;
         }
 
@@ -1183,18 +1225,13 @@ public class ReportController {
             if (success) {
                 printerJob.endJob();
 
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Print Successful");
-                alert.setHeaderText("Report Printed!");
-                alert.setContentText(
+                showSweetAlert(SweetAlert.AlertType.SUCCESS, "Print Successful",
                         "Your report has been sent to the printer.\n\n" +
-                                "💡 Tip: To save as PDF:\n" +
-                                "   • Select 'Microsoft Print to PDF' or\n" +
-                                "   • Select 'Save as PDF' in the print dialog"
-                );
-                alert.showAndWait();
+                                "Tip: To save as PDF:\n" +
+                                "   Select 'Microsoft Print to PDF' or\n" +
+                                "   Select 'Save as PDF' in the print dialog");
             } else {
-                showAlert(Alert.AlertType.ERROR, "Print Failed",
+                showSweetAlert(SweetAlert.AlertType.ERROR, "Print Failed",
                         "Failed to print the report. Please try again.");
             }
         }
@@ -1433,13 +1470,13 @@ public class ReportController {
         loadingOverlay.setManaged(show);
     }
 
-    private void showAlert(Alert.AlertType type, String title, String message) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
+//    private void showAlert(Alert.AlertType type, String title, String message) {
+//        Alert alert = new Alert(type);
+//        alert.setTitle(title);
+//        alert.setHeaderText(null);
+//        alert.setContentText(message);
+//        alert.showAndWait();
+//    }
 
     // Inner class for date range
     private static class DateRange {
