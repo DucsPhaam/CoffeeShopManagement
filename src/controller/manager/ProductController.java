@@ -6,7 +6,6 @@ import dao.ProductIngredientDAO;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -20,6 +19,7 @@ import javafx.stage.FileChooser;
 import model.Inventory;
 import model.Product;
 import model.ProductIngredient;
+import utils.SweetAlert;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import javafx.fxml.FXML;
 
 public class ProductController {
 
@@ -473,11 +474,11 @@ public class ProductController {
                 // Update the image preview
                 imgPreview.setImage(new Image("file:" + destPath.toAbsolutePath().toString()));
 
-                showAlert(Alert.AlertType.INFORMATION, "Success", "Image uploaded successfully!");
+                showSweetAlert(SweetAlert.AlertType.SUCCESS, "Success", "Image uploaded successfully!");
 
             } catch (IOException e) {
                 e.printStackTrace();
-                showAlert(Alert.AlertType.ERROR, "Error", "Failed to upload image: " + e.getMessage());
+                showSweetAlert(SweetAlert.AlertType.ERROR, "Error", "Failed to upload image: " + e.getMessage());
             }
         }
     }
@@ -503,11 +504,11 @@ public class ProductController {
             currentProduct.setImage(selectedImagePath);
 
             if (productDAO.updateProduct(currentProduct)) {
-                showAlert(Alert.AlertType.INFORMATION, "Success", "Product updated successfully.");
+                showSweetAlert(SweetAlert.AlertType.SUCCESS, "Success", "Product updated successfully.");
                 loadProductData();
                 handleCloseDialog();
             } else {
-                showAlert(Alert.AlertType.ERROR, "Error", "Failed to update product.");
+                showSweetAlert(SweetAlert.AlertType.ERROR, "Error", "Failed to update product.");
             }
         } else {
             Product newProduct = new Product();
@@ -517,29 +518,24 @@ public class ProductController {
             newProduct.setImage(selectedImagePath);
 
             if (productDAO.addProduct(newProduct)) {
-                showAlert(Alert.AlertType.INFORMATION, "Success", "Product added successfully.");
+                showSweetAlert(SweetAlert.AlertType.SUCCESS, "Success", "Product added successfully.");
                 loadProductData();
                 handleCloseDialog();
             } else {
-                showAlert(Alert.AlertType.ERROR, "Error", "Failed to add product.");
+                showSweetAlert(SweetAlert.AlertType.ERROR, "Error", "Failed to add product.");
             }
         }
     }
 
     private void handleDeleteProduct(Product product) {
-        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmAlert.setTitle("Confirm Delete");
-        confirmAlert.setHeaderText("Are you sure you want to delete this product?");
-        confirmAlert.setContentText("Product: " + product.getName());
-
-        if (confirmAlert.showAndWait().get() == ButtonType.OK) {
+        showConfirmation("Confirm Delete", "Are you sure you want to delete this product?\nProduct: " + product.getName(), () -> {
             if (productDAO.deleteProduct(product.getId())) {
-                showAlert(Alert.AlertType.INFORMATION, "Success", "Product deleted successfully.");
+                showSweetAlert(SweetAlert.AlertType.SUCCESS, "Success", "Product deleted successfully.");
                 loadProductData();
             } else {
-                showAlert(Alert.AlertType.ERROR, "Error", "Failed to delete product. It may be in use.");
+                showSweetAlert(SweetAlert.AlertType.ERROR, "Error", "Failed to delete product. It may be in use.");
             }
-        }
+        }, null);
     }
 
     private void handleManageIngredients(Product product) {
@@ -570,26 +566,26 @@ public class ProductController {
         String quantityStr = txtIngredientQuantity.getText().trim();
 
         if (selected == null) {
-            showAlert(Alert.AlertType.WARNING, "Warning", "Please select an ingredient.");
+            showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Please select an ingredient.");
             return;
         }
 
         if (quantityStr.isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "Warning", "Please enter quantity.");
+            showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Please enter quantity.");
             return;
         }
 
         try {
             double quantity = Double.parseDouble(quantityStr);
             if (quantity <= 0) {
-                showAlert(Alert.AlertType.WARNING, "Warning", "Quantity must be greater than 0.");
+                showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Quantity must be greater than 0.");
                 return;
             }
 
             // Check if already exists
             for (ProductIngredientRow row : ingredientsList) {
                 if (row.getInventoryId() == selected.getId()) {
-                    showAlert(Alert.AlertType.WARNING, "Warning", "This ingredient is already added.");
+                    showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "This ingredient is already added.");
                     return;
                 }
             }
@@ -605,7 +601,7 @@ public class ProductController {
             txtIngredientQuantity.clear();
 
         } catch (NumberFormatException e) {
-            showAlert(Alert.AlertType.WARNING, "Warning", "Invalid quantity format.");
+            showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Invalid quantity format.");
         }
     }
 
@@ -625,7 +621,7 @@ public class ProductController {
             productIngredientDAO.addProductIngredient(pi);
         }
 
-        showAlert(Alert.AlertType.INFORMATION, "Success", "Ingredients saved successfully.");
+        showSweetAlert(SweetAlert.AlertType.SUCCESS, "Success", "Ingredients saved successfully.");
         hideIngredientsDialog();
     }
 
@@ -669,7 +665,7 @@ public class ProductController {
 
     private boolean validateInput() {
         if (txtProductName.getText().trim().isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "Warning", "Please enter product name.");
+            showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Please enter product name.");
             txtProductName.requestFocus();
             return false;
         }
@@ -677,30 +673,72 @@ public class ProductController {
         try {
             double price = Double.parseDouble(txtPrice.getText().trim());
             if (price <= 0) {
-                showAlert(Alert.AlertType.WARNING, "Warning", "Price must be greater than 0.");
+                showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Price must be greater than 0.");
                 txtPrice.requestFocus();
                 return false;
             }
         } catch (NumberFormatException e) {
-            showAlert(Alert.AlertType.WARNING, "Warning", "Invalid price format.");
+            showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Invalid price format.");
             txtPrice.requestFocus();
             return false;
         }
 
         if (!chkHot.isSelected() && !chkIced.isSelected() && !chkFrappe.isSelected()) {
-            showAlert(Alert.AlertType.WARNING, "Warning", "Please select at least one drink type.");
+            showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Please select at least one drink type.");
             return false;
         }
 
         return true;
     }
 
-    private void showAlert(Alert.AlertType type, String title, String content) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
+    private void showSweetAlert(SweetAlert.AlertType type, String title, String content) {
+        try {
+            if (tableProducts.getScene() == null) {
+                throw new NullPointerException("Scene is null - falling back to standard alert");
+            }
+            Pane rootPane = (Pane) tableProducts.getScene().getRoot();
+            SweetAlert.showAlert(rootPane, type, title, content, null);
+        } catch (Exception e) {
+            System.err.println("Failed to show SweetAlert: " + e.getMessage());
+            // Fallback to regular alert
+            Alert alert = new Alert(convertToAlertType(type));
+            alert.setTitle(title);
+            alert.setHeaderText(null);
+            alert.setContentText(content);
+            alert.showAndWait();
+        }
+    }
+
+    private void showConfirmation(String title, String content, Runnable onConfirm, Runnable onCancel) {
+        try {
+            if (tableProducts.getScene() == null) {
+                throw new NullPointerException("Scene is null - falling back to standard confirmation");
+            }
+            Pane rootPane = (Pane) tableProducts.getScene().getRoot();
+            SweetAlert.showConfirmation(rootPane, title, content, onConfirm, onCancel);
+        } catch (Exception e) {
+            System.err.println("Failed to show SweetConfirmation: " + e.getMessage());
+            // Fallback to regular confirmation
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle(title);
+            alert.setHeaderText(null);
+            alert.setContentText(content);
+            if (alert.showAndWait().get() == ButtonType.OK) {
+                if (onConfirm != null) onConfirm.run();
+            } else {
+                if (onCancel != null) onCancel.run();
+            }
+        }
+    }
+
+    private Alert.AlertType convertToAlertType(SweetAlert.AlertType sweetType) {
+        return switch (sweetType) {
+            case SUCCESS -> Alert.AlertType.INFORMATION;
+            case ERROR -> Alert.AlertType.ERROR;
+            case WARNING -> Alert.AlertType.WARNING;
+            case QUESTION -> Alert.AlertType.CONFIRMATION;
+            default -> Alert.AlertType.INFORMATION;
+        };
     }
 
     // Inner class for ingredient rows
