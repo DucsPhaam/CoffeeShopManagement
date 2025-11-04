@@ -24,6 +24,9 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import model.OrderItem;
 import utils.SessionManager;
+import utils.SweetAlert; // ← Thêm import
+import model.Product;
+import model.Table;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,38 +42,25 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-/**
- * Controller for managing coffee shop orders in a JavaFX application.
- * Handles table selection, menu display, order processing, and payment.
- */
 public class OrderController implements Initializable {
 
     // FXML Components
-    @FXML
-    private Label lblStaffName, lblDateTime, lblSelectedTable, lblItemCount;
-    @FXML
-    private Label lblSubtotal, lblVAT, lblTotal, lblNotification;
-    @FXML
-    private ToggleButton btnDineIn, btnTakeaway;
-    @FXML
-    private VBox tableSelectionPane, menuPane, orderItemsContainer, notificationPane;
-    @FXML
-    private TabPane floorTabPane;
-    @FXML
-    private GridPane floor1Grid, floor2Grid, floor3Grid, menuGrid;
-    @FXML
-    private TextField txtSearchProduct;
-    @FXML
-    private Button btnPayment, btnClearOrder, btnPrintBill, btnViewOrders, btnDashboard, btnLogout;
-    @FXML
-    private BorderPane mainBorderPane;
+    @FXML private Label lblStaffName, lblDateTime, lblSelectedTable, lblItemCount;
+    @FXML private Label lblSubtotal, lblVAT, lblTotal, lblNotification;
+    @FXML private ToggleButton btnDineIn, btnTakeaway;
+    @FXML private VBox tableSelectionPane, menuPane, orderItemsContainer, notificationPane;
+    @FXML private TabPane floorTabPane;
+    @FXML private GridPane floor1Grid, floor2Grid, floor3Grid, menuGrid;
+    @FXML private TextField txtSearchProduct;
+    @FXML private Button btnPayment, btnClearOrder, btnPrintBill, btnViewOrders, btnDashboard, btnLogout;
+    @FXML private BorderPane mainBorderPane;
 
     // Data Members
     private ToggleGroup orderTypeGroup;
     private String orderType = "dine-in";
     private String paymentMethod = "cash";
     private Map<String, OrderItem> orderItems = new LinkedHashMap<>();
-    private List<ProductData> allProducts = new ArrayList<>();
+    private List<Product> allProducts = new ArrayList<>();
     private final DecimalFormat df = new DecimalFormat("#,##0.00");
     private final OrderDAO orderDAO = new OrderDAO();
     private final ProductIngredientDAO piDAO = new ProductIngredientDAO();
@@ -151,8 +141,8 @@ public class OrderController implements Initializable {
         menuGrid.getChildren().clear();
         int col = 0, row = 0;
 
-        for (ProductData product : allProducts) {
-            if (searchText.isEmpty() || product.name.toLowerCase().contains(searchText)) {
+        for (Product product : allProducts) {
+            if (searchText.isEmpty() || product.getName().toLowerCase().contains(searchText)) {
                 VBox productBox = createProductCard(product);
                 menuGrid.add(productBox, col, row);
                 col++;
@@ -168,7 +158,7 @@ public class OrderController implements Initializable {
     @FXML
     private void handleRefreshTables(ActionEvent event) {
         loadTables();
-        showNotification("success", "Tables refreshed!");
+        showSweetAlert(SweetAlert.AlertType.SUCCESS, "Success", "Tables refreshed!");
     }
 
     private void loadTables() {
@@ -177,10 +167,10 @@ public class OrderController implements Initializable {
             PreparedStatement stmt = conn.prepareStatement(sql);
             ResultSet rs = stmt.executeQuery();
 
-            Map<Integer, List<TableData>> floorTables = new HashMap<>();
+            Map<Integer, List<Table>> floorTables = new HashMap<>();
             while (rs.next()) {
                 int floor = rs.getInt("floor");
-                TableData table = new TableData(
+                Table table = new Table(
                         rs.getInt("id"),
                         rs.getString("name"),
                         floor,
@@ -193,135 +183,66 @@ public class OrderController implements Initializable {
             displayTables(floor2Grid, floorTables.get(2));
             displayTables(floor3Grid, floorTables.get(3));
         } catch (SQLException e) {
-            showNotification("error", "✗ Failed to load tables: " + e.getMessage());
+            showSweetAlert(SweetAlert.AlertType.ERROR, "Error", "Failed to load tables: " + e.getMessage());
         }
     }
 
-    private void displayTables(GridPane grid, List<TableData> tables) {
-        if (tables == null)
-            return;
+    private void displayTables(GridPane grid, List<Table> tables) {
+        if (tables == null) return;
         grid.getChildren().clear();
+        grid.setHgap(15); grid.setVgap(15);
+        int col = 0, row = 0, columnsPerRow = 5;
 
-        // Điều chỉnh spacing của grid
-        grid.setHgap(15); // Khoảng cách ngang giữa các card
-        grid.setVgap(15); // Khoảng cách dọc giữa các card
-
-        int col = 0, row = 0;
-        int columnsPerRow = 5; // Tăng số cột từ 4 lên 5 để hiển thị nhiều card hơn
-
-        for (TableData table : tables) {
+        for (Table table : tables) {
             VBox tableBox = createTableCard(table);
             grid.add(tableBox, col, row);
             col++;
-            if (col >= columnsPerRow) {
-                col = 0;
-                row++;
-            }
+            if (col >= columnsPerRow) { col = 0; row++; }
         }
     }
 
-    private VBox createTableCard(TableData table) {
-        VBox card = new VBox(8); // Giảm spacing từ 10 xuống 8
+    private VBox createTableCard(Table table) {
+        VBox card = new VBox(8);
         card.setAlignment(Pos.CENTER);
-        card.setPadding(new Insets(12)); // Giảm padding từ 18 xuống 12
-        card.setPrefSize(120, 140); // Giảm từ 140x160 xuống 120x140
-        card.setMaxSize(120, 140); // Thêm maxSize để đảm bảo không vượt quá
+        card.setPadding(new Insets(12));
+        card.setPrefSize(120, 140); card.setMaxSize(120, 140);
 
         String bgColor, borderColor, textColor, statusBadgeColor;
         boolean isClickable = false;
 
-        switch (table.status) {
-            case "available":
-                bgColor = "linear-gradient(from 0% 0% to 100% 100%, #ffffff 0%, #f0f9ff 100%)";
-                borderColor = "#10b981";
-                textColor = "#059669";
-                statusBadgeColor = "#d1fae5";
-                isClickable = true;
-                break;
-            case "occupied":
-                bgColor = "linear-gradient(from 0% 0% to 100% 100%, #ffffff 0%, #fef2f2 100%)";
-                borderColor = "#ef4444";
-                textColor = "#dc2626";
-                statusBadgeColor = "#fee2e2";
-                break;
-            case "reserved":
-                bgColor = "linear-gradient(from 0% 0% to 100% 100%, #ffffff 0%, #fffbeb 100%)";
-                borderColor = "#f59e0b";
-                textColor = "#d97706";
-                statusBadgeColor = "#fed7aa";
-                break;
-            case "cleaning":
-                bgColor = "linear-gradient(from 0% 0% to 100% 100%, #ffffff 0%, #f3f4f6 100%)";
-                borderColor = "#6b7280";
-                textColor = "#4b5563";
-                statusBadgeColor = "#e5e7eb";
-                break;
-            default:
-                bgColor = "linear-gradient(from 0% 0% to 100% 100%, #ffffff 0%, #f3f4f6 100%)";
-                borderColor = "#9ca3af";
-                textColor = "#6b7280";
-                statusBadgeColor = "#e5e7eb";
+        switch (table.getStatus()) {
+            case "available" -> { bgColor = "linear-gradient(from 0% 0% to 100% 100%, #ffffff 0%, #f0f9ff 100%)"; borderColor = "#10b981"; textColor = "#059669"; statusBadgeColor = "#d1fae5"; isClickable = true; }
+            case "occupied" -> { bgColor = "linear-gradient(from 0% 0% to 100% 100%, #ffffff 0%, #fef2f2 100%)"; borderColor = "#ef4444"; textColor = "#dc2626"; statusBadgeColor = "#fee2e2"; }
+            case "reserved" -> { bgColor = "linear-gradient(from 0% 0% to 100% 100%, #ffffff 0%, #fffbeb 100%)"; borderColor = "#f59e0b"; textColor = "#d97706"; statusBadgeColor = "#fed7aa"; }
+            case "cleaning" -> { bgColor = "linear-gradient(from 0% 0% to 100% 100%, #ffffff 0%, #f3f4f6 100%)"; borderColor = "#6b7280"; textColor = "#4b5563"; statusBadgeColor = "#e5e7eb"; }
+            default -> { bgColor = "linear-gradient(from 0% 0% to 100% 100%, #ffffff 0%, #f3f4f6 100%)"; borderColor = "#9ca3af"; textColor = "#6b7280"; statusBadgeColor = "#e5e7eb"; }
         }
 
         card.setStyle(String.format(
                 "-fx-background-color: white; -fx-background-radius: 12; -fx-border-color: %s; -fx-border-width: 2; -fx-border-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 8, 0, 0, 2);",
                 borderColor));
 
-        // Table Icon - Giảm kích thước icon
         ImageView tableIcon = new ImageView();
-        try {
-            Image icon = new Image(getClass().getResourceAsStream("/resources/img/table-icon.png"));
-            tableIcon.setImage(icon);
-        } catch (Exception e) {
-            System.err.println("Failed to load table icon");
-        }
-        tableIcon.setFitWidth(40); // Giảm từ 50 xuống 40
-        tableIcon.setFitHeight(40);
-        tableIcon.setPreserveRatio(true);
+        try { Image icon = new Image(getClass().getResourceAsStream("/resources/img/table-icon.png")); tableIcon.setImage(icon); } catch (Exception e) { System.err.println("Failed to load table icon"); }
+        tableIcon.setFitWidth(40); tableIcon.setFitHeight(40); tableIcon.setPreserveRatio(true);
+        if (!"available".equals(table.getStatus())) tableIcon.setOpacity(0.6);
 
-        if (!table.status.equals("available")) {
-            tableIcon.setOpacity(0.6);
-        }
+        Label lblName = new Label(table.getName());
+        lblName.setStyle(String.format("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: %s;", textColor));
+        lblName.setMaxWidth(100); lblName.setWrapText(true); lblName.setAlignment(Pos.CENTER);
 
-        // Table Name - Giảm font size
-        Label lblName = new Label(table.name);
-        lblName.setStyle(String.format(
-                "-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: %s;",
-                textColor));
-        lblName.setMaxWidth(100); // Giới hạn width
-        lblName.setWrapText(true); // Cho phép wrap text
-        lblName.setAlignment(Pos.CENTER);
-
-        // Seats Box - Giảm kích thước
-        HBox seatsBox = new HBox(4); // Giảm spacing từ 5 xuống 4
-        seatsBox.setAlignment(Pos.CENTER);
-
+        HBox seatsBox = new HBox(4); seatsBox.setAlignment(Pos.CENTER);
         ImageView seatsIcon = new ImageView();
-        try {
-            Image icon = new Image(getClass().getResourceAsStream("/resources/img/user-solid-full.png"));
-            seatsIcon.setImage(icon);
-            seatsIcon.setFitWidth(12); // Giảm từ 14 xuống 12
-            seatsIcon.setFitHeight(12);
-            seatsIcon.setPreserveRatio(true);
-        } catch (Exception e) {
-            System.err.println("Failed to load people icon");
-        }
-
-        Label lblSeats = new Label(table.seats + " seats");
-        lblSeats.setStyle(String.format(
-                "-fx-font-size: 11px; -fx-text-fill: %s; -fx-font-weight: 600;",
-                textColor));
+        try { Image icon = new Image(getClass().getResourceAsStream("/resources/img/user-solid-full.png")); seatsIcon.setImage(icon); seatsIcon.setFitWidth(12); seatsIcon.setFitHeight(12); seatsIcon.setPreserveRatio(true); } catch (Exception e) { System.err.println("Failed to load people icon"); }
+        Label lblSeats = new Label(table.getSeats() + " seats");
+        lblSeats.setStyle(String.format("-fx-font-size: 11px; -fx-text-fill: %s; -fx-font-weight: 600;", textColor));
         seatsBox.getChildren().addAll(seatsIcon, lblSeats);
 
-        // Status Badge - Giảm kích thước
-        Label lblStatus = new Label(table.status.toUpperCase());
-        lblStatus.setStyle(String.format(
-                "-fx-font-size: 9px; -fx-text-fill: %s; -fx-font-weight: 700; -fx-background-color: %s; -fx-padding: 3 8; -fx-background-radius: 10;",
-                textColor, statusBadgeColor));
+        Label lblStatus = new Label(table.getStatus().toUpperCase());
+        lblStatus.setStyle(String.format("-fx-font-size: 9px; -fx-text-fill: %s; -fx-font-weight: 700; -fx-background-color: %s; -fx-padding: 3 8; -fx-background-radius: 10;", textColor, statusBadgeColor));
 
         card.getChildren().addAll(tableIcon, lblName, seatsBox, lblStatus);
 
-        // Click handlers
         if (isClickable) {
             card.setOnMouseClicked(e -> selectTable(table));
             card.setOnMouseEntered(e -> card.setStyle(String.format(
@@ -337,12 +258,12 @@ public class OrderController implements Initializable {
         return card;
     }
 
-    private void selectTable(TableData table) {
-        selectedTableId = table.id;
-        lblSelectedTable.setText("Table: " + table.name + " (" + table.seats + " seats)");
-        showMenu();
-        showNotification("success", "Table " + table.name + " selected!");
-    }
+    private void selectTable(Table table) {
+    selectedTableId = table.getId();  // ← getId()
+    lblSelectedTable.setText("Table: " + table.getName() + " (" + table.getSeats() + " seats)");
+    showMenu();
+    showSweetAlert(SweetAlert.AlertType.SUCCESS, "Table Selected", "Table " + table.getName() + " selected!");
+}
 
     private void showMenu() {
         menuPane.setVisible(true);
@@ -361,35 +282,32 @@ public class OrderController implements Initializable {
             while (rs.next()) {
                 String drinkTypesStr = rs.getString("drink_types");
                 String[] drinkTypes = drinkTypesStr != null ? drinkTypesStr.split(",") : new String[] { "hot" };
-                ProductData product = new ProductData(
-                        rs.getInt("id"),
-                        rs.getString("name"),
-                        rs.getDouble("price"),
-                        new HashSet<>(Arrays.asList(drinkTypes)),
-                        rs.getString("image"));
+                Product product = new Product(
+    rs.getInt("id"),
+    rs.getString("name"),
+    rs.getDouble("price"),
+    new HashSet<>(Arrays.asList(drinkTypes)),
+    rs.getString("image")
+);
                 allProducts.add(product);
             }
         } catch (SQLException e) {
-            showNotification("error", "✗ Failed to load products: " + e.getMessage());
+            showSweetAlert(SweetAlert.AlertType.ERROR, "Error", "Failed to load products: " + e.getMessage());
         }
     }
 
     private void displayProducts() {
         menuGrid.getChildren().clear();
         int col = 0, row = 0;
-
-        for (ProductData product : allProducts) {
+        for (Product product : allProducts) {
             VBox productBox = createProductCard(product);
             menuGrid.add(productBox, col, row);
             col++;
-            if (col >= 3) {
-                col = 0;
-                row++;
-            }
+            if (col >= 3) { col = 0; row++; }
         }
     }
 
-    private VBox createProductCard(ProductData product) {
+    private VBox createProductCard(Product product) {
         VBox box = new VBox(8);
         box.setAlignment(Pos.CENTER);
         box.setPadding(new Insets(10));
@@ -397,168 +315,96 @@ public class OrderController implements Initializable {
         box.setPrefSize(150, 200);
 
         ImageView imgView = new ImageView();
-        String imagePath = product.image != null && !product.image.isEmpty() ? product.image : "img/temp_icon.png";
+        String imagePath = product.getImage() != null && !product.getImage().isEmpty() ? product.getImage() : "img/temp_icon.png";
         String fullPath = Paths.get("src/resources/" + imagePath).toAbsolutePath().toString();
         try {
-            System.out.println("Loading image from file: " + fullPath);
             File file = new File(fullPath);
             if (file.exists()) {
-                Image image = new Image("file:" + fullPath);
-                if (!image.isError()) {
-                    imgView.setImage(image);
-                } else {
-                    System.err.println("Error loading image: " + fullPath);
-                    loadDefaultImage(imgView);
-                }
+                imgView.setImage(new Image("file:" + fullPath));
             } else {
-                System.err.println("File not found: " + fullPath);
                 loadDefaultImage(imgView);
             }
         } catch (Exception e) {
-            System.err.println("Error loading image: " + fullPath + ", Error: " + e.getMessage());
             loadDefaultImage(imgView);
         }
+        imgView.setFitWidth(80); imgView.setFitHeight(80); imgView.setPreserveRatio(true);
 
-        imgView.setFitWidth(80);
-        imgView.setFitHeight(80);
-        imgView.setPreserveRatio(true);
-
-        Label lblName = new Label(product.name);
+        Label lblName = new Label(product.getName());
         lblName.setStyle("-fx-font-size: 13px; -fx-font-weight: bold;");
-        lblName.setWrapText(true);
-        lblName.setAlignment(Pos.CENTER);
+        lblName.setWrapText(true); lblName.setAlignment(Pos.CENTER);
 
         box.getChildren().addAll(imgView, lblName);
-        box.setOnMouseClicked(e -> addToOrder(product, product.drinkTypes.iterator().next(), product.price, ""));
+        box.setOnMouseClicked(e -> addToOrder(product, product.getDrinkTypes().iterator().next(), product.getPrice(), ""));
         box.setOnMouseEntered(e -> box.setStyle(box.getStyle() + "-fx-background-color: #ECF0F1;"));
-        box.setOnMouseExited(e -> box.setStyle(box.getStyle() + "-fx-background-color: white;"));
+        box.setOnMouseExited(e -> box.setStyle(box.getStyle().replace("-fx-background-color: #ECF0F1;", "-fx-background-color: white;")));
 
         return box;
     }
 
     private void loadDefaultImage(ImageView imgView) {
-        String defaultImagePath = "src/resources/img/temp_icon.png";
         try {
-            System.out.println("Loading default image from file: " + defaultImagePath);
-            File file = new File(defaultImagePath);
-            if (file.exists()) {
-                Image defaultImage = new Image("file:" + defaultImagePath);
-                if (!defaultImage.isError()) {
-                    imgView.setImage(defaultImage);
-                } else {
-                    System.err.println("Error loading default image: " + defaultImagePath);
-                }
-            } else {
-                System.err.println("Default image not found: " + defaultImagePath);
-            }
-        } catch (Exception e) {
-            System.err.println("Error loading default image: " + defaultImagePath + ", Error: " + e.getMessage());
-        }
+            String path = "src/resources/img/temp_icon.png";
+            File file = new File(path);
+            if (file.exists()) imgView.setImage(new Image(file.toURI().toString()));
+        } catch (Exception e) { System.err.println("Default image failed"); }
     }
 
-    private void addToOrder(ProductData product, String drinkType, double price, String note) {
-        String key = product.id + "-" + drinkType + "-" + note.hashCode();
-
+    private void addToOrder(Product product, String drinkType, double price, String note) {
+        String key = product.getId() + "-" + drinkType + "-" + note.hashCode();
         if (orderItems.containsKey(key)) {
-            OrderItem item = orderItems.get(key);
-            item.setQuantity(item.getQuantity() + 1);
+            orderItems.get(key).setQuantity(orderItems.get(key).getQuantity() + 1);
         } else {
-            OrderItem item = new OrderItem(0, 0, product.id, drinkType, 1, price, note);
-            item.setProductName(product.name);
-            item.setAvailableDrinkTypes(new HashSet<>(product.drinkTypes));
-            item.setImage(product.image != null && !product.image.isEmpty() ? product.image : "img/temp_icon.png");
+            OrderItem item = new OrderItem(0, 0, product.getId(), drinkType, 1, price, note);
+            item.setProductName(product.getName());
+            item.setAvailableDrinkTypes(new HashSet<>(product.getDrinkTypes()));
+            item.setImage(product.getImage() != null && !product.getImage().isEmpty() ? product.getImage() : "img/temp_icon.png");
             orderItems.put(key, item);
         }
-
         updateOrderDisplay();
     }
 
     private void updateOrderDisplay() {
         orderItemsContainer.getChildren().clear();
-        double subtotal = 0;
-        int itemCount = 0;
-
+        double subtotal = 0; int itemCount = 0;
         for (OrderItem item : orderItems.values()) {
-            HBox itemBox = createOrderItemBox(item);
-            orderItemsContainer.getChildren().add(itemBox);
+            orderItemsContainer.getChildren().add(createOrderItemBox(item));
             subtotal += item.getPrice() * item.getQuantity();
             itemCount += item.getQuantity();
         }
-
-        double vat = subtotal * 0.1;
-        double total = subtotal + vat;
-
+        double vat = subtotal * 0.1, total = subtotal + vat;
         lblSubtotal.setText("$" + df.format(subtotal));
         lblVAT.setText("$" + df.format(vat));
         lblTotal.setText("$" + df.format(total));
         lblItemCount.setText(itemCount + " items");
-
         btnPayment.setDisable(orderItems.isEmpty());
     }
 
     private HBox createOrderItemBox(OrderItem item) {
-        HBox box = new HBox(10);
-        box.setAlignment(Pos.TOP_LEFT);
-        box.setPadding(new Insets(10));
+        HBox box = new HBox(10); box.setAlignment(Pos.TOP_LEFT); box.setPadding(new Insets(10));
         box.setStyle("-fx-background-color: #ECF0F1; -fx-background-radius: 5;");
 
         ImageView imgView = new ImageView();
         String imagePath = item.getImage() != null && !item.getImage().isEmpty() ? item.getImage() : "img/temp_icon.png";
         String resourcePath = imagePath.startsWith("/") ? imagePath : "/" + imagePath;
         try {
-            System.out.println("Loading image from resource: " + resourcePath);
             InputStream stream = getClass().getResourceAsStream(resourcePath);
-            if (stream == null) {
-                System.err.println("Resource not found: " + resourcePath);
-                String filePath = "src/resources/" + imagePath.replaceFirst("^/", "");
-                File file = new File(filePath);
-                if (file.exists()) {
-                    System.out.println("Loading image from file: " + filePath);
-                    imgView.setImage(new Image(file.toURI().toString()));
-                } else {
-                    loadDefaultImage(imgView);
-                }
-            } else {
-                Image image = new Image(stream);
-                if (image.isError()) {
-                    System.err.println("Error loading image: " + resourcePath);
-                    loadDefaultImage(imgView);
-                } else {
-                    imgView.setImage(image);
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Error loading image: " + resourcePath + ", Error: " + e.getMessage());
-            loadDefaultImage(imgView);
-        }
+            if (stream != null) imgView.setImage(new Image(stream));
+            else loadDefaultImage(imgView);
+        } catch (Exception e) { loadDefaultImage(imgView); }
+        imgView.setFitWidth(50); imgView.setFitHeight(50); imgView.setPreserveRatio(true);
 
-        imgView.setFitWidth(50);
-        imgView.setFitHeight(50);
-        imgView.setPreserveRatio(true);
-
-        VBox infoBox = new VBox(4);
-        infoBox.setAlignment(Pos.CENTER_LEFT);
-        HBox.setHgrow(infoBox, Priority.ALWAYS);
-
+        VBox infoBox = new VBox(4); infoBox.setAlignment(Pos.CENTER_LEFT); HBox.setHgrow(infoBox, Priority.ALWAYS);
         Label lblName = new Label(item.getProductName());
         lblName.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #1a1a1a;");
 
         HBox drinkTypeBox = new HBox(5);
-        Label lblTypeLabel = new Label("Type: ");
-        lblTypeLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #6b7280;");
-        ComboBox<String> comboDrinkType = new ComboBox<>();
-        comboDrinkType.getItems().addAll(item.getAvailableDrinkTypes());
-        comboDrinkType.setValue(item.getDrinkType());
-        comboDrinkType.setStyle("-fx-font-size: 12px; -fx-pref-width: 100;");
+        Label lblTypeLabel = new Label("Type: "); lblTypeLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #6b7280;");
+        ComboBox<String> comboDrinkType = new ComboBox<>(); comboDrinkType.getItems().addAll(item.getAvailableDrinkTypes());
+        comboDrinkType.setValue(item.getDrinkType()); comboDrinkType.setStyle("-fx-font-size: 12px; -fx-pref-width: 100;");
         comboDrinkType.setOnAction(e -> {
             String oldKey = findItemKey(item);
             item.setDrinkType(comboDrinkType.getValue());
-            if (oldKey != null) {
-                orderItems.remove(oldKey);
-                String newKey = item.getProductId() + "-" + item.getDrinkType() + "-" + item.getNote().hashCode();
-                orderItems.put(newKey, item);
-                updateOrderDisplay();
-            }
+            if (oldKey != null) { orderItems.remove(oldKey); orderItems.put(item.getProductId() + "-" + item.getDrinkType() + "-" + item.getNote().hashCode(), item); updateOrderDisplay(); }
         });
         drinkTypeBox.getChildren().addAll(lblTypeLabel, comboDrinkType);
 
@@ -566,75 +412,30 @@ public class OrderController implements Initializable {
         lblPrice.setStyle("-fx-font-size: 13px; -fx-text-fill: #667eea; -fx-font-weight: 600;");
 
         HBox noteBox = new HBox(5);
-        Label lblNoteLabel = new Label("Note: ");
-        lblNoteLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #6b7280;");
-        TextField txtNote = new TextField(item.getNote());
-        txtNote.setPromptText("Add note...");
+        Label lblNoteLabel = new Label("Note: "); lblNoteLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #6b7280;");
+        TextField txtNote = new TextField(item.getNote()); txtNote.setPromptText("Add note...");
         txtNote.setStyle("-fx-font-size: 12px; -fx-pref-width: 150;");
         txtNote.textProperty().addListener((obs, oldVal, newVal) -> {
             String oldKey = findItemKey(item);
             item.setNote(newVal.trim());
-            if (oldKey != null) {
-                orderItems.remove(oldKey);
-                String newKey = item.getProductId() + "-" + item.getDrinkType() + "-" + item.getNote().hashCode();
-                orderItems.put(newKey, item);
-                updateOrderDisplay();
-            }
+            if (oldKey != null) { orderItems.remove(oldKey); orderItems.put(item.getProductId() + "-" + item.getDrinkType() + "-" + item.getNote().hashCode(), item); updateOrderDisplay(); }
         });
         noteBox.getChildren().addAll(lblNoteLabel, txtNote);
 
         infoBox.getChildren().addAll(lblName, drinkTypeBox, lblPrice, noteBox);
 
-        VBox quantityBox = new VBox(6);
-        quantityBox.setAlignment(Pos.CENTER);
-
-        Button btnMinus = new Button("-");
-        btnMinus.setStyle(
-                "-fx-background-color: #fee; -fx-text-fill: #e53e3e; -fx-font-size: 16px; -fx-font-weight: bold; -fx-pref-width: 36; -fx-pref-height: 36; -fx-background-radius: 8; -fx-cursor: hand;");
-        btnMinus.setOnAction(e -> {
-            if (item.getQuantity() > 1) {
-                item.setQuantity(item.getQuantity() - 1);
-                updateOrderDisplay();
-            }
-        });
-
-        Label lblQty = new Label(String.valueOf(item.getQuantity()));
-        lblQty.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;");
-        lblQty.setAlignment(Pos.CENTER);
-        lblQty.setMinWidth(40);
-
-        Button btnPlus = new Button("+");
-        btnPlus.setStyle(
-                "-fx-background-color: #d1fae5; -fx-text-fill: #10b981; -fx-font-size: 16px; -fx-font-weight: bold; -fx-pref-width: 36; -fx-pref-height: 36; -fx-background-radius: 8; -fx-cursor: hand;");
-        btnPlus.setOnAction(e -> {
-            item.setQuantity(item.getQuantity() + 1);
-            updateOrderDisplay();
-        });
-
+        VBox quantityBox = new VBox(6); quantityBox.setAlignment(Pos.CENTER);
+        Button btnMinus = new Button("-"); btnMinus.setStyle("-fx-background-color: #fee; -fx-text-fill: #e53e3e; -fx-font-size: 16px; -fx-font-weight: bold; -fx-pref-width: 36; -fx-pref-height: 36; -fx-background-radius: 8; -fx-cursor: hand;");
+        btnMinus.setOnAction(e -> { if (item.getQuantity() > 1) { item.setQuantity(item.getQuantity() - 1); updateOrderDisplay(); } });
+        Label lblQty = new Label(String.valueOf(item.getQuantity())); lblQty.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;"); lblQty.setAlignment(Pos.CENTER); lblQty.setMinWidth(40);
+        Button btnPlus = new Button("+"); btnPlus.setStyle("-fx-background-color: #d1fae5; -fx-text-fill: #10b981; -fx-font-size: 16px; -fx-font-weight: bold; -fx-pref-width: 36; -fx-pref-height: 36; -fx-background-radius: 8; -fx-cursor: hand;");
+        btnPlus.setOnAction(e -> { item.setQuantity(item.getQuantity() + 1); updateOrderDisplay(); });
         quantityBox.getChildren().addAll(btnPlus, lblQty, btnMinus);
 
-        Button btnDelete = new Button();
-        ImageView deleteIcon = new ImageView();
-        try {
-            Image icon = new Image(getClass().getResourceAsStream("/resources/img/trash-can-solid-full.png"));
-            deleteIcon.setImage(icon);
-            deleteIcon.setFitWidth(20);
-            deleteIcon.setFitHeight(20);
-            deleteIcon.setPreserveRatio(true);
-        } catch (Exception e) {
-            System.err.println("Failed to load delete icon");
-        }
-        btnDelete.setGraphic(deleteIcon);
-        btnDelete.setStyle(
-                "-fx-background-color: #fee; -fx-pref-width: 40; -fx-pref-height: 40; -fx-background-radius: 10; -fx-cursor: hand;");
-        btnDelete.setOnAction(e -> {
-            String key = findItemKey(item);
-            if (key != null) {
-                orderItems.remove(key);
-                updateOrderDisplay();
-                showNotification("info", "Item removed");
-            }
-        });
+        Button btnDelete = new Button(); ImageView deleteIcon = new ImageView();
+        try { Image icon = new Image(getClass().getResourceAsStream("/resources/img/trash-can-solid-full.png")); deleteIcon.setImage(icon); deleteIcon.setFitWidth(20); deleteIcon.setFitHeight(20); deleteIcon.setPreserveRatio(true); } catch (Exception e) { System.err.println("Failed to load delete icon"); }
+        btnDelete.setGraphic(deleteIcon); btnDelete.setStyle("-fx-background-color: #fee; -fx-pref-width: 40; -fx-pref-height: 40; -fx-background-radius: 10; -fx-cursor: hand;");
+        btnDelete.setOnAction(e -> { String key = findItemKey(item); if (key != null) { orderItems.remove(key); updateOrderDisplay(); showSweetAlert(SweetAlert.AlertType.INFO, "Removed", "Item removed"); } });
 
         box.getChildren().addAll(imgView, infoBox, quantityBox, btnDelete);
         return box;
@@ -642,9 +443,7 @@ public class OrderController implements Initializable {
 
     private String findItemKey(OrderItem item) {
         for (Map.Entry<String, OrderItem> entry : orderItems.entrySet()) {
-            if (entry.getValue() == item) {
-                return entry.getKey();
-            }
+            if (entry.getValue() == item) return entry.getKey();
         }
         return null;
     }
@@ -652,20 +451,12 @@ public class OrderController implements Initializable {
     // Payment Processing
     @FXML
     private void handlePayment(ActionEvent event) {
-        if (orderItems.isEmpty()) {
-            showNotification("warning", "⚠ No items in order!");
-            return;
-        }
-
-        if (orderType.equals("dine-in") && selectedTableId == null) {
-            showNotification("warning", "⚠ Please select a table!");
-            return;
-        }
-
+        if (orderItems.isEmpty()) { showSweetAlert(SweetAlert.AlertType.WARNING, "No Items", "No items in order!"); return; }
+        if ("dine-in".equals(orderType) && selectedTableId == null) { showSweetAlert(SweetAlert.AlertType.WARNING, "Select Table", "Please select a table!"); return; }
         showPaymentOverlay();
     }
 
-    private void showPaymentOverlay() {
+   private void showPaymentOverlay() {
         paymentOverlay = new VBox(20);
         paymentOverlay.setAlignment(Pos.CENTER);
         paymentOverlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.75);");
@@ -998,11 +789,11 @@ public class OrderController implements Initializable {
             try {
                 discount = txtDiscount.getText().isEmpty() ? 0 : Double.parseDouble(txtDiscount.getText());
                 if (discount < 0) {
-                    showNotification("error", "✗ Discount cannot be negative!");
+                    showSweetAlert(SweetAlert.AlertType.WARNING,"error", "✗ Discount cannot be negative!");
                     return;
                 }
             } catch (NumberFormatException ex) {
-                showNotification("error", "✗ Invalid discount format!");
+                showSweetAlert(SweetAlert.AlertType.WARNING,"error", "✗ Invalid discount format!");
                 return;
             }
 
@@ -1010,17 +801,17 @@ public class OrderController implements Initializable {
             if (paymentMethod.equals("cash")) {
                 String amountText = txtAmountReceived.getText().trim();
                 if (amountText.isEmpty()) {
-                    showNotification("warning", "⚠ Please enter amount received!");
+                    showSweetAlert(SweetAlert.AlertType.WARNING,"warning", "⚠ Please enter amount received!");
                     return;
                 }
                 try {
                     paidAmount = Double.parseDouble(amountText);
                     if (paidAmount < total) {
-                        showNotification("error", "✗ Insufficient amount received!");
+                        showSweetAlert(SweetAlert.AlertType.WARNING,"error", "✗ Insufficient amount received!");
                         return;
                     }
                 } catch (NumberFormatException ex) {
-                    showNotification("error", "✗ Invalid amount format!");
+                    showSweetAlert(SweetAlert.AlertType.WARNING,"error", "✗ Invalid amount format!");
                     return;
                 }
             } else {
@@ -1069,7 +860,7 @@ public class OrderController implements Initializable {
         }
     }
 
-    private void payment(double paidAmount, double discount) {
+   private void payment(double paidAmount, double discount) {
         try (Connection conn = DatabaseConnection.getConnection()) {
             conn.setAutoCommit(false);
 
@@ -1084,14 +875,14 @@ public class OrderController implements Initializable {
             boolean sufficient = piDAO.consumeIngredients(conn, totalIngredientsNeeded);
             if (!sufficient) {
                 conn.rollback();
-                showNotification("error", "✗ Insufficient ingredients!");
+                showSweetAlert(SweetAlert.AlertType.WARNING,"error", "✗ Insufficient ingredients!");
                 return;
             }
 
             int orderId = orderDAO.createOrder(selectedTableId, currentStaffId, orderType);
             if (orderId == -1) {
                 conn.rollback();
-                showNotification("error", "✗ Failed to create order!");
+                showSweetAlert(SweetAlert.AlertType.WARNING,"error", "✗ Failed to create order!");
                 return;
             }
 
@@ -1101,7 +892,7 @@ public class OrderController implements Initializable {
                         item.getQuantity(), item.getPrice(), item.getNote());
                 if (!success) {
                     conn.rollback();
-                    showNotification("error", "✗ Failed to add items!");
+                    showSweetAlert(SweetAlert.AlertType.WARNING,"error", "✗ Failed to add items!");
                     return;
                 }
             }
@@ -1124,7 +915,7 @@ public class OrderController implements Initializable {
 
             if (!paymentSuccess) {
                 conn.rollback();
-                showNotification("error", "✗ Payment failed!");
+                showSweetAlert(SweetAlert.AlertType.WARNING,"error", "✗ Payment failed!");
                 return;
             }
 
@@ -1136,7 +927,7 @@ public class OrderController implements Initializable {
 
         } catch (SQLException e) {
             e.printStackTrace();
-            showNotification("error", "✗ Error: " + e.getMessage());
+            showSweetAlert(SweetAlert.AlertType.WARNING,"error", "✗ Error: " + e.getMessage());
         }
     }
 
@@ -1213,7 +1004,7 @@ public class OrderController implements Initializable {
         autoClose.play();
     }
 
-    private void hideSuccessConfirmation() {
+     private void hideSuccessConfirmation() {
         if (confirmationOverlay != null) {
             StackPane root = (StackPane) confirmationOverlay.getParent();
             if (root != null) {
@@ -1222,19 +1013,13 @@ public class OrderController implements Initializable {
             confirmationOverlay = null;
         }
     }
-
     // Bill Printing
     @FXML
     private void handlePrintBill(ActionEvent event) {
-        if (orderItems.isEmpty()) {
-            showNotification("warning", "⚠ No items to print!");
-            return;
-        }
-
+        if (orderItems.isEmpty()) { showSweetAlert(SweetAlert.AlertType.WARNING, "No Items", "No items to print!"); return; }
         VBox billContent = createBillContent();
         printNode(billContent);
     }
-
     private VBox createBillContent() {
         VBox bill = new VBox(10);
         bill.setPadding(new Insets(20));
@@ -1313,110 +1098,26 @@ public class OrderController implements Initializable {
 
     private void printNode(VBox node) {
         PrinterJob job = PrinterJob.createPrinterJob();
-        if (job == null) {
-            showNotification("error", "✗ No printer available!");
-            return;
-        }
-
+        if (job == null) { showSweetAlert(SweetAlert.AlertType.ERROR, "Printer Error", "No printer available!"); return; }
         if (job.showPrintDialog(btnPrintBill.getScene().getWindow())) {
             try {
                 boolean success = job.printPage(node);
-                if (success) {
-                    job.endJob();
-                    showNotification("success", "🖨 Bill printed successfully!");
-                } else {
-                    showNotification("error", "✗ Failed to print!");
-                }
-            } catch (Exception e) {
-                showNotification("error", "✗ Printing error: " + e.getMessage());
-            }
+                if (success) { job.endJob(); showSweetAlert(SweetAlert.AlertType.SUCCESS, "Success", "Bill printed successfully!"); }
+                else showSweetAlert(SweetAlert.AlertType.ERROR, "Error", "Failed to print!");
+            } catch (Exception e) { showSweetAlert(SweetAlert.AlertType.ERROR, "Error", "Printing error: " + e.getMessage()); }
         }
     }
 
     // Order Management
     @FXML
     private void handleClearOrder(ActionEvent event) {
-        if (orderItems.isEmpty()) {
-            return;
-        }
-
-        showClearOrderConfirmation();
-    }
-
-    private void showClearOrderConfirmation() {
-        VBox confirmOverlay = new VBox(20);
-        confirmOverlay.setAlignment(Pos.CENTER);
-        confirmOverlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.75);");
-
-        VBox confirmBox = new VBox(20);
-        confirmBox.setAlignment(Pos.CENTER);
-        confirmBox.setPadding(new Insets(30));
-        confirmBox.setMaxWidth(400);
-        confirmBox.setStyle(
-                "-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 20, 0, 0, 0);");
-
-        ImageView icon = new ImageView();
-        try {
-            Image iconImg = new Image(getClass().getResourceAsStream("/resources/img/triangle-exclamation-solid-full.png"));
-            icon.setImage(iconImg);
-            icon.setFitWidth(60);
-            icon.setFitHeight(60);
-            icon.setPreserveRatio(true);
-        } catch (Exception e) {
-            System.err.println("Failed to load warning icon");
-        }
-
-        Label title = new Label("Clear Order?");
-        title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;");
-
-        Label message = new Label("This will remove all items from the current order.");
-        message.setStyle("-fx-font-size: 14px; -fx-text-fill: #6b7280; -fx-text-alignment: center;");
-        message.setWrapText(true);
-        message.setMaxWidth(350);
-
-        HBox buttonBox = new HBox(12);
-        buttonBox.setAlignment(Pos.CENTER);
-
-        Button confirmBtn = new Button("Yes, Clear");
-        confirmBtn.setStyle(
-                "-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-pref-width: 140; -fx-pref-height: 45; -fx-background-radius: 10; -fx-cursor: hand;");
-        confirmBtn.setOnAction(e -> {
-            clearOrder();
-            StackPane root = (StackPane) confirmOverlay.getParent();
-            root.getChildren().remove(confirmOverlay);
-            showNotification("info", "Order cleared!");
-        });
-
-        Button cancelBtn = new Button("Cancel");
-        cancelBtn.setStyle(
-                "-fx-background-color: #e5e7eb; -fx-text-fill: #4a5568; -fx-font-size: 14px; -fx-font-weight: bold; -fx-pref-width: 140; -fx-pref-height: 45; -fx-background-radius: 10; -fx-cursor: hand;");
-        cancelBtn.setOnAction(e -> {
-            StackPane root = (StackPane) confirmOverlay.getParent();
-            root.getChildren().remove(confirmOverlay);
-        });
-
-        buttonBox.getChildren().addAll(confirmBtn, cancelBtn);
-
-        confirmBox.getChildren().addAll(icon, title, message, buttonBox);
-        confirmOverlay.getChildren().add(confirmBox);
-
-        StackPane root = (StackPane) mainBorderPane.getParent();
-        if (root == null) {
-            root = new StackPane(mainBorderPane);
-            Scene scene = mainBorderPane.getScene();
-            scene.setRoot(root);
-        }
-        root.getChildren().add(confirmOverlay);
+        if (orderItems.isEmpty()) return;
+        showConfirmation("Clear Order?", "This will remove all items from the current order.", this::clearOrder, null);
     }
 
     private void clearOrder() {
-        orderItems.clear();
-        updateOrderDisplay();
-        selectedTableId = null;
-        lblSelectedTable.setText("");
-        menuPane.setVisible(false);
-        menuPane.setManaged(false);
-        btnDineIn.setSelected(true);
+        orderItems.clear(); updateOrderDisplay(); selectedTableId = null; lblSelectedTable.setText(""); menuPane.setVisible(false); menuPane.setManaged(false); btnDineIn.setSelected(true);
+        showSweetAlert(SweetAlert.AlertType.INFO, "Cleared", "Order cleared!");
     }
 
     @FXML
@@ -1424,13 +1125,9 @@ public class OrderController implements Initializable {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/resources/view/staff/view_orders.fxml"));
             Parent root = loader.load();
-            Stage stage = new Stage();
-            stage.setTitle("View All Orders");
-            stage.setScene(new Scene(root));
-            stage.show();
+            Stage stage = new Stage(); stage.setTitle("View All Orders"); stage.setScene(new Scene(root)); stage.show();
         } catch (IOException e) {
-            e.printStackTrace();
-            showNotification("error", "✗ Failed to load orders view: " + e.getMessage());
+            showSweetAlert(SweetAlert.AlertType.ERROR, "Error", "Failed to load orders view: " + e.getMessage());
         }
     }
 
@@ -1441,163 +1138,59 @@ public class OrderController implements Initializable {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/common/sidebar.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) btnDashboard.getScene().getWindow();
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.setFullScreen(true);
-            stage.setFullScreenExitHint("");
-            stage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
-            stage.show();
+            Scene scene = new Scene(root); stage.setScene(scene); stage.setFullScreen(true); stage.setFullScreenExitHint(""); stage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH); stage.show();
         } catch (IOException e) {
-            e.printStackTrace();
-            showNotification("error", "✗ Failed to load dashboard!");
+            showSweetAlert(SweetAlert.AlertType.ERROR, "Error", "Failed to load dashboard!");
         }
     }
 
     @FXML
     private void handleLogout(ActionEvent event) {
-        showLogoutConfirmation();
-    }
-
-    private void showLogoutConfirmation() {
-        VBox logoutOverlay = new VBox(20);
-        logoutOverlay.setAlignment(Pos.CENTER);
-        logoutOverlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.75);");
-
-        VBox logoutBox = new VBox(20);
-        logoutBox.setAlignment(Pos.CENTER);
-        logoutBox.setPadding(new Insets(30));
-        logoutBox.setMaxWidth(400);
-        logoutBox.setStyle(
-                "-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 20, 0, 0, 0);");
-
-        ImageView icon = new ImageView();
-        try {
-            Image iconImg = new Image(getClass().getResourceAsStream("/resources/img/right-from-bracket-solid-full.png"));
-            icon.setImage(iconImg);
-            icon.setFitWidth(60);
-            icon.setFitHeight(60);
-            icon.setPreserveRatio(true);
-        } catch (Exception e) {
-            System.err.println("Failed to load logout icon");
-        }
-
-        Label title = new Label("Confirm Logout");
-        title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;");
-
-        Label message = new Label("Are you sure you want to logout?");
-        message.setStyle("-fx-font-size: 14px; -fx-text-fill: #6b7280; -fx-text-alignment: center;");
-        message.setWrapText(true);
-        message.setMaxWidth(350);
-
-        HBox buttonBox = new HBox(12);
-        buttonBox.setAlignment(Pos.CENTER);
-
-        Button confirmBtn = new Button("Yes, Logout");
-        confirmBtn.setStyle(
-                "-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-pref-width: 140; -fx-pref-height: 45; -fx-background-radius: 10; -fx-cursor: hand;");
-        confirmBtn.setOnAction(e -> {
+        showConfirmation("Confirm Logout", "Are you sure you want to logout?", () -> {
             try {
                 SessionManager.logout();
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/auth/login.fxml"));
                 Parent root = loader.load();
                 Stage stage = (Stage) btnLogout.getScene().getWindow();
-                Scene scene = new Scene(root);
-                stage.setScene(scene);
-                stage.show();
+                Scene scene = new Scene(root); stage.setScene(scene); stage.show();
             } catch (IOException ex) {
-                ex.printStackTrace();
-                showNotification("error", "✗ Failed to logout!");
+                showSweetAlert(SweetAlert.AlertType.ERROR, "Error", "Failed to logout!");
             }
-        });
-
-        Button cancelBtn = new Button("Cancel");
-        cancelBtn.setStyle(
-                "-fx-background-color: #e5e7eb; -fx-text-fill: #4a5568; -fx-font-size: 14px; -fx-font-weight: bold; -fx-pref-width: 140; -fx-pref-height: 45; -fx-background-radius: 10; -fx-cursor: hand;");
-        cancelBtn.setOnAction(e -> {
-            StackPane root = (StackPane) logoutOverlay.getParent();
-            root.getChildren().remove(logoutOverlay);
-        });
-
-        buttonBox.getChildren().addAll(confirmBtn, cancelBtn);
-
-        logoutBox.getChildren().addAll(icon, title, message, buttonBox);
-        logoutOverlay.getChildren().add(logoutBox);
-
-        StackPane root = (StackPane) mainBorderPane.getParent();
-        if (root == null) {
-            root = new StackPane(mainBorderPane);
-            Scene scene = mainBorderPane.getScene();
-            scene.setRoot(root);
-        }
-        root.getChildren().add(logoutOverlay);
+        }, null);
     }
 
-    private void showNotification(String type, String message) {
-        String bgColor;
-        switch (type.toLowerCase()) {
-            case "success":
-                bgColor = "#10b981";
-                break;
-            case "error":
-                bgColor = "#ef4444";
-                break;
-            case "warning":
-                bgColor = "#f59e0b";
-                break;
-            case "info":
-                bgColor = "#3b82f6";
-                break;
-            default:
-                bgColor = "#6b7280";
-        }
-
-        lblNotification.setText(message);
-        lblNotification.setStyle("-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: 600;");
-        notificationPane.setStyle(
-                "-fx-background-color: " + bgColor
-                        + "; -fx-background-radius: 12; -fx-padding: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 4);");
-
-        notificationPane.setVisible(true);
-        notificationPane.setManaged(true);
-
-        PauseTransition pause = new PauseTransition(Duration.seconds(3));
-        pause.setOnFinished(e -> {
-            notificationPane.setVisible(false);
-            notificationPane.setManaged(false);
-        });
-        pause.play();
-    }
-
-    // Inner Classes
-    class TableData {
-        int id;
-        String name;
-        int floor;
-        int seats;
-        String status;
-
-        TableData(int id, String name, int floor, int seats, String status) {
-            this.id = id;
-            this.name = name;
-            this.floor = floor;
-            this.seats = seats;
-            this.status = status;
+    // ← SWEETALERT CHUNG
+    private void showSweetAlert(SweetAlert.AlertType type, String title, String content) {
+        try {
+            Pane root = (Pane) mainBorderPane.getScene().getRoot();
+            SweetAlert.showAlert(root, type, title, content, null);
+        } catch (Exception e) {
+            Alert a = new Alert(convertToAlertType(type));
+            a.setTitle(title); a.setHeaderText(null); a.setContentText(content);
+            a.showAndWait();
         }
     }
 
-    class ProductData {
-        int id;
-        String name;
-        double price;
-        Set<String> drinkTypes;
-        String image;
-
-        ProductData(int id, String name, double price, Set<String> drinkTypes, String image) {
-            this.id = id;
-            this.name = name;
-            this.price = price;
-            this.drinkTypes = drinkTypes;
-            this.image = image;
+    private void showConfirmation(String title, String content, Runnable onConfirm, Runnable onCancel) {
+        try {
+            Pane root = (Pane) mainBorderPane.getScene().getRoot();
+            SweetAlert.showConfirmation(root, title, content, onConfirm, onCancel);
+        } catch (Exception e) {
+            Alert a = new Alert(Alert.AlertType.CONFIRMATION);
+            a.setTitle(title); a.setHeaderText(null); a.setContentText(content);
+            if (a.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK && onConfirm != null) onConfirm.run();
+            else if (onCancel != null) onCancel.run();
         }
     }
+
+    private Alert.AlertType convertToAlertType(SweetAlert.AlertType t) {
+        return switch (t) {
+            case SUCCESS -> Alert.AlertType.INFORMATION;
+            case ERROR -> Alert.AlertType.ERROR;
+            case WARNING -> Alert.AlertType.WARNING;
+            default -> Alert.AlertType.INFORMATION;
+        };
+    }
+
+    
 }
