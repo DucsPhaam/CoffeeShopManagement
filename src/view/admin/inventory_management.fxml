@@ -101,7 +101,6 @@
             </HBox>
 
             <!-- Inventory Table -->
-            <!-- Inventory Table -->
             <VBox VBox.vgrow="ALWAYS" styleClass="card" style="-fx-padding: 20;">
                 <children>
                     <TableView fx:id="tableInventory" VBox.vgrow="ALWAYS">
@@ -118,7 +117,7 @@
 
                     <!-- View More Bar - giống hệt Cashbook -->
                     <HBox alignment="CENTER" style="-fx-padding: 15.0 0 0 0;">
-                        <Label fx:id="lblTotalItems"
+                        <Label fx:id="lblLowStockItems"
                                text="Total: 0 items"
                                style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #1e293b; -fx-font-family: 'Segoe UI Semibold';"/>
                         <Region HBox.hgrow="ALWAYS"/>
@@ -126,9 +125,9 @@
                                 text="View More"
                                 onAction="#handleLoadMore"
                                 style="-fx-background-color: #e2e8f0; -fx-text-fill: #1e293b; -fx-cursor: hand;
-                                       -fx-background-radius: 8; -fx-pref-height: 40px; -fx-pref-width: 120px;
-                                       -fx-font-size: 14px; -fx-font-weight: 600; -fx-font-family: 'Segoe UI Semibold';
-                                       -fx-border-color: #cbd5e0; -fx-border-width: 1; -fx-border-radius: 8;"
+                   -fx-background-radius: 8; -fx-pref-height: 40px; -fx-pref-width: 120px;
+                   -fx-font-size: 14px; -fx-font-weight: 600; -fx-font-family: 'Segoe UI Semibold';
+                   -fx-border-color: #cbd5e0; -fx-border-width: 1; -fx-border-radius: 8;"
                                 visible="false" managed="false"/>
                         <Region HBox.hgrow="ALWAYS"/>
                         <Label fx:id="lblLowStockItems"

@@ -12,12 +12,11 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import model.Transaction;
-import utils.SweetAlert; // ← Thêm import
 import utils.SessionManager;
 
+import java.util.List;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
-import java.util.List;
 
 public class CashbookController {
 
@@ -61,13 +60,14 @@ public class CashbookController {
     private boolean isEditMode = false;
 
     private int currentPage = 0;
-    private final int PAGE_SIZE = 10;
+    private final int PAGE_SIZE = 20;
     private boolean hasMoreRecords = true;
 
     @FXML
     public void initialize() {
         try {
             System.out.println("=== Initializing CashbookController ===");
+
             transactionDAO = new TransactionDAO();
             System.out.println("✓ TransactionDAO initialized");
 
@@ -92,7 +92,7 @@ public class CashbookController {
         } catch (Exception e) {
             System.err.println("!!! Error initializing CashbookController !!!");
             e.printStackTrace();
-            showSweetAlert(SweetAlert.AlertType.ERROR, "Error", "Failed to initialize Cashbook: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Error", "Failed to initialize Cashbook interface: " + e.getMessage());
         }
     }
 
@@ -105,7 +105,7 @@ public class CashbookController {
         colCreatedAt.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(
                 new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(cellData.getValue().getCreatedAt())));
 
-        // Format amount
+        // Format amount column
         colAmount.setCellFactory(col -> new TableCell<Transaction, Double>() {
             @Override
             protected void updateItem(Double item, boolean empty) {
@@ -118,28 +118,52 @@ public class CashbookController {
             }
         });
 
-        // Actions column
+        // Actions column (Edit/Delete)
         colActions.setCellFactory(col -> new TableCell<Transaction, Void>() {
             private final Button btnEdit = new Button("Edit");
             private final Button btnDelete = new Button("Delete");
             private final HBox actionBox = new HBox(10);
 
             {
+                // EDIT BUTTON
                 btnEdit.getStyleClass().add("action-button-edit");
                 btnEdit.setFont(javafx.scene.text.Font.font("Segoe UI Semibold", 12));
                 btnEdit.setStyle(
-                        "-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: 600; -fx-padding: 6 14; -fx-background-radius: 5; -fx-border-color: transparent; -fx-cursor: hand;"
+                        "-fx-background-color: #3b82f6; " +
+                                "-fx-text-fill: white; " +
+                                "-fx-font-size: 12px; " +
+                                "-fx-font-weight: 600; " +
+                                "-fx-padding: 6 14; " +
+                                "-fx-background-radius: 5; " +
+                                "-fx-border-color: transparent; " +
+                                "-fx-cursor: hand;"
                 );
-                btnEdit.setOnMouseEntered(e -> btnEdit.setStyle(btnEdit.getStyle() + "-fx-background-color: #2563eb;"));
-                btnEdit.setOnMouseExited(e -> btnEdit.setStyle(btnEdit.getStyle() + "-fx-background-color: #3b82f6;"));
+                btnEdit.setOnMouseEntered(e -> btnEdit.setStyle(
+                        btnEdit.getStyle() + "-fx-background-color: #2563eb;"
+                ));
+                btnEdit.setOnMouseExited(e -> btnEdit.setStyle(
+                        btnEdit.getStyle() + "-fx-background-color: #3b82f6;"
+                ));
 
+                // DELETE BUTTON
                 btnDelete.getStyleClass().add("action-button-delete");
                 btnDelete.setFont(javafx.scene.text.Font.font("Segoe UI Semibold", 12));
                 btnDelete.setStyle(
-                        "-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: 600; -fx-padding: 6 14; -fx-background-radius: 5; -fx-border-color: transparent; -fx-cursor: hand;"
+                        "-fx-background-color: #ef4444; " +
+                                "-fx-text-fill: white; " +
+                                "-fx-font-size: 12px; " +
+                                "-fx-font-weight: 600; " +
+                                "-fx-padding: 6 14; " +
+                                "-fx-background-radius: 5; " +
+                                "-fx-border-color: transparent; " +
+                                "-fx-cursor: hand;"
                 );
-                btnDelete.setOnMouseEntered(e -> btnDelete.setStyle(btnDelete.getStyle() + "-fx-background-color: #dc2626;"));
-                btnDelete.setOnMouseExited(e -> btnDelete.setStyle(btnDelete.getStyle() + "-fx-background-color: #ef4444;"));
+                btnDelete.setOnMouseEntered(e -> btnDelete.setStyle(
+                        btnDelete.getStyle() + "-fx-background-color: #dc2626;"
+                ));
+                btnDelete.setOnMouseExited(e -> btnDelete.setStyle(
+                        btnDelete.getStyle() + "-fx-background-color: #ef4444;"
+                ));
 
                 actionBox.setAlignment(Pos.CENTER);
                 actionBox.getChildren().addAll(btnEdit, btnDelete);
@@ -168,12 +192,13 @@ public class CashbookController {
     }
 
     private void loadInitialTransactionData() {
-        currentPage = 0;
         transactionList.clear();
         filteredList.clear();
+        currentPage = 0;
         hasMoreRecords = true;
-
         loadNextPage();
+        tableTransactions.setItems(filteredList);
+        updateStatistics();
         updateViewMoreButton();
     }
 
@@ -181,13 +206,15 @@ public class CashbookController {
         if (!hasMoreRecords) return;
 
         List<Transaction> newTransactions = transactionDAO.getTransactionsPaginated(currentPage * PAGE_SIZE, PAGE_SIZE);
-        if (newTransactions.isEmpty()) {
+        if (newTransactions.size() < PAGE_SIZE) {
             hasMoreRecords = false;
-        } else {
-            transactionList.addAll(newTransactions);
-            currentPage++;
         }
-        applyFilters(); // Áp dụng filter ngay
+        transactionList.addAll(newTransactions);
+        // Không cần sort vì SQL đã sort sẵn theo created_at DESC
+        filteredList.setAll(transactionList);
+        currentPage++;
+        updateStatistics();
+        updateViewMoreButton();
     }
 
     private void applyFilters() {
@@ -198,44 +225,47 @@ public class CashbookController {
 
         filteredList.clear();
 
-        for (Transaction t : transactionList) {
-            boolean matchSearch = searchText.isEmpty() || t.getReason().toLowerCase().contains(searchText);
-            boolean matchType = typeFilter == null || typeFilter.equals("All") || t.getType().equalsIgnoreCase(typeFilter);
-            boolean matchDate = (fromDate == null || !t.getCreatedAt().before(fromDate)) &&
-                    (toDate == null || !t.getCreatedAt().after(toDate));
+        for (Transaction transaction : transactionList) {
+            boolean matchSearch = searchText.isEmpty() || transaction.getReason().toLowerCase().contains(searchText);
+            boolean matchType = typeFilter.equals("All") || transaction.getType().equalsIgnoreCase(typeFilter);
+            boolean matchDate = (fromDate == null || !transaction.getCreatedAt().before(fromDate)) &&
+                    (toDate == null || !transaction.getCreatedAt().after(toDate));
 
             if (matchSearch && matchType && matchDate) {
-                filteredList.add(t);
+                filteredList.add(transaction);
             }
         }
 
+        // Sắp xếp theo created_at DESC (mới nhất trước)
         filteredList.sort((t1, t2) -> t2.getCreatedAt().compareTo(t1.getCreatedAt()));
         tableTransactions.setItems(filteredList);
         updateStatistics();
-
-        int totalCount = transactionDAO.getTotalCount();
-        hasMoreRecords = (currentPage * PAGE_SIZE) < totalCount;
         updateViewMoreButton();
     }
 
     private void updateStatistics() {
-        if (lblTotalTransactions == null) return;
+        if (lblTotalTransactions != null && lblBalance != null && lblTotalIncome != null &&
+                lblTotalExpense != null && lblProfitLoss != null && lblCurrentBalance != null) {
+            lblTotalTransactions.setText("Total: " + filteredList.size() + " transactions");
 
-        lblTotalTransactions.setText("Total: " + filteredList.size() + " transactions");
+            double totalIncome = 0;
+            double totalExpense = 0;
+            for (Transaction t : filteredList) {
+                if ("income".equalsIgnoreCase(t.getType())) {
+                    totalIncome += t.getAmount();
+                } else if ("expense".equalsIgnoreCase(t.getType())) {
+                    totalExpense += t.getAmount();
+                }
+            }
+            double profitLoss = totalIncome - totalExpense;
+            double balance = transactionDAO.calculateBalance();
 
-        double totalIncome = 0, totalExpense = 0;
-        for (Transaction t : filteredList) {
-            if ("income".equalsIgnoreCase(t.getType())) totalIncome += t.getAmount();
-            else if ("expense".equalsIgnoreCase(t.getType())) totalExpense += t.getAmount();
+            lblTotalIncome.setText(String.format("$%.2f", totalIncome));
+            lblTotalExpense.setText(String.format("$%.2f", totalExpense));
+            lblProfitLoss.setText(String.format("$%.2f", profitLoss));
+            lblCurrentBalance.setText(String.format("$%.2f", balance));
+            lblBalance.setText("Balance: $ " + String.format("%.2f", balance));
         }
-        double profitLoss = totalIncome - totalExpense;
-        double balance = transactionDAO.calculateBalance();
-
-        lblTotalIncome.setText(String.format("$%.2f", totalIncome));
-        lblTotalExpense.setText(String.format("$%.2f", totalExpense));
-        lblProfitLoss.setText(String.format("$%.2f", profitLoss));
-        lblCurrentBalance.setText(String.format("$%.2f", balance));
-        lblBalance.setText("Balance: $ " + String.format("%.2f", balance));
     }
 
     private void setupSearchAndFilter() {
@@ -243,9 +273,22 @@ public class CashbookController {
         cmbFilterType.getItems().setAll("All", "Income", "Expense");
     }
 
-    @FXML private void handleSearch() { applyFilters(); }
-    @FXML private void handleFilter() { applyFilters(); }
-    @FXML private void handleFilterDate() { applyFilters(); }
+    @FXML
+    private void handleSearch() {
+        applyFilters();
+    }
+
+    @FXML
+    private void handleFilter() {
+        applyFilters();
+    }
+
+    @FXML
+    private void handleFilterDate() {
+        applyFilters();
+    }
+
+
 
     @FXML
     private void handleRefresh() {
@@ -278,38 +321,62 @@ public class CashbookController {
     private void handleAddTransaction() {
         isEditMode = false;
         currentTransaction = null;
-        dialogTitle.setText("Add New Transaction");
-        cmbType.setValue(null);
-        txtAmount.clear();
-        txtReason.clear();
+        if (dialogTitle != null) {
+            dialogTitle.setText("Add New Transaction");
+        }
+        if (cmbType != null) {
+            cmbType.setValue(null);
+        }
+        if (txtAmount != null) {
+            txtAmount.clear();
+        }
+        if (txtReason != null) {
+            txtReason.clear();
+        }
+
         showDialog();
     }
 
     private void handleEditTransaction(Transaction transaction) {
         isEditMode = true;
         currentTransaction = transaction;
-        dialogTitle.setText("Edit Transaction");
-        cmbType.setValue(transaction.getType());
-        txtAmount.setText(String.format("%.2f", transaction.getAmount()));
-        txtReason.setText(transaction.getReason());
+        if (dialogTitle != null) {
+            dialogTitle.setText("Edit Transaction");
+        }
+        if (cmbType != null) {
+            cmbType.setValue(transaction.getType());
+        }
+        if (txtAmount != null) {
+            txtAmount.setText(String.format("%.2f", transaction.getAmount()));
+        }
+        if (txtReason != null) {
+            txtReason.setText(transaction.getReason());
+        }
+
         showDialog();
     }
 
-    // ← DÙNG SWEETALERT CHO XÓA
     private void handleDeleteTransaction(Transaction transaction) {
-        showConfirmation("Confirm Delete", "Are you sure you want to delete this transaction?\nID: " + transaction.getId(), () -> {
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Confirm Delete");
+        confirmAlert.setHeaderText("Are you sure you want to delete this transaction?");
+        confirmAlert.setContentText("Transaction ID: " + transaction.getId());
+
+        if (confirmAlert.showAndWait().get() == ButtonType.OK) {
             if (transactionDAO.deleteTransaction(transaction.getId())) {
-                showSweetAlert(SweetAlert.AlertType.SUCCESS, "Success", "Transaction deleted successfully.");
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Transaction deleted successfully.");
                 loadInitialTransactionData();
             } else {
-                showSweetAlert(SweetAlert.AlertType.ERROR, "Error", "Failed to delete transaction.");
+                showAlert(Alert.AlertType.ERROR, "Error", "Failed to delete transaction.");
             }
-        }, null);
+        }
     }
 
     @FXML
     private void handleSaveTransaction() {
-        if (!validateInput()) return;
+        if (!validateInput()) {
+            return;
+        }
 
         String type = cmbType.getValue();
         double amount = Double.parseDouble(txtAmount.getText().trim());
@@ -323,11 +390,11 @@ public class CashbookController {
             currentTransaction.setCreatedBy(createdBy);
 
             if (transactionDAO.updateTransaction(currentTransaction)) {
-                showSweetAlert(SweetAlert.AlertType.SUCCESS, "Success", "Transaction updated successfully.");
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Transaction updated successfully.");
                 loadInitialTransactionData();
                 handleCloseDialog();
             } else {
-                showSweetAlert(SweetAlert.AlertType.ERROR, "Error", "Failed to update transaction.");
+                showAlert(Alert.AlertType.ERROR, "Error", "Failed to update transaction.");
             }
         } else {
             Transaction newTransaction = new Transaction();
@@ -337,16 +404,19 @@ public class CashbookController {
             newTransaction.setCreatedBy(createdBy);
 
             if (transactionDAO.addTransaction(newTransaction)) {
-                showSweetAlert(SweetAlert.AlertType.SUCCESS, "Success", "Transaction added successfully.");
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Transaction added successfully.");
                 loadInitialTransactionData();
                 handleCloseDialog();
             } else {
-                showSweetAlert(SweetAlert.AlertType.ERROR, "Error", "Failed to add transaction.");
+                showAlert(Alert.AlertType.ERROR, "Error", "Failed to add transaction.");
             }
         }
     }
 
-    @FXML private void handleCloseDialog() { hideDialog(); }
+    @FXML
+    private void handleCloseDialog() {
+        hideDialog();
+    }
 
     private void showDialog() {
         if (overlay != null && dialogPane != null) {
@@ -354,6 +424,8 @@ public class CashbookController {
             overlay.setManaged(true);
             dialogPane.setVisible(true);
             dialogPane.setManaged(true);
+        } else {
+            System.err.println("overlay or dialogPane is null in showDialog");
         }
     }
 
@@ -368,7 +440,7 @@ public class CashbookController {
 
     private boolean validateInput() {
         if (cmbType.getValue() == null) {
-            showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Please select a type.");
+            showAlert(Alert.AlertType.WARNING, "Warning", "Please select a type.");
             cmbType.requestFocus();
             return false;
         }
@@ -376,18 +448,18 @@ public class CashbookController {
         try {
             double amount = Double.parseDouble(txtAmount.getText().trim());
             if (amount <= 0) {
-                showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Amount must be greater than 0.");
+                showAlert(Alert.AlertType.WARNING, "Warning", "Amount must be greater than 0.");
                 txtAmount.requestFocus();
                 return false;
             }
         } catch (NumberFormatException e) {
-            showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Invalid amount format.");
+            showAlert(Alert.AlertType.WARNING, "Warning", "Invalid amount format.");
             txtAmount.requestFocus();
             return false;
         }
 
         if (txtReason.getText().trim().isEmpty()) {
-            showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Please enter a reason.");
+            showAlert(Alert.AlertType.WARNING, "Warning", "Please enter a reason.");
             txtReason.requestFocus();
             return false;
         }
@@ -395,48 +467,11 @@ public class CashbookController {
         return true;
     }
 
-    // ← SWEETALERT CHUNG CHO TOÀN BỘ
-    private void showSweetAlert(SweetAlert.AlertType type, String title, String content) {
-        try {
-            if (tableTransactions.getScene() == null) throw new NullPointerException("Scene is null");
-            Pane rootPane = (Pane) tableTransactions.getScene().getRoot();
-            SweetAlert.showAlert(rootPane, type, title, content, null);
-        } catch (Exception e) {
-            System.err.println("SweetAlert failed: " + e.getMessage());
-            Alert alert = new Alert(convertToAlertType(type));
-            alert.setTitle(title);
-            alert.setHeaderText(null);
-            alert.setContentText(content);
-            alert.showAndWait();
-        }
-    }
-
-    private void showConfirmation(String title, String content, Runnable onConfirm, Runnable onCancel) {
-        try {
-            if (tableTransactions.getScene() == null) throw new NullPointerException("Scene is null");
-            Pane rootPane = (Pane) tableTransactions.getScene().getRoot();
-            SweetAlert.showConfirmation(rootPane, title, content, onConfirm, onCancel);
-        } catch (Exception e) {
-            System.err.println("SweetConfirmation failed: " + e.getMessage());
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle(title);
-            alert.setHeaderText(null);
-            alert.setContentText(content);
-            if (alert.showAndWait().get() == ButtonType.OK && onConfirm != null) {
-                onConfirm.run();
-            } else if (onCancel != null) {
-                onCancel.run();
-            }
-        }
-    }
-
-    private Alert.AlertType convertToAlertType(SweetAlert.AlertType sweetType) {
-        return switch (sweetType) {
-            case SUCCESS -> Alert.AlertType.INFORMATION;
-            case ERROR -> Alert.AlertType.ERROR;
-            case WARNING -> Alert.AlertType.WARNING;
-            case QUESTION -> Alert.AlertType.CONFIRMATION;
-            default -> Alert.AlertType.INFORMATION;
-        };
+    private void showAlert(Alert.AlertType type, String title, String content) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 }

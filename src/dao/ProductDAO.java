@@ -116,4 +116,40 @@ public class ProductDAO {
         }
         return false;
     }
+
+    public List<Product> getProductsPaginated(int offset, int limit) {
+        List<Product> products = new ArrayList<>();
+        String sql = "SELECT id, name, price, image, drink_types FROM products ORDER BY id LIMIT ? OFFSET ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, limit);
+            stmt.setInt(2, offset);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Product p = new Product();
+                    p.setId(rs.getInt("id"));
+                    p.setName(rs.getString("name"));
+                    p.setPrice(rs.getDouble("price"));
+                    p.setImage(rs.getString("image"));
+
+                    String typesStr = rs.getString("drink_types");
+                    Set<String> types = new HashSet<>();
+                    if (typesStr != null && !typesStr.isEmpty()) {
+                        for (String t : typesStr.split(",")) {
+                            types.add(t.trim().toLowerCase());
+                        }
+                    }
+                    p.setDrinkTypes(types);
+
+                    products.add(p);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return products;
+    }
 }

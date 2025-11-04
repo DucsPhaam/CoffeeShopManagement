@@ -125,7 +125,11 @@ public class InventoryController {
                 btnEdit.getStyleClass().add("action-button-edit");
                 btnEdit.setFont(Font.font("Segoe UI Semibold", 12));
                 btnEdit.setStyle(
+<<<<<<< HEAD
                     "-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: 600; -fx-padding: 6 14; -fx-background-radius: 5; -fx-border-color: transparent; -fx-cursor: hand;"
+=======
+                        "-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: 600; -fx-padding: 6 14; -fx-background-radius: 5; -fx-border-color: transparent; -fx-cursor: hand;"
+>>>>>>> 82ad102 (add Overlay alert)
                 );
                 btnEdit.setOnMouseEntered(e -> btnEdit.setStyle(btnEdit.getStyle() + "-fx-background-color: #2563eb;"));
                 btnEdit.setOnMouseExited(e -> btnEdit.setStyle(btnEdit.getStyle() + "-fx-background-color: #3b82f6;"));
@@ -133,7 +137,11 @@ public class InventoryController {
                 btnAddStock.getStyleClass().add("action-button-view");
                 btnAddStock.setFont(Font.font("Segoe UI Semibold", 12));
                 btnAddStock.setStyle(
+<<<<<<< HEAD
                     "-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: 600; -fx-padding: 6 14; -fx-background-radius: 5; -fx-border-color: transparent; -fx-cursor: hand;"
+=======
+                        "-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: 600; -fx-padding: 6 14; -fx-background-radius: 5; -fx-border-color: transparent; -fx-cursor: hand;"
+>>>>>>> 82ad102 (add Overlay alert)
                 );
                 btnAddStock.setOnMouseEntered(e -> btnAddStock.setStyle(btnAddStock.getStyle() + "-fx-background-color: #059669;"));
                 btnAddStock.setOnMouseExited(e -> btnAddStock.setStyle(btnAddStock.getStyle() + "-fx-background-color: #10b981;"));
@@ -141,7 +149,11 @@ public class InventoryController {
                 btnDelete.getStyleClass().add("action-button-delete");
                 btnDelete.setFont(Font.font("Segoe UI Semibold", 12));
                 btnDelete.setStyle(
+<<<<<<< HEAD
                     "-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: 600; -fx-padding: 6 14; -fx-background-radius: 5; -fx-border-color: transparent; -fx-cursor: hand;"
+=======
+                        "-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: 600; -fx-padding: 6 14; -fx-background-radius: 5; -fx-border-color: transparent; -fx-cursor: hand;"
+>>>>>>> 82ad102 (add Overlay alert)
                 );
                 btnDelete.setOnMouseEntered(e -> btnDelete.setStyle(btnDelete.getStyle() + "-fx-background-color: #dc2626;"));
                 btnDelete.setOnMouseExited(e -> btnDelete.setStyle(btnDelete.getStyle() + "-fx-background-color: #ef4444;"));
@@ -235,6 +247,7 @@ public class InventoryController {
                 .filter(item -> item.getQuantity() < item.getMinStock())
                 .count();
 
+<<<<<<< HEAD
         // Thống kê trên đầu
         lblTotalItems.setText(total + " items");
         lblLowStockItems.setText("Low Stock: " + lowStockCount);
@@ -242,6 +255,10 @@ public class InventoryController {
         // Thống kê dưới bảng
         lblTotalItemsInTable.setText("Total: " + total + " items");
         lblLowStockInTable.setText("Low Stock: " + lowStockCount);
+=======
+        if (lblTotalItems != null) lblTotalItems.setText("Total: " + total + " items");
+        if (lblLowStockItems != null) lblLowStockItems.setText("Low Stock: " + lowStock);
+>>>>>>> 82ad102 (add Overlay alert)
     }
 
     private void setupSearchAndFilter() {
@@ -495,6 +512,31 @@ public class InventoryController {
             a.setTitle(title); a.setHeaderText(null); a.setContentText(content);
             a.showAndWait();
         }
+<<<<<<< HEAD
+    }
+
+    private void showConfirmation(String title, String content, Runnable onConfirm, Runnable onCancel) {
+        try {
+            if (tableInventory.getScene() == null) throw new NullPointerException();
+            Pane root = (Pane) tableInventory.getScene().getRoot();
+            SweetAlert.showConfirmation(root, title, content, onConfirm, onCancel);
+        } catch (Exception e) {
+            Alert a = new Alert(Alert.AlertType.CONFIRMATION);
+            a.setTitle(title); a.setHeaderText(null); a.setContentText(content);
+            if (a.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK && onConfirm != null) onConfirm.run();
+            else if (onCancel != null) onCancel.run();
+        }
+    }
+
+    private Alert.AlertType convertToAlertType(SweetAlert.AlertType t) {
+        return switch (t) {
+            case SUCCESS -> Alert.AlertType.INFORMATION;
+            case ERROR -> Alert.AlertType.ERROR;
+            case WARNING -> Alert.AlertType.WARNING;
+            default -> Alert.AlertType.INFORMATION;
+        };
+=======
+>>>>>>> 82ad102 (add Overlay alert)
     }
 
     private void showConfirmation(String title, String content, Runnable onConfirm, Runnable onCancel) {

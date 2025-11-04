@@ -12,8 +12,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import model.User;
-import utils.SweetAlert; // ← Thêm import này
-
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -43,7 +41,6 @@ public class EmployeeController {
     @FXML private Button btnEndShift;
     @FXML private ComboBox<String> cmbShiftStatus;
     @FXML private Button btnUpdateShift;
-    @FXML private Button btnViewMore;
 
     private UserDAO userDAO;
     private ObservableList<User> userList;
@@ -51,9 +48,6 @@ public class EmployeeController {
 
     private User currentUser;
     private boolean isEditMode = false;
-    private int currentPage = 0;
-    private static final int PAGE_SIZE = 5;
-    private boolean hasMoreData = true;
 
     @FXML
     public void initialize() {
@@ -85,32 +79,65 @@ public class EmployeeController {
             private final HBox actionBox = new HBox(8);
 
             {
-                // EDIT BUTTON - Blue
+                // EDIT BUTTON - Blue with clear text
                 btnEdit.getStyleClass().add("action-button-edit");
                 btnEdit.setFont(javafx.scene.text.Font.font("Segoe UI Semibold", 12));
                 btnEdit.setStyle(
-                        "-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: 600; -fx-padding: 6 14; -fx-background-radius: 5; -fx-border-color: transparent; -fx-cursor: hand;"
+                    "-fx-background-color: #3b82f6; " +
+                    "-fx-text-fill: white; " +
+                    "-fx-font-size: 12px; " +
+                    "-fx-font-weight: 600; " +
+                    "-fx-padding: 6 14; " +
+                    "-fx-background-radius: 5; " +
+                    "-fx-border-color: transparent; " +
+                    "-fx-cursor: hand;"
                 );
-                btnEdit.setOnMouseEntered(e -> btnEdit.setStyle(btnEdit.getStyle() + "-fx-background-color: #2563eb;"));
-                btnEdit.setOnMouseExited(e -> btnEdit.setStyle(btnEdit.getStyle() + "-fx-background-color: #3b82f6;"));
+                btnEdit.setOnMouseEntered(e -> btnEdit.setStyle(
+                    btnEdit.getStyle() + "-fx-background-color: #2563eb;"
+                ));
+                btnEdit.setOnMouseExited(e -> btnEdit.setStyle(
+                    btnEdit.getStyle() + "-fx-background-color: #3b82f6;"
+                ));
 
-                // MANAGE SHIFT BUTTON - Green
+                // MANAGE SHIFT BUTTON - Green with clear text
                 btnManageShift.getStyleClass().add("action-button-view");
                 btnManageShift.setFont(javafx.scene.text.Font.font("Segoe UI Semibold", 12));
                 btnManageShift.setStyle(
-                        "-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: 600; -fx-padding: 6 14; -fx-background-radius: 5; -fx-border-color: transparent; -fx-cursor: hand;"
+                    "-fx-background-color: #10b981; " +
+                    "-fx-text-fill: white; " +
+                    "-fx-font-size: 12px; " +
+                    "-fx-font-weight: 600; " +
+                    "-fx-padding: 6 14; " +
+                    "-fx-background-radius: 5; " +
+                    "-fx-border-color: transparent; " +
+                    "-fx-cursor: hand;"
                 );
-                btnManageShift.setOnMouseEntered(e -> btnManageShift.setStyle(btnManageShift.getStyle() + "-fx-background-color: #059669;"));
-                btnManageShift.setOnMouseExited(e -> btnManageShift.setStyle(btnManageShift.getStyle() + "-fx-background-color: #10b981;"));
+                btnManageShift.setOnMouseEntered(e -> btnManageShift.setStyle(
+                    btnManageShift.getStyle() + "-fx-background-color: #059669;"
+                ));
+                btnManageShift.setOnMouseExited(e -> btnManageShift.setStyle(
+                    btnManageShift.getStyle() + "-fx-background-color: #10b981;"
+                ));
 
-                // DELETE BUTTON - Red
+                // DELETE BUTTON - Red with clear text
                 btnDelete.getStyleClass().add("action-button-delete");
                 btnDelete.setFont(javafx.scene.text.Font.font("Segoe UI Semibold", 12));
                 btnDelete.setStyle(
-                        "-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: 600; -fx-padding: 6 14; -fx-background-radius: 5; -fx-border-color: transparent; -fx-cursor: hand;"
+                    "-fx-background-color: #ef4444; " +
+                    "-fx-text-fill: white; " +
+                    "-fx-font-size: 12px; " +
+                    "-fx-font-weight: 600; " +
+                    "-fx-padding: 6 14; " +
+                    "-fx-background-radius: 5; " +
+                    "-fx-border-color: transparent; " +
+                    "-fx-cursor: hand;"
                 );
-                btnDelete.setOnMouseEntered(e -> btnDelete.setStyle(btnDelete.getStyle() + "-fx-background-color: #dc2626;"));
-                btnDelete.setOnMouseExited(e -> btnDelete.setStyle(btnDelete.getStyle() + "-fx-background-color: #ef4444;"));
+                btnDelete.setOnMouseEntered(e -> btnDelete.setStyle(
+                    btnDelete.getStyle() + "-fx-background-color: #dc2626;"
+                ));
+                btnDelete.setOnMouseExited(e -> btnDelete.setStyle(
+                    btnDelete.getStyle() + "-fx-background-color: #ef4444;"
+                ));
 
                 actionBox.setAlignment(Pos.CENTER);
                 actionBox.getChildren().addAll(btnEdit, btnManageShift, btnDelete);
@@ -144,39 +171,11 @@ public class EmployeeController {
     }
 
     private void loadUserData() {
-        currentPage = 0;
         userList.clear();
-        filteredList.clear();
-
-        List<User> firstPage = userDAO.getUsersPaginated(0, PAGE_SIZE);
-        userList.addAll(firstPage);
-        filteredList.setAll(firstPage);
-
-        int totalCount = userDAO.getTotalCount();
-        hasMoreData = totalCount > PAGE_SIZE;
-
+        userList.addAll(userDAO.getAllUsers());
+        filteredList.setAll(userList);
         tableEmployees.setItems(filteredList);
         updateStatistics();
-        updateViewMoreButton();
-    }
-
-    @FXML
-    private void handleLoadMore() {
-        if (!hasMoreData) return;
-
-        currentPage++;
-        List<User> nextPage = userDAO.getUsersPaginated(currentPage * PAGE_SIZE, PAGE_SIZE);
-
-        if (!nextPage.isEmpty()) {
-            userList.addAll(nextPage);
-            applyFilters();
-        }
-
-        int totalCount = userDAO.getTotalCount();
-        hasMoreData = (currentPage + 1) * PAGE_SIZE < totalCount;
-
-        updateStatistics();
-        updateViewMoreButton();
     }
 
     private void updateStatistics() {
@@ -204,8 +203,11 @@ public class EmployeeController {
         filteredList.clear();
 
         for (User user : userList) {
-            boolean matchSearch = searchText.isEmpty() || user.getUsername().toLowerCase().contains(searchText);
-            boolean matchRole = roleFilter.equals("All") || user.getRole().equalsIgnoreCase(roleFilter);
+            boolean matchSearch = searchText.isEmpty() ||
+                    user.getUsername().toLowerCase().contains(searchText);
+
+            boolean matchRole = roleFilter.equals("All") ||
+                    user.getRole().equalsIgnoreCase(roleFilter);
 
             if (matchSearch && matchRole) {
                 filteredList.add(user);
@@ -214,16 +216,6 @@ public class EmployeeController {
 
         tableEmployees.setItems(filteredList);
         updateStatistics();
-        int totalCount = userDAO.getTotalCount();
-        hasMoreData = (currentPage + 1) * PAGE_SIZE < totalCount;
-        updateViewMoreButton();
-    }
-
-    private void updateViewMoreButton() {
-        if (btnViewMore != null) {
-            btnViewMore.setVisible(hasMoreData);
-            btnViewMore.setManaged(hasMoreData);
-        }
     }
 
     @FXML
@@ -253,21 +245,25 @@ public class EmployeeController {
 
         txtUsername.setText(user.getUsername());
         cmbRole.setValue(user.getRole());
-        txtPassword.clear();
+        txtPassword.clear(); // Password is not editable, only set during creation
 
         showDialog();
     }
 
-    // ← DÙNG SWEETALERT CHO XÓA
     private void handleDeleteUser(User user) {
-        showConfirmation("Confirm Delete", "Are you sure you want to delete this employee?\nEmployee: " + user.getUsername(), () -> {
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Confirm Delete");
+        confirmAlert.setHeaderText("Are you sure you want to delete this employee?");
+        confirmAlert.setContentText("Employee: " + user.getUsername());
+
+        if (confirmAlert.showAndWait().get() == ButtonType.OK) {
             if (userDAO.deleteUser(user.getId())) {
-                showSweetAlert(SweetAlert.AlertType.SUCCESS, "Success", "Employee deleted successfully.");
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Employee deleted successfully.");
                 loadUserData();
             } else {
-                showSweetAlert(SweetAlert.AlertType.ERROR, "Error", "Failed to delete employee. It may be in use.");
+                showAlert(Alert.AlertType.ERROR, "Error", "Failed to delete employee. It may be in use.");
             }
-        }, null);
+        }
     }
 
     @FXML
@@ -283,26 +279,27 @@ public class EmployeeController {
         if (isEditMode && currentUser != null) {
             currentUser.setUsername(username);
             currentUser.setRole(role);
+            // Password is not updated during edit for security; only username and role are editable
 
             if (userDAO.updateUser(currentUser)) {
-                showSweetAlert(SweetAlert.AlertType.SUCCESS, "Success", "Employee updated successfully.");
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Employee updated successfully.");
                 loadUserData();
                 handleCloseDialog();
             } else {
-                showSweetAlert(SweetAlert.AlertType.ERROR, "Error", "Failed to update employee.");
+                showAlert(Alert.AlertType.ERROR, "Error", "Failed to update employee.");
             }
         } else {
             User newUser = new User();
             newUser.setUsername(username);
             newUser.setRole(role);
-            newUser.setPassword(password);
+            newUser.setPassword(password); // Set password only during creation
 
             if (userDAO.addUser(newUser)) {
-                showSweetAlert(SweetAlert.AlertType.SUCCESS, "Success", "Employee added successfully.");
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Employee added successfully.");
                 loadUserData();
                 handleCloseDialog();
             } else {
-                showSweetAlert(SweetAlert.AlertType.ERROR, "Error", "Failed to add employee.");
+                showAlert(Alert.AlertType.ERROR, "Error", "Failed to add employee.");
             }
         }
     }
@@ -328,25 +325,25 @@ public class EmployeeController {
 
     private boolean validateInput() {
         if (txtUsername.getText().trim().isEmpty()) {
-            showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Please enter username.");
+            showAlert(Alert.AlertType.WARNING, "Warning", "Please enter username.");
             txtUsername.requestFocus();
             return false;
         }
 
         if (cmbRole.getValue() == null) {
-            showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Please select a role.");
+            showAlert(Alert.AlertType.WARNING, "Warning", "Please select a role.");
             cmbRole.requestFocus();
             return false;
         }
 
         if (!isEditMode && txtPassword.getText().trim().isEmpty()) {
-            showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Please enter a password.");
+            showAlert(Alert.AlertType.WARNING, "Warning", "Please enter a password.");
             txtPassword.requestFocus();
             return false;
         }
 
         if (!isEditMode && txtPassword.getText().length() < 6) {
-            showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Password must be at least 6 characters long.");
+            showAlert(Alert.AlertType.WARNING, "Warning", "Password must be at least 6 characters long.");
             txtPassword.requestFocus();
             return false;
         }
@@ -354,65 +351,64 @@ public class EmployeeController {
         return true;
     }
 
-    // ← SWEETALERT CHO TẤT CẢ THÔNG BÁO
-    private void showSweetAlert(SweetAlert.AlertType type, String title, String content) {
-        try {
-            if (tableEmployees.getScene() == null) {
-                throw new NullPointerException("Scene is null");
-            }
-            Pane rootPane = (Pane) tableEmployees.getScene().getRoot();
-            SweetAlert.showAlert(rootPane, type, title, content, null);
-        } catch (Exception e) {
-            System.err.println("Failed to show SweetAlert: " + e.getMessage());
-            // Fallback
-            Alert alert = new Alert(convertToAlertType(type));
-            alert.setTitle(title);
-            alert.setHeaderText(null);
-            alert.setContentText(content);
-            alert.showAndWait();
-        }
+  private void showAlert(Alert.AlertType type, String title, String content) {
+    Alert alert = new Alert(type);
+    alert.setTitle(title);
+    alert.setHeaderText(null);
+    alert.setContentText(content);
+    
+    // Enhanced alert styling
+    DialogPane dialogPane = alert.getDialogPane();
+    dialogPane.setStyle(
+        "-fx-background-color: white; " +
+        "-fx-font-family: 'Segoe UI'; " +
+        "-fx-font-size: 14px; " +
+        "-fx-padding: 20;"
+    );
+    
+    // Style the content text
+    dialogPane.lookup(".content.label").setStyle(
+        "-fx-font-size: 15px; " +
+        "-fx-text-fill: #1e293b; " +
+        "-fx-font-weight: 600; " +
+        "-fx-padding: 15 0;"
+    );
+    
+    // Style buttons
+    if (type == Alert.AlertType.INFORMATION) {
+        dialogPane.lookupButton(ButtonType.OK).setStyle(
+            "-fx-background-color: #10b981; " +
+            "-fx-text-fill: white; " +
+            "-fx-font-size: 14px; " +
+            "-fx-font-weight: 600; " +
+            "-fx-padding: 10 30; " +
+            "-fx-background-radius: 6; " +
+            "-fx-cursor: hand;"
+        );
+    } else if (type == Alert.AlertType.ERROR) {
+        dialogPane.lookupButton(ButtonType.OK).setStyle(
+            "-fx-background-color: #ef4444; " +
+            "-fx-text-fill: white; " +
+            "-fx-font-size: 14px; " +
+            "-fx-font-weight: 600; " +
+            "-fx-padding: 10 30; " +
+            "-fx-background-radius: 6; " +
+            "-fx-cursor: hand;"
+        );
     }
-
-    private void showConfirmation(String title, String content, Runnable onConfirm, Runnable onCancel) {
-        try {
-            if (tableEmployees.getScene() == null) {
-                throw new NullPointerException("Scene is null");
-            }
-            Pane rootPane = (Pane) tableEmployees.getScene().getRoot();
-            SweetAlert.showConfirmation(rootPane, title, content, onConfirm, onCancel);
-        } catch (Exception e) {
-            System.err.println("Failed to show SweetConfirmation: " + e.getMessage());
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle(title);
-            alert.setHeaderText(null);
-            alert.setContentText(content);
-            if (alert.showAndWait().get() == ButtonType.OK) {
-                if (onConfirm != null) onConfirm.run();
-            } else {
-                if (onCancel != null) onCancel.run();
-            }
-        }
-    }
-
-    private Alert.AlertType convertToAlertType(SweetAlert.AlertType sweetType) {
-        return switch (sweetType) {
-            case SUCCESS -> Alert.AlertType.INFORMATION;
-            case ERROR -> Alert.AlertType.ERROR;
-            case WARNING -> Alert.AlertType.WARNING;
-            case QUESTION -> Alert.AlertType.CONFIRMATION;
-            default -> Alert.AlertType.INFORMATION;
-        };
-    }
+    
+    alert.showAndWait();
+}
 
     @FXML
     private void handleStartShift() {
         if (currentUser != null) {
             Timestamp startTime = Timestamp.valueOf(LocalDateTime.now());
             if (userDAO.startShift(currentUser.getId(), startTime)) {
-                showSweetAlert(SweetAlert.AlertType.SUCCESS, "Success", "Shift started for " + currentUser.getUsername());
-                loadUserData();
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Shift started for " + currentUser.getUsername());
+                loadUserData(); // Refresh to update shift status
             } else {
-                showSweetAlert(SweetAlert.AlertType.ERROR, "Error", "Failed to start shift.");
+                showAlert(Alert.AlertType.ERROR, "Error", "Failed to start shift.");
             }
         }
     }
@@ -421,10 +417,10 @@ public class EmployeeController {
     private void handleEndShift() {
         if (currentUser != null) {
             if (userDAO.endShift(currentUser.getId())) {
-                showSweetAlert(SweetAlert.AlertType.SUCCESS, "Success", "Shift ended for " + currentUser.getUsername());
-                loadUserData();
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Shift ended for " + currentUser.getUsername());
+                loadUserData(); // Refresh to update shift status
             } else {
-                showSweetAlert(SweetAlert.AlertType.ERROR, "Error", "Failed to end shift. No active shift found.");
+                showAlert(Alert.AlertType.ERROR, "Error", "Failed to end shift. No active shift found.");
             }
         }
     }
@@ -434,13 +430,13 @@ public class EmployeeController {
         if (currentUser != null && cmbShiftStatus.getValue() != null) {
             String status = cmbShiftStatus.getValue();
             if (userDAO.updateShiftStatus(currentUser.getId(), status)) {
-                showSweetAlert(SweetAlert.AlertType.SUCCESS, "Success", "Shift status updated to " + status + " for " + currentUser.getUsername());
-                loadUserData();
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Shift status updated to " + status + " for " + currentUser.getUsername());
+                loadUserData(); // Refresh to update shift status
             } else {
-                showSweetAlert(SweetAlert.AlertType.ERROR, "Error", "Failed to update shift status.");
+                showAlert(Alert.AlertType.ERROR, "Error", "Failed to update shift status.");
             }
         } else {
-            showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Please select a status.");
+            showAlert(Alert.AlertType.WARNING, "Warning", "Please select a status.");
         }
     }
 
@@ -463,4 +459,4 @@ public class EmployeeController {
             btnEndShift.setDisable(currentStatus == null || currentStatus.equals("off-duty"));
         }
     }
-}
+        }

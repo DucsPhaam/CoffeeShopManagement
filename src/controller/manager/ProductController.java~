@@ -81,11 +81,7 @@ public class ProductController {
     private Product currentProduct;
     private boolean isEditMode = false;
     private String selectedImagePath = "";
-    @FXML private Button btnViewMore;
 
-    private int currentPage = 0;
-    private static final int PAGE_SIZE = 10;
-    private boolean hasMoreData = true;
     @FXML
     public void initialize() {
         productDAO = new ProductDAO();
@@ -338,42 +334,11 @@ public class ProductController {
     }
 
     private void loadProductData() {
-        currentPage = 0;
-        hasMoreData = true;
         productList.clear();
-        filteredList.clear();
-
-        List<Product> firstPage = productDAO.getProductsPaginated(currentPage * PAGE_SIZE, PAGE_SIZE);
-        productList.addAll(firstPage);
-        filteredList.setAll(firstPage);
-
+        productList.addAll(productDAO.getAllProducts());
+        filteredList.setAll(productList);
         tableProducts.setItems(filteredList);
         updateStatistics();
-        updateViewMoreButton();
-    }
-
-    @FXML
-    private void handleLoadMore() {
-        if (!hasMoreData) return;
-
-        currentPage++;
-        List<Product> nextPage = productDAO.getProductsPaginated(currentPage * PAGE_SIZE, PAGE_SIZE);
-
-        if (nextPage.isEmpty()) {
-            hasMoreData = false;
-        } else {
-            productList.addAll(nextPage);
-            applyFilters(); // Áp dụng lại filter
-        }
-
-        updateViewMoreButton();
-    }
-
-    private void updateViewMoreButton() {
-        if (btnViewMore != null) {
-            btnViewMore.setVisible(hasMoreData);
-            btnViewMore.setManaged(hasMoreData);
-        }
     }
 
     private void loadInventoryOptions() {
@@ -403,7 +368,9 @@ public class ProductController {
         filteredList.clear();
 
         for (Product product : productList) {
-            boolean matchSearch = searchText.isEmpty() || product.getName().toLowerCase().contains(searchText);
+            boolean matchSearch = searchText.isEmpty() ||
+                    product.getName().toLowerCase().contains(searchText);
+
             boolean matchType = typeFilter.equals("all") ||
                     (product.getDrinkTypes() != null && product.getDrinkTypes().stream()
                             .anyMatch(type -> type.toLowerCase().contains(typeFilter)));
@@ -415,7 +382,6 @@ public class ProductController {
 
         tableProducts.setItems(filteredList);
         updateStatistics();
-        updateViewMoreButton();
     }
 
     private void updateStatistics() {
@@ -795,6 +761,4 @@ public class ProductController {
         public void setQuantity(double quantity) { this.quantity = quantity; }
         public String getUnit() { return unit; }
     }
-
-
 }

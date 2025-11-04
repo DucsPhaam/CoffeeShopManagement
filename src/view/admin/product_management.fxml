@@ -84,21 +84,36 @@
 
         <!-- Products Table -->
         <VBox VBox.vgrow="ALWAYS" styleClass="card" style="-fx-padding: 20;">
-            <TableView fx:id="tableProducts" VBox.vgrow="ALWAYS">
-                <columns>
-                    <TableColumn fx:id="colId" text="ID" prefWidth="60.0" style="-fx-alignment: CENTER;" />
-                    <TableColumn fx:id="colImage" text="Image" prefWidth="80.0" style="-fx-alignment: CENTER;" />
-                    <TableColumn fx:id="colName" text="Product Name" prefWidth="220.0" />
-                    <TableColumn fx:id="colPrice" text="Price" prefWidth="100.0" style="-fx-alignment: CENTER;" />
-                    <TableColumn fx:id="colDrinkTypes" text="Types" prefWidth="160.0" style="-fx-alignment: CENTER;" />
-                    <TableColumn fx:id="colActions" text="Actions" prefWidth="300.0" style="-fx-alignment: CENTER;" />
-                </columns>
-            </TableView>
-            <HBox spacing="20.0" alignment="CENTER_LEFT" style="-fx-padding: 15.0 0 0 0;">
-                <Label fx:id="lblTotalProducts" text="Total: 0 products" style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #1e293b; -fx-font-family: 'Segoe UI Semibold';" />
-            </HBox>
-        </VBox>
+            <children>
+                <TableView fx:id="tableProducts" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colId" text="ID" prefWidth="60.0" style="-fx-alignment: CENTER;" />
+                        <TableColumn fx:id="colImage" text="Image" prefWidth="80.0" style="-fx-alignment: CENTER;" />
+                        <TableColumn fx:id="colName" text="Product Name" prefWidth="220.0" />
+                        <TableColumn fx:id="colPrice" text="Price" prefWidth="100.0" style="-fx-alignment: CENTER;" />
+                        <TableColumn fx:id="colDrinkTypes" text="Types" prefWidth="160.0" style="-fx-alignment: CENTER;" />
+                        <TableColumn fx:id="colActions" text="Actions" prefWidth="300.0" style="-fx-alignment: CENTER;" />
+                    </columns>
+                </TableView>
 
+                <!-- View More Bar - giống hệt Cashbook -->
+                <HBox alignment="CENTER" style="-fx-padding: 15.0 0 0 0;">
+                    <Label fx:id="lblTotalProducts"
+                           text="Total: 0 products"
+                           style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #1e293b; -fx-font-family: 'Segoe UI Semibold';"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="btnViewMore"
+                            text="View More"
+                            onAction="#handleLoadMore"
+                            style="-fx-background-color: #e2e8f0; -fx-text-fill: #1e293b; -fx-cursor: hand;
+                                   -fx-background-radius: 8; -fx-pref-height: 40px; -fx-pref-width: 120px;
+                                   -fx-font-size: 14px; -fx-font-weight: 600; -fx-font-family: 'Segoe UI Semibold';
+                                   -fx-border-color: #cbd5e0; -fx-border-width: 1; -fx-border-radius: 8;"
+                            visible="false" managed="false"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                </HBox>
+            </children>
+        </VBox>
     </VBox>
 
     <!-- Overlay for Dialogs -->

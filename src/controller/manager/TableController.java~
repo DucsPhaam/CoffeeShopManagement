@@ -16,7 +16,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import model.Table;
-import utils.SweetAlert;
+
 import java.util.List;
 
 public class TableController {
@@ -370,11 +370,11 @@ public class TableController {
             currentTable.setStatus(status);
 
             if (tableDAO.updateTable(currentTable)) {
-                showSweetAlert(SweetAlert.AlertType.INFO, "Success", "Table updated successfully.");
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Table updated successfully.");
                 loadTableData();
                 handleCloseDialog();
             } else {
-                showSweetAlert(SweetAlert.AlertType.WARNING, "Error", "Failed to update table.");
+                showAlert(Alert.AlertType.ERROR, "Error", "Failed to update table.");
             }
         } else {
             Table newTable = new Table();
@@ -384,11 +384,11 @@ public class TableController {
             newTable.setStatus(status);
 
             if (tableDAO.addTable(newTable)) {
-                showSweetAlert(SweetAlert.AlertType.INFO, "Success", "Table added successfully.");
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Table added successfully.");
                 loadTableData();
                 handleCloseDialog();
             } else {
-                showSweetAlert(SweetAlert.AlertType.WARNING, "Error", "Failed to add table.");
+                showAlert(Alert.AlertType.ERROR, "Error", "Failed to add table.");
             }
         }
     }
@@ -401,10 +401,10 @@ public class TableController {
 
         if (confirmAlert.showAndWait().get() == ButtonType.OK) {
             if (tableDAO.deleteTable(table.getId())) {
-                showSweetAlert(SweetAlert.AlertType.INFO, "Success", "Table deleted successfully.");
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Table deleted successfully.");
                 loadTableData();
             } else {
-                showSweetAlert(SweetAlert.AlertType.WARNING, "Error", "Failed to delete table.");
+                showAlert(Alert.AlertType.ERROR, "Error", "Failed to delete table.");
             }
         }
     }
@@ -430,13 +430,13 @@ public class TableController {
 
     private boolean validateInput() {
         if (txtName.getText().trim().isEmpty()) {
-            showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Please enter table name.");
+            showAlert(Alert.AlertType.WARNING, "Warning", "Please enter table name.");
             txtName.requestFocus();
             return false;
         }
 
         if (cmbFloor.getValue() == null) {
-            showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Please select floor.");
+            showAlert(Alert.AlertType.WARNING, "Warning", "Please select floor.");
             cmbFloor.requestFocus();
             return false;
         }
@@ -444,18 +444,18 @@ public class TableController {
         try {
             int seats = Integer.parseInt(txtSeats.getText().trim());
             if (seats <= 0) {
-                showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Seats must be greater than 0.");
+                showAlert(Alert.AlertType.WARNING, "Warning", "Seats must be greater than 0.");
                 txtSeats.requestFocus();
                 return false;
             }
         } catch (NumberFormatException e) {
-            showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Invalid seats format.");
+            showAlert(Alert.AlertType.WARNING, "Warning", "Invalid seats format.");
             txtSeats.requestFocus();
             return false;
         }
 
         if (cmbStatus.getValue() == null) {
-            showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Please select status.");
+            showAlert(Alert.AlertType.WARNING, "Warning", "Please select status.");
             cmbStatus.requestFocus();
             return false;
         }
@@ -463,88 +463,11 @@ public class TableController {
         return true;
     }
 
-    private void showSweetAlert(SweetAlert.AlertType type, String title, String content) {
-        try {
-            if (floorTabPane.getScene() == null) {
-                throw new NullPointerException("Scene is null - falling back to standard alert");
-            }
-            Pane rootPane = (Pane) floorTabPane.getScene().getRoot();
-            SweetAlert.showAlert(rootPane, type, title, content, null);
-        } catch (Exception e) {
-            System.err.println("Failed to show SweetAlert: " + e.getMessage());
-            // Fallback to regular alert
-            Alert alert = new Alert(convertToAlertType(type));
-            alert.setTitle(title);
-            alert.setHeaderText(null);
-            alert.setContentText(content);
-            alert.showAndWait();
-        }
-<<<<<<< HEAD
-    }
-
-    private void showConfirmation(String title, String content, Runnable onConfirm, Runnable onCancel) {
-        try {
-            if (floorTabPane.getScene() == null) {
-                throw new NullPointerException("Scene is null - falling back to standard confirmation");
-            }
-            Pane rootPane = (Pane) floorTabPane.getScene().getRoot();
-            SweetAlert.showConfirmation(rootPane, title, content, onConfirm, onCancel);
-        } catch (Exception e) {
-            System.err.println("Failed to show SweetConfirmation: " + e.getMessage());
-            // Fallback to regular confirmation
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle(title);
-            alert.setHeaderText(null);
-            alert.setContentText(content);
-            if (alert.showAndWait().get() == ButtonType.OK) {
-                if (onConfirm != null) onConfirm.run();
-            } else {
-                if (onCancel != null) onCancel.run();
-            }
-        }
-    }
-
-    private Alert.AlertType convertToAlertType(SweetAlert.AlertType sweetType) {
-        return switch (sweetType) {
-            case SUCCESS -> Alert.AlertType.INFORMATION;
-            case ERROR -> Alert.AlertType.ERROR;
-            case WARNING -> Alert.AlertType.WARNING;
-            case QUESTION -> Alert.AlertType.CONFIRMATION;
-            default -> Alert.AlertType.INFORMATION;
-        };
-=======
->>>>>>> 82ad102 (add Overlay alert)
-    }
-
-    private void showConfirmation(String title, String content, Runnable onConfirm, Runnable onCancel) {
-        try {
-            if (floorTabPane.getScene() == null) {
-                throw new NullPointerException("Scene is null - falling back to standard confirmation");
-            }
-            Pane rootPane = (Pane) floorTabPane.getScene().getRoot();
-            SweetAlert.showConfirmation(rootPane, title, content, onConfirm, onCancel);
-        } catch (Exception e) {
-            System.err.println("Failed to show SweetConfirmation: " + e.getMessage());
-            // Fallback to regular confirmation
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle(title);
-            alert.setHeaderText(null);
-            alert.setContentText(content);
-            if (alert.showAndWait().get() == ButtonType.OK) {
-                if (onConfirm != null) onConfirm.run();
-            } else {
-                if (onCancel != null) onCancel.run();
-            }
-        }
-    }
-
-    private Alert.AlertType convertToAlertType(SweetAlert.AlertType sweetType) {
-        return switch (sweetType) {
-            case SUCCESS -> Alert.AlertType.INFORMATION;
-            case ERROR -> Alert.AlertType.ERROR;
-            case WARNING -> Alert.AlertType.WARNING;
-            case QUESTION -> Alert.AlertType.CONFIRMATION;
-            default -> Alert.AlertType.INFORMATION;
-        };
+    private void showAlert(Alert.AlertType type, String title, String content) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 }
