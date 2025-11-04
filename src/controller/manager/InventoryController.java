@@ -15,9 +15,9 @@ import javafx.scene.layout.VBox;
 import model.Inventory;
 import model.Transaction;
 import utils.SessionManager;
+import utils.SweetAlert; // ← Thêm import
 import javafx.scene.text.Font;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class InventoryController {
@@ -51,9 +51,11 @@ public class InventoryController {
     @FXML private TextField txtAddCostPerUnit;
     @FXML private Button btnAddStock;
     @FXML private Button btnViewMore;
+    @FXML private Label lblTotalItemsInTable;   // ← mới
+    @FXML private Label lblLowStockInTable;
 
     private int currentPage = 0;
-    private static final int PAGE_SIZE = 10;  // hoặc 20 nếu muốn
+    private static final int PAGE_SIZE = 10;
     private boolean hasMoreData = true;
 
     private InventoryDAO inventoryDAO;
@@ -80,226 +82,175 @@ public class InventoryController {
     }
 
     private void setupTableColumns() {
-    colId.setCellValueFactory(new PropertyValueFactory<>("id"));
-    colName.setCellValueFactory(new PropertyValueFactory<>("name"));
-    colQuantity.setCellValueFactory(new PropertyValueFactory<>("quantity"));
-    colUnit.setCellValueFactory(new PropertyValueFactory<>("unit"));
-    colMinStock.setCellValueFactory(new PropertyValueFactory<>("minStock"));
+        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
+        colName.setCellValueFactory(new PropertyValueFactory<>("name"));
+        colQuantity.setCellValueFactory(new PropertyValueFactory<>("quantity"));
+        colUnit.setCellValueFactory(new PropertyValueFactory<>("unit"));
+        colMinStock.setCellValueFactory(new PropertyValueFactory<>("minStock"));
 
-    // Status column with clear text
-    colStatus.setCellValueFactory(cellData -> {
-        Inventory inv = cellData.getValue();
-        String status = inv.getQuantity() <= inv.getMinStock() ? "Low Stock" : "Normal";
-        return new javafx.beans.property.SimpleStringProperty(status);
-    });
+        // Status column
+        colStatus.setCellValueFactory(cellData -> {
+            Inventory inv = cellData.getValue();
+            String status = inv.getQuantity() <= inv.getMinStock() ? "Low Stock" : "Normal";
+            return new javafx.beans.property.SimpleStringProperty(status);
+        });
 
-    colStatus.setCellFactory(col -> new TableCell<Inventory, String>() {
-        @Override
-        protected void updateItem(String item, boolean empty) {
-            super.updateItem(item, empty);
-            if (empty || item == null) {
-                setText(null);
-                setStyle("");
-            } else {
-                setText(item);
-                setFont(Font.font("Segoe UI Semibold", 12));
-                if (item.equals("Low Stock")) {
-                    setStyle("-fx-text-fill: #ef4444; -fx-font-weight: 700;");
+        colStatus.setCellFactory(col -> new TableCell<Inventory, String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    setStyle("");
                 } else {
-                    setStyle("-fx-text-fill: #10b981; -fx-font-weight: 700;");
+                    setText(item);
+                    setFont(Font.font("Segoe UI Semibold", 12));
+                    if ("Low Stock".equals(item)) {
+                        setStyle("-fx-text-fill: #ef4444; -fx-font-weight: 700;");
+                    } else {
+                        setStyle("-fx-text-fill: #10b981; -fx-font-weight: 700;");
+                    }
                 }
             }
-        }
-    });
-
+        });
 
         // Actions column
         colActions.setCellFactory(col -> new TableCell<Inventory, Void>() {
-        private final Button btnEdit = new Button("Edit");
-        private final Button btnAddStock = new Button("Add Stock");
-        private final Button btnDelete = new Button("Delete");
-        private final HBox actionBox = new HBox(8);
+            private final Button btnEdit = new Button("Edit");
+            private final Button btnAddStock = new Button("Add Stock");
+            private final Button btnDelete = new Button("Delete");
+            private final HBox actionBox = new HBox(8);
 
-        {
-            // EDIT BUTTON - Blue with clear text
-            btnEdit.getStyleClass().add("action-button-edit");
-            btnEdit.setFont(Font.font("Segoe UI Semibold", 12));
-            btnEdit.setStyle(
-                "-fx-background-color: #3b82f6; " +
-                "-fx-text-fill: white; " +
-                "-fx-font-size: 12px; " +
-                "-fx-font-weight: 600; " +
-                "-fx-padding: 6 14; " +
-                "-fx-background-radius: 5; " +
-                "-fx-border-color: transparent; " +
-                "-fx-cursor: hand;"
-            );
-            btnEdit.setOnMouseEntered(e -> btnEdit.setStyle(
-                btnEdit.getStyle() + "-fx-background-color: #2563eb;"
-            ));
-            btnEdit.setOnMouseExited(e -> btnEdit.setStyle(
-                btnEdit.getStyle() + "-fx-background-color: #3b82f6;"
-            ));
+            {
+                btnEdit.getStyleClass().add("action-button-edit");
+                btnEdit.setFont(Font.font("Segoe UI Semibold", 12));
+                btnEdit.setStyle(
+                    "-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: 600; -fx-padding: 6 14; -fx-background-radius: 5; -fx-border-color: transparent; -fx-cursor: hand;"
+                );
+                btnEdit.setOnMouseEntered(e -> btnEdit.setStyle(btnEdit.getStyle() + "-fx-background-color: #2563eb;"));
+                btnEdit.setOnMouseExited(e -> btnEdit.setStyle(btnEdit.getStyle() + "-fx-background-color: #3b82f6;"));
 
-            // ADD STOCK BUTTON - Green with clear text
-            btnAddStock.getStyleClass().add("action-button-view");
-            btnAddStock.setFont(Font.font("Segoe UI Semibold", 12));
-            btnAddStock.setStyle(
-                "-fx-background-color: #10b981; " +
-                "-fx-text-fill: white; " +
-                "-fx-font-size: 12px; " +
-                "-fx-font-weight: 600; " +
-                "-fx-padding: 6 14; " +
-                "-fx-background-radius: 5; " +
-                "-fx-border-color: transparent; " +
-                "-fx-cursor: hand;"
-            );
-            btnAddStock.setOnMouseEntered(e -> btnAddStock.setStyle(
-                btnAddStock.getStyle() + "-fx-background-color: #059669;"
-            ));
-            btnAddStock.setOnMouseExited(e -> btnAddStock.setStyle(
-                btnAddStock.getStyle() + "-fx-background-color: #10b981;"
-            ));
+                btnAddStock.getStyleClass().add("action-button-view");
+                btnAddStock.setFont(Font.font("Segoe UI Semibold", 12));
+                btnAddStock.setStyle(
+                    "-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: 600; -fx-padding: 6 14; -fx-background-radius: 5; -fx-border-color: transparent; -fx-cursor: hand;"
+                );
+                btnAddStock.setOnMouseEntered(e -> btnAddStock.setStyle(btnAddStock.getStyle() + "-fx-background-color: #059669;"));
+                btnAddStock.setOnMouseExited(e -> btnAddStock.setStyle(btnAddStock.getStyle() + "-fx-background-color: #10b981;"));
 
-            // DELETE BUTTON - Red with clear text
-            btnDelete.getStyleClass().add("action-button-delete");
-            btnDelete.setFont(Font.font("Segoe UI Semibold", 12));
-            btnDelete.setStyle(
-                "-fx-background-color: #ef4444; " +
-                "-fx-text-fill: white; " +
-                "-fx-font-size: 12px; " +
-                "-fx-font-weight: 600; " +
-                "-fx-padding: 6 14; " +
-                "-fx-background-radius: 5; " +
-                "-fx-border-color: transparent; " +
-                "-fx-cursor: hand;"
-            );
-            btnDelete.setOnMouseEntered(e -> btnDelete.setStyle(
-                btnDelete.getStyle() + "-fx-background-color: #dc2626;"
-            ));
-            btnDelete.setOnMouseExited(e -> btnDelete.setStyle(
-                btnDelete.getStyle() + "-fx-background-color: #ef4444;"
-            ));
+                btnDelete.getStyleClass().add("action-button-delete");
+                btnDelete.setFont(Font.font("Segoe UI Semibold", 12));
+                btnDelete.setStyle(
+                    "-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: 600; -fx-padding: 6 14; -fx-background-radius: 5; -fx-border-color: transparent; -fx-cursor: hand;"
+                );
+                btnDelete.setOnMouseEntered(e -> btnDelete.setStyle(btnDelete.getStyle() + "-fx-background-color: #dc2626;"));
+                btnDelete.setOnMouseExited(e -> btnDelete.setStyle(btnDelete.getStyle() + "-fx-background-color: #ef4444;"));
 
-            actionBox.setAlignment(Pos.CENTER);
-            actionBox.getChildren().addAll(btnEdit, btnAddStock, btnDelete);
+                actionBox.setAlignment(Pos.CENTER);
+                actionBox.getChildren().addAll(btnEdit, btnAddStock, btnDelete);
 
-            btnEdit.setOnAction(event -> {
-                Inventory inv = getTableView().getItems().get(getIndex());
-                handleEditInventory(inv);
-            });
-
-            btnAddStock.setOnAction(event -> {
-                Inventory inv = getTableView().getItems().get(getIndex());
-                handleAddStock(inv);
-            });
-
-            btnDelete.setOnAction(event -> {
-                Inventory inv = getTableView().getItems().get(getIndex());
-                handleDeleteInventory(inv);
-            });
-        }
-
-        @Override
-        protected void updateItem(Void item, boolean empty) {
-            super.updateItem(item, empty);
-            if (empty) {
-                setGraphic(null);
-            } else {
-                setGraphic(actionBox);
+                btnEdit.setOnAction(e -> handleEditInventory(getTableView().getItems().get(getIndex())));
+                btnAddStock.setOnAction(e -> handleAddStock(getTableView().getItems().get(getIndex())));
+                btnDelete.setOnAction(e -> handleDeleteInventory(getTableView().getItems().get(getIndex())));
             }
-        }
-    });
 
-    // Format quantity and min stock with clear font
-    colQuantity.setCellFactory(col -> new TableCell<Inventory, Double>() {
-        @Override
-        protected void updateItem(Double item, boolean empty) {
-            super.updateItem(item, empty);
-            if (empty || item == null) {
-                setText(null);
-            } else {
-                setText(String.format("%.2f", item));
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                setGraphic(empty ? null : actionBox);
+            }
+        });
+
+        // Format quantity & min stock
+        colQuantity.setCellFactory(col -> new TableCell<Inventory, Double>() {
+            @Override
+            protected void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : String.format("%.2f", item));
                 setFont(Font.font("Segoe UI", 13));
                 setStyle("-fx-text-fill: #1e293b;");
             }
-        }
-    });
+        });
 
-    colMinStock.setCellFactory(col -> new TableCell<Inventory, Double>() {
-        @Override
-        protected void updateItem(Double item, boolean empty) {
-            super.updateItem(item, empty);
-            if (empty || item == null) {
-                setText(null);
-            } else {
-                setText(String.format("%.2f", item));
+        colMinStock.setCellFactory(col -> new TableCell<Inventory, Double>() {
+            @Override
+            protected void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : String.format("%.2f", item));
                 setFont(Font.font("Segoe UI", 13));
                 setStyle("-fx-text-fill: #1e293b;");
             }
-        }
-    });
-}
+        });
+    }
 
     private void loadInventoryData() {
         currentPage = 0;
-        hasMoreData = true;
         inventoryList.clear();
         filteredList.clear();
+        hasMoreData = true;
 
-        List<Inventory> firstPage = inventoryDAO.getInventoryPage(currentPage, PAGE_SIZE);
+        List<Inventory> firstPage = inventoryDAO.getInventoryPage(0, PAGE_SIZE);
         inventoryList.addAll(firstPage);
         filteredList.setAll(firstPage);
+
+        int total = inventoryDAO.getTotalCount();
+        hasMoreData = (currentPage + 1) * PAGE_SIZE < total;
 
         tableInventory.setItems(filteredList);
         updateStatistics();
         updateViewMoreButton();
     }
+
     @FXML
     private void handleLoadMore() {
         if (!hasMoreData) return;
 
         currentPage++;
-        List<Inventory> nextPage = inventoryDAO.getInventoryPage(currentPage, PAGE_SIZE);
+        List<Inventory> nextPage = inventoryDAO.getInventoryPage(currentPage * PAGE_SIZE, PAGE_SIZE);
 
         if (nextPage.isEmpty()) {
             hasMoreData = false;
         } else {
             inventoryList.addAll(nextPage);
-            applyFilters(); // Áp dụng lại filter
+            applyFilters();
         }
 
+        int total = inventoryDAO.getTotalCount();
+        hasMoreData = (currentPage + 1) * PAGE_SIZE < total;
+
+        updateStatistics();
         updateViewMoreButton();
     }
 
     private void updateViewMoreButton() {
-        btnViewMore.setVisible(hasMoreData);
-        btnViewMore.setManaged(hasMoreData);
+        if (btnViewMore != null) {
+            btnViewMore.setVisible(hasMoreData);
+            btnViewMore.setManaged(hasMoreData);
+        }
     }
 
     private void updateStatistics() {
         int total = filteredList.size();
-        int lowStock = (int) filteredList.stream()
-                .filter(inv -> inv.getQuantity() <= inv.getMinStock())
+        int lowStockCount = (int) filteredList.stream()
+                .filter(item -> item.getQuantity() < item.getMinStock())
                 .count();
 
-        lblTotalItems.setText("Total: " + total + " items");
-        lblLowStockItems.setText("Low Stock: " + lowStock);
+        // Thống kê trên đầu
+        lblTotalItems.setText(total + " items");
+        lblLowStockItems.setText("Low Stock: " + lowStockCount);
+
+        // Thống kê dưới bảng
+        lblTotalItemsInTable.setText("Total: " + total + " items");
+        lblLowStockInTable.setText("Low Stock: " + lowStockCount);
     }
 
     private void setupSearchAndFilter() {
         cmbFilterStock.setValue("All");
+        cmbFilterStock.getItems().setAll("All", "Low Stock");
     }
 
-    @FXML
-    private void handleSearch() {
-        applyFilters();
-    }
-
-    @FXML
-    private void handleFilter() {
-        applyFilters();
-    }
+    @FXML private void handleSearch() { applyFilters(); }
+    @FXML private void handleFilter() { applyFilters(); }
 
     private void applyFilters() {
         String searchText = txtSearch.getText().toLowerCase().trim();
@@ -309,8 +260,8 @@ public class InventoryController {
 
         for (Inventory inv : inventoryList) {
             boolean matchSearch = searchText.isEmpty() || inv.getName().toLowerCase().contains(searchText);
-            boolean matchStock = stockFilter.equals("All") ||
-                    (stockFilter.equals("Low Stock") && inv.getQuantity() <= inv.getMinStock());
+            boolean matchStock = "All".equals(stockFilter) ||
+                    ("Low Stock".equals(stockFilter) && inv.getQuantity() <= inv.getMinStock());
 
             if (matchSearch && matchStock) {
                 filteredList.add(inv);
@@ -334,29 +285,24 @@ public class InventoryController {
         isEditMode = false;
         currentInventory = null;
         dialogTitle.setText("Add New Item");
-
         txtName.clear();
         txtQuantity.setText("0.00");
         txtUnit.clear();
         txtMinStock.setText("0.00");
         txtCostPerUnit.setText("0.00");
-
         showDialog();
     }
 
     private void handleEditInventory(Inventory inv) {
         isEditMode = true;
         currentInventory = inv;
+        oldQuantity = inv.getQuantity();
         dialogTitle.setText("Edit Item");
-
         txtName.setText(inv.getName());
         txtQuantity.setText(String.format("%.2f", inv.getQuantity()));
         txtUnit.setText(inv.getUnit());
         txtMinStock.setText(String.format("%.2f", inv.getMinStock()));
         txtCostPerUnit.setText(String.format("%.2f", inv.getCostPerUnit()));
-
-        oldQuantity = inv.getQuantity();
-
         showDialog();
     }
 
@@ -365,239 +311,211 @@ public class InventoryController {
         lblItemName.setText(inv.getName());
         txtAddQuantity.setText("0.00");
         txtAddCostPerUnit.setText(String.format("%.2f", inv.getCostPerUnit()));
-
         showAddStockDialog();
     }
 
     @FXML
     private void handleAddStock() {
-        if (!validateAddStockInput()) {
-            return;
-        }
+        if (!validateAddStockInput()) return;
 
-        double addQuantity = Double.parseDouble(txtAddQuantity.getText().trim());
+        double addQty = Double.parseDouble(txtAddQuantity.getText().trim());
         double costPerUnit = Double.parseDouble(txtAddCostPerUnit.getText().trim());
-        double newQuantity = currentItemForStock.getQuantity() + addQuantity;
-        double expenseAmount = addQuantity * costPerUnit;
+        double newQty = currentItemForStock.getQuantity() + addQty;
+        double expense = addQty * costPerUnit;
 
-        currentItemForStock.setQuantity(newQuantity);
+        currentItemForStock.setQuantity(newQty);
 
         if (inventoryDAO.updateInventory(currentItemForStock)) {
-            insertExpenseTransaction(expenseAmount, "Added " + addQuantity + " " + currentItemForStock.getUnit() + " of " + currentItemForStock.getName());
-            showAlert(Alert.AlertType.INFORMATION, "Success", "Stock added successfully.");
+            insertExpenseTransaction(expense, "Added " + addQty + " " + currentItemForStock.getUnit() + " of " + currentItemForStock.getName());
+            showSweetAlert(SweetAlert.AlertType.SUCCESS, "Success", "Stock added successfully.");
             loadInventoryData();
             handleCloseAddStockDialog();
         } else {
-            showAlert(Alert.AlertType.ERROR, "Error", "Failed to add stock.");
+            showSweetAlert(SweetAlert.AlertType.ERROR, "Error", "Failed to add stock.");
         }
     }
 
     private boolean validateAddStockInput() {
         try {
-            double addQuantity = Double.parseDouble(txtAddQuantity.getText().trim());
-            if (addQuantity <= 0) {
-                showAlert(Alert.AlertType.WARNING, "Warning", "Add quantity must be greater than 0.");
+            double qty = Double.parseDouble(txtAddQuantity.getText().trim());
+            if (qty <= 0) {
+                showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Add quantity must be greater than 0.");
                 txtAddQuantity.requestFocus();
                 return false;
             }
         } catch (NumberFormatException e) {
-            showAlert(Alert.AlertType.WARNING, "Warning", "Invalid add quantity format.");
+            showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Invalid quantity format.");
             txtAddQuantity.requestFocus();
             return false;
         }
 
         try {
-            double costPerUnit = Double.parseDouble(txtAddCostPerUnit.getText().trim());
-            if (costPerUnit < 0) {
-                showAlert(Alert.AlertType.WARNING, "Warning", "Cost per unit cannot be negative.");
+            double cost = Double.parseDouble(txtAddCostPerUnit.getText().trim());
+            if (cost < 0) {
+                showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Cost per unit cannot be negative.");
                 txtAddCostPerUnit.requestFocus();
                 return false;
             }
         } catch (NumberFormatException e) {
-            showAlert(Alert.AlertType.WARNING, "Warning", "Invalid cost per unit format.");
+            showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Invalid cost format.");
             txtAddCostPerUnit.requestFocus();
             return false;
         }
-
         return true;
     }
 
+    // ← DÙNG SWEETALERT CHO XÓA
     private void handleDeleteInventory(Inventory inv) {
-        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmAlert.setTitle("Confirm Delete");
-        confirmAlert.setHeaderText("Are you sure you want to delete this item?");
-        confirmAlert.setContentText("Item: " + inv.getName());
-
-        if (confirmAlert.showAndWait().get() == ButtonType.OK) {
+        showConfirmation("Confirm Delete", "Are you sure you want to delete this item?\nItem: " + inv.getName(), () -> {
             if (inventoryDAO.deleteInventory(inv.getId())) {
-                showAlert(Alert.AlertType.INFORMATION, "Success", "Item deleted successfully.");
+                showSweetAlert(SweetAlert.AlertType.SUCCESS, "Success", "Item deleted successfully.");
                 loadInventoryData();
             } else {
-                showAlert(Alert.AlertType.ERROR, "Error", "Failed to delete item. It may be in use.");
+                showSweetAlert(SweetAlert.AlertType.ERROR, "Error", "Failed to delete item. It may be in use.");
             }
-        }
+        }, null);
     }
 
     @FXML
     private void handleSaveInventory() {
-        if (!validateInput()) {
-            return;
-        }
+        if (!validateInput()) return;
 
         String name = txtName.getText().trim();
-        double quantity = Double.parseDouble(txtQuantity.getText().trim());
+        double qty = Double.parseDouble(txtQuantity.getText().trim());
         String unit = txtUnit.getText().trim();
         double minStock = Double.parseDouble(txtMinStock.getText().trim());
         double costPerUnit = Double.parseDouble(txtCostPerUnit.getText().trim());
 
-        double addedQuantity = quantity - oldQuantity;
-        double expenseAmount = addedQuantity * costPerUnit;
+        double addedQty = qty - oldQuantity;
+        double expense = addedQty * costPerUnit;
 
         if (isEditMode && currentInventory != null) {
             currentInventory.setName(name);
-            currentInventory.setQuantity(quantity);
+            currentInventory.setQuantity(qty);
             currentInventory.setUnit(unit);
             currentInventory.setMinStock(minStock);
             currentInventory.setCostPerUnit(costPerUnit);
 
             if (inventoryDAO.updateInventory(currentInventory)) {
-                if (addedQuantity > 0) {
-                    insertExpenseTransaction(expenseAmount, "Purchased additional " + addedQuantity + " " + unit + " of " + name);
+                if (addedQty > 0) {
+                    insertExpenseTransaction(expense, "Purchased additional " + addedQty + " " + unit + " of " + name);
                 }
-                showAlert(Alert.AlertType.INFORMATION, "Success", "Item updated successfully.");
+                showSweetAlert(SweetAlert.AlertType.SUCCESS, "Success", "Item updated successfully.");
                 loadInventoryData();
                 handleCloseDialog();
             } else {
-                showAlert(Alert.AlertType.ERROR, "Error", "Failed to update item.");
+                showSweetAlert(SweetAlert.AlertType.ERROR, "Error", "Failed to update item.");
             }
         } else {
-            Inventory newInventory = new Inventory();
-            newInventory.setName(name);
-            newInventory.setQuantity(quantity);
-            newInventory.setUnit(unit);
-            newInventory.setMinStock(minStock);
-            newInventory.setCostPerUnit(costPerUnit);
+            Inventory newInv = new Inventory();
+            newInv.setName(name);
+            newInv.setQuantity(qty);
+            newInv.setUnit(unit);
+            newInv.setMinStock(minStock);
+            newInv.setCostPerUnit(costPerUnit);
 
-            if (inventoryDAO.addInventory(newInventory)) {
-                if (quantity > 0) {
-                    insertExpenseTransaction(quantity * costPerUnit, "Purchased initial " + quantity + " " + unit + " of " + name);
+            if (inventoryDAO.addInventory(newInv)) {
+                if (qty > 0) {
+                    insertExpenseTransaction(qty * costPerUnit, "Purchased initial " + qty + " " + unit + " of " + name);
                 }
-                showAlert(Alert.AlertType.INFORMATION, "Success", "Item added successfully.");
+                showSweetAlert(SweetAlert.AlertType.SUCCESS, "Success", "Item added successfully.");
                 loadInventoryData();
                 handleCloseDialog();
             } else {
-                showAlert(Alert.AlertType.ERROR, "Error", "Failed to add item.");
+                showSweetAlert(SweetAlert.AlertType.ERROR, "Error", "Failed to add item.");
             }
         }
     }
 
     private void insertExpenseTransaction(double amount, String reason) {
-        Transaction transaction = new Transaction();
-        transaction.setType("expense");
-        transaction.setAmount(amount);
-        transaction.setReason(reason);
-        transaction.setCreatedBy(SessionManager.getCurrentUserId());
-        transactionDAO.addTransaction(transaction);
+        Transaction t = new Transaction();
+        t.setType("expense");
+        t.setAmount(amount);
+        t.setReason(reason);
+        t.setCreatedBy(SessionManager.getCurrentUserId());
+        transactionDAO.addTransaction(t);
     }
 
-    @FXML
-    private void handleCloseDialog() {
-        hideDialog();
-    }
-
-    @FXML
-    private void handleCloseAddStockDialog() {
-        hideAddStockDialog();
-    }
+    @FXML private void handleCloseDialog() { hideDialog(); }
+    @FXML private void handleCloseAddStockDialog() { hideAddStockDialog(); }
 
     private void showDialog() {
-        overlay.setVisible(true);
-        overlay.setManaged(true);
-        dialogPane.setVisible(true);
-        dialogPane.setManaged(true);
+        overlay.setVisible(true); overlay.setManaged(true);
+        dialogPane.setVisible(true); dialogPane.setManaged(true);
     }
 
     private void hideDialog() {
-        overlay.setVisible(false);
-        overlay.setManaged(false);
-        dialogPane.setVisible(false);
-        dialogPane.setManaged(false);
+        overlay.setVisible(false); overlay.setManaged(false);
+        dialogPane.setVisible(false); dialogPane.setManaged(false);
     }
 
     private void showAddStockDialog() {
-        overlay.setVisible(true);
-        overlay.setManaged(true);
-        addStockPane.setVisible(true);
-        addStockPane.setManaged(true);
+        overlay.setVisible(true); overlay.setManaged(true);
+        addStockPane.setVisible(true); addStockPane.setManaged(true);
     }
 
     private void hideAddStockDialog() {
-        overlay.setVisible(false);
-        overlay.setManaged(false);
-        addStockPane.setVisible(false);
-        addStockPane.setManaged(false);
+        overlay.setVisible(false); overlay.setManaged(false);
+        addStockPane.setVisible(false); addStockPane.setManaged(false);
     }
 
     private boolean validateInput() {
         if (txtName.getText().trim().isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "Warning", "Please enter item name.");
-            txtName.requestFocus();
-            return false;
+            showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Please enter item name.");
+            txtName.requestFocus(); return false;
         }
-
         if (txtUnit.getText().trim().isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "Warning", "Please enter unit.");
-            txtUnit.requestFocus();
-            return false;
+            showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Please enter unit.");
+            txtUnit.requestFocus(); return false;
         }
 
-        try {
-            double quantity = Double.parseDouble(txtQuantity.getText().trim());
-            if (quantity < 0) {
-                showAlert(Alert.AlertType.WARNING, "Warning", "Quantity cannot be negative.");
-                txtQuantity.requestFocus();
-                return false;
-            }
-        } catch (NumberFormatException e) {
-            showAlert(Alert.AlertType.WARNING, "Warning", "Invalid quantity format.");
-            txtQuantity.requestFocus();
-            return false;
-        }
+        try { double q = Double.parseDouble(txtQuantity.getText().trim());
+            if (q < 0) { showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Quantity cannot be negative."); txtQuantity.requestFocus(); return false; }
+        } catch (NumberFormatException e) { showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Invalid quantity."); txtQuantity.requestFocus(); return false; }
 
-        try {
-            double minStock = Double.parseDouble(txtMinStock.getText().trim());
-            if (minStock < 0) {
-                showAlert(Alert.AlertType.WARNING, "Warning", "Min stock cannot be negative.");
-                txtMinStock.requestFocus();
-                return false;
-            }
-        } catch (NumberFormatException e) {
-            showAlert(Alert.AlertType.WARNING, "Warning", "Invalid min stock format.");
-            txtMinStock.requestFocus();
-            return false;
-        }
+        try { double m = Double.parseDouble(txtMinStock.getText().trim());
+            if (m < 0) { showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Min stock cannot be negative."); txtMinStock.requestFocus(); return false; }
+        } catch (NumberFormatException e) { showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Invalid min stock."); txtMinStock.requestFocus(); return false; }
 
-        try {
-            double costPerUnit = Double.parseDouble(txtCostPerUnit.getText().trim());
-            if (costPerUnit < 0) {
-                showAlert(Alert.AlertType.WARNING, "Warning", "Cost per unit cannot be negative.");
-                txtCostPerUnit.requestFocus();
-                return false;
-            }
-        } catch (NumberFormatException e) {
-            showAlert(Alert.AlertType.WARNING, "Warning", "Invalid cost per unit format.");
-            txtCostPerUnit.requestFocus();
-            return false;
-        }
+        try { double c = Double.parseDouble(txtCostPerUnit.getText().trim());
+            if (c < 0) { showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Cost cannot be negative."); txtCostPerUnit.requestFocus(); return false; }
+        } catch (NumberFormatException e) { showSweetAlert(SweetAlert.AlertType.WARNING, "Warning", "Invalid cost."); txtCostPerUnit.requestFocus(); return false; }
 
         return true;
     }
 
-    private void showAlert(Alert.AlertType type, String title, String content) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
+    // ← SWEETALERT CHUNG
+    private void showSweetAlert(SweetAlert.AlertType type, String title, String content) {
+        try {
+            if (tableInventory.getScene() == null) throw new NullPointerException();
+            Pane root = (Pane) tableInventory.getScene().getRoot();
+            SweetAlert.showAlert(root, type, title, content, null);
+        } catch (Exception e) {
+            Alert a = new Alert(convertToAlertType(type));
+            a.setTitle(title); a.setHeaderText(null); a.setContentText(content);
+            a.showAndWait();
+        }
+    }
+
+    private void showConfirmation(String title, String content, Runnable onConfirm, Runnable onCancel) {
+        try {
+            if (tableInventory.getScene() == null) throw new NullPointerException();
+            Pane root = (Pane) tableInventory.getScene().getRoot();
+            SweetAlert.showConfirmation(root, title, content, onConfirm, onCancel);
+        } catch (Exception e) {
+            Alert a = new Alert(Alert.AlertType.CONFIRMATION);
+            a.setTitle(title); a.setHeaderText(null); a.setContentText(content);
+            if (a.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK && onConfirm != null) onConfirm.run();
+            else if (onCancel != null) onCancel.run();
+        }
+    }
+
+    private Alert.AlertType convertToAlertType(SweetAlert.AlertType t) {
+        return switch (t) {
+            case SUCCESS -> Alert.AlertType.INFORMATION;
+            case ERROR -> Alert.AlertType.ERROR;
+            case WARNING -> Alert.AlertType.WARNING;
+            default -> Alert.AlertType.INFORMATION;
+        };
     }
 }
