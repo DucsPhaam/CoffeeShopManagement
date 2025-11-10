@@ -447,4 +447,6 @@ INSERT INTO `transactions` (`type`, `amount`, `reason`, `created_by`, `created_a
 ('expense', 60.00, 'Utilities Payment', 1, '2025-10-10 09:00:00'),
 ('expense', 100.00, 'Staff Bonus - Performance', 1, '2025-10-12 16:00:00');
 ALTER TABLE transactions ADD COLUMN display_order INT DEFAULT 0;
+ALTER TABLE transactions ADD COLUMN order_id INT NULL;
+ALTER TABLE transactions ADD FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE SET NULL;
 COMMIT;
