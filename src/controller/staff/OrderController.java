@@ -95,7 +95,7 @@ public class OrderController implements Initializable {
 
     private void setupOrderTypeToggle() {
         String selectedStyle = "-fx-background-color: #667eea; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: 600; -fx-background-radius: 12; -fx-pref-width: 200; -fx-pref-height: 50; -fx-cursor: hand;";
-        String unselectedStyle = "-fx-background-color: #e5e7eb; -fx-text-fill: #4a5568; -fx-font-size: 15px; -fx-font-weight: 600; -fx-background-radius: 12; -fx-pref-width: 200; -fx-pref-height: 50; -fx-cursor: hand;";
+        String unselectedStyle = "-fx-background-color: #e5e7eb; -fx-text-fill: #4a5568; -fx-font-size: 15px; -fx-font-weight: 600; -fx-background-radius: 12; -fx-pref-width: 200; -fx-pref-height: 50; -fx-cursor: hand; -fx-padding: 0 10 0 10;";
 
         orderTypeGroup.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal == btnDineIn) {
@@ -259,11 +259,11 @@ public class OrderController implements Initializable {
     }
 
     private void selectTable(Table table) {
-    selectedTableId = table.getId();  // ← getId()
-    lblSelectedTable.setText("Table: " + table.getName() + " (" + table.getSeats() + " seats)");
-    showMenu();
-    showSweetAlert(SweetAlert.AlertType.SUCCESS, "Table Selected", "Table " + table.getName() + " selected!");
-}
+        selectedTableId = table.getId();  // ← getId()
+        lblSelectedTable.setText("Table: " + table.getName() + " (" + table.getSeats() + " seats)");
+        showMenu();
+        showSweetAlert(SweetAlert.AlertType.SUCCESS, "Table Selected", "Table " + table.getName() + " selected!");
+    }
 
     private void showMenu() {
         menuPane.setVisible(true);
@@ -283,12 +283,12 @@ public class OrderController implements Initializable {
                 String drinkTypesStr = rs.getString("drink_types");
                 String[] drinkTypes = drinkTypesStr != null ? drinkTypesStr.split(",") : new String[] { "hot" };
                 Product product = new Product(
-    rs.getInt("id"),
-    rs.getString("name"),
-    rs.getDouble("price"),
-    new HashSet<>(Arrays.asList(drinkTypes)),
-    rs.getString("image")
-);
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getDouble("price"),
+                        new HashSet<>(Arrays.asList(drinkTypes)),
+                        rs.getString("image")
+                );
                 allProducts.add(product);
             }
         } catch (SQLException e) {
@@ -385,12 +385,17 @@ public class OrderController implements Initializable {
 
         ImageView imgView = new ImageView();
         String imagePath = item.getImage() != null && !item.getImage().isEmpty() ? item.getImage() : "img/temp_icon.png";
-        String resourcePath = imagePath.startsWith("/") ? imagePath : "/" + imagePath;
+        String fullPath = Paths.get("src/resources/" + imagePath).toAbsolutePath().toString();
         try {
-            InputStream stream = getClass().getResourceAsStream(resourcePath);
-            if (stream != null) imgView.setImage(new Image(stream));
-            else loadDefaultImage(imgView);
-        } catch (Exception e) { loadDefaultImage(imgView); }
+            File file = new File(fullPath);
+            if (file.exists()) {
+                imgView.setImage(new Image("file:" + fullPath));
+            } else {
+                loadDefaultImage(imgView);
+            }
+        } catch (Exception e) {
+            loadDefaultImage(imgView);
+        }
         imgView.setFitWidth(50); imgView.setFitHeight(50); imgView.setPreserveRatio(true);
 
         VBox infoBox = new VBox(4); infoBox.setAlignment(Pos.CENTER_LEFT); HBox.setHgrow(infoBox, Priority.ALWAYS);
@@ -456,7 +461,7 @@ public class OrderController implements Initializable {
         showPaymentOverlay();
     }
 
-   private void showPaymentOverlay() {
+    private void showPaymentOverlay() {
         paymentOverlay = new VBox(20);
         paymentOverlay.setAlignment(Pos.CENTER);
         paymentOverlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.75);");
@@ -860,7 +865,7 @@ public class OrderController implements Initializable {
         }
     }
 
-   private void payment(double paidAmount, double discount) {
+    private void payment(double paidAmount, double discount) {
         try (Connection conn = DatabaseConnection.getConnection()) {
             conn.setAutoCommit(false);
 
@@ -922,7 +927,7 @@ public class OrderController implements Initializable {
             conn.commit();
             showSuccessConfirmation(orderId, total, paidAmount, changeReturned);
 
-            clearOrder();
+            orderItems.clear(); updateOrderDisplay(); selectedTableId = null; lblSelectedTable.setText(""); menuPane.setVisible(false); menuPane.setManaged(false); btnDineIn.setSelected(true);
             loadTables();
 
         } catch (SQLException e) {
@@ -1004,7 +1009,7 @@ public class OrderController implements Initializable {
         autoClose.play();
     }
 
-     private void hideSuccessConfirmation() {
+    private void hideSuccessConfirmation() {
         if (confirmationOverlay != null) {
             StackPane root = (StackPane) confirmationOverlay.getParent();
             if (root != null) {
@@ -1117,18 +1122,7 @@ public class OrderController implements Initializable {
 
     private void clearOrder() {
         orderItems.clear(); updateOrderDisplay(); selectedTableId = null; lblSelectedTable.setText(""); menuPane.setVisible(false); menuPane.setManaged(false); btnDineIn.setSelected(true);
-        showSweetAlert(SweetAlert.AlertType.INFO, "Cleared", "Order cleared!");
-    }
-
-    @FXML
-    private void handleViewOrders(ActionEvent event) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/resources/view/staff/view_orders.fxml"));
-            Parent root = loader.load();
-            Stage stage = new Stage(); stage.setTitle("View All Orders"); stage.setScene(new Scene(root)); stage.show();
-        } catch (IOException e) {
-            showSweetAlert(SweetAlert.AlertType.ERROR, "Error", "Failed to load orders view: " + e.getMessage());
-        }
+            showSweetAlert(SweetAlert.AlertType.INFO, "Cleared", "Order cleared!");
     }
 
     // Navigation
@@ -1192,5 +1186,5 @@ public class OrderController implements Initializable {
         };
     }
 
-    
+
 }

@@ -8,8 +8,7 @@ public class Transaction {
     private double amount;
     private String reason;
     private int createdBy;
-
-
+    private Integer orderId;
     private Timestamp createdAt;
 
     public Transaction() {}
@@ -40,5 +39,8 @@ public class Transaction {
 
     public Timestamp getCreatedAt() { return createdAt; }
     public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
+
+    public Integer getOrderId() { return orderId; }
+    public void setOrderId(Integer orderId) { this.orderId = orderId; }
 
 }

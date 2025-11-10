@@ -207,12 +207,13 @@ public class OrderDAO {
             orderStmt.setInt(1, orderId);
             orderStmt.executeUpdate();
 
-            // Add income transaction
-            String transSql = "INSERT INTO transactions (type, amount, reason, created_by) VALUES ('income', ?, ?, ?)";
+            // Add income transaction WITH order_id ← CẬP NHẬT PHẦN NÀY
+            String transSql = "INSERT INTO transactions (type, amount, reason, created_by, order_id) VALUES ('income', ?, ?, ?, ?)";
             PreparedStatement transStmt = conn.prepareStatement(transSql);
             transStmt.setDouble(1, totalPrice + vat);
             transStmt.setString(2, "Payment for order #" + orderId);
             transStmt.setInt(3, utils.SessionManager.getCurrentUserId());
+            transStmt.setInt(4, orderId); // ← THÊM ORDER_ID
             transStmt.executeUpdate();
 
             conn.commit();

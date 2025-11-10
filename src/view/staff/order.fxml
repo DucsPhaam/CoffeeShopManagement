@@ -336,21 +336,6 @@
                                 <text>Clear</text>
                             </Button>
                         </HBox>
-
-                        <Button fx:id="btnViewOrders" maxWidth="Infinity"
-                                style="-fx-background-color: #f59e0b; -fx-text-fill: white;
-                                       -fx-font-size: 14px; -fx-font-weight: 600; -fx-pref-height: 48;
-                                       -fx-background-radius: 12; -fx-cursor: hand;"
-                                onAction="#handleViewOrders">
-                            <graphic>
-                                <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
-                                    <image>
-                                        <Image url="/resources/img/clipboard-list-solid-full.png"/>
-                                    </image>
-                                </ImageView>
-                            </graphic>
-                            <text>View All Orders</text>
-                        </Button>
                     </VBox>
                 </VBox>
             </HBox>

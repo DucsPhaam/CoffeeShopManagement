@@ -117,7 +117,7 @@
 
                     <!-- View More Bar - giống hệt Cashbook -->
                     <HBox alignment="CENTER" style="-fx-padding: 15.0 0 0 0;">
-                        <Label fx:id="lblLowStockItems"
+                        <Label fx:id="lblTotalItemsInTable"
                                text="Total: 0 items"
                                style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #1e293b; -fx-font-family: 'Segoe UI Semibold';"/>
                         <Region HBox.hgrow="ALWAYS"/>
@@ -130,7 +130,7 @@
                    -fx-border-color: #cbd5e0; -fx-border-width: 1; -fx-border-radius: 8;"
                                 visible="false" managed="false"/>
                         <Region HBox.hgrow="ALWAYS"/>
-                        <Label fx:id="lblLowStockItems"
+                        <Label fx:id="lblLowStockInTable"
                                text="Low Stock: 0"
                                style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #ef4444; -fx-font-family: 'Segoe UI Semibold';"/>
                     </HBox>

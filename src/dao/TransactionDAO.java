@@ -9,7 +9,7 @@ public class TransactionDAO {
 
     public List<Transaction> getAllTransactions() {
         List<Transaction> transactionList = new ArrayList<>();
-        String sql = "SELECT id, type, amount, reason, created_by, created_at " +
+        String sql = "SELECT id, type, amount, reason, created_by, created_at, order_id " +
                 "FROM transactions " +
                 "ORDER BY created_at DESC, id DESC";
 
@@ -24,8 +24,9 @@ public class TransactionDAO {
                         rs.getDouble("amount"),
                         rs.getString("reason"),
                         rs.getInt("created_by"),
-                        rs.getTimestamp("created_at")
-                );
+                        rs.getTimestamp("created_at"));
+                Integer orderId = rs.getObject("order_id") != null ? rs.getInt("order_id") : null;
+                transaction.setOrderId(orderId);
                 transactionList.add(transaction);
             }
         } catch (SQLException e) {
@@ -37,7 +38,7 @@ public class TransactionDAO {
 
     public List<Transaction> getTransactionsPaginated(int offset, int limit) {
         List<Transaction> transactions = new ArrayList<>();
-        String sql = "SELECT id, type, amount, reason, created_by, created_at " +
+        String sql = "SELECT id, type, amount, reason, created_by, created_at, order_id " + // THÊM order_id
                 "FROM transactions " +
                 "ORDER BY created_at DESC, id DESC " +
                 "LIMIT ? OFFSET ?";
@@ -56,8 +57,11 @@ public class TransactionDAO {
                             rs.getDouble("amount"),
                             rs.getString("reason"),
                             rs.getInt("created_by"),
-                            rs.getTimestamp("created_at")
-                    );
+                            rs.getTimestamp("created_at"));
+                    // THÊM DÒNG NÀY:
+                    Integer orderId = rs.getObject("order_id") != null ? rs.getInt("order_id") : null;
+                    transaction.setOrderId(orderId);
+
                     transactions.add(transaction);
                 }
             }
@@ -68,8 +72,9 @@ public class TransactionDAO {
     }
 
     public boolean addTransaction(Transaction transaction) {
-        String sql = "INSERT INTO transactions (type, amount, reason, created_by, created_at) " +
-                "VALUES (?, ?, ?, ?, NOW())";
+        String sql = "INSERT INTO transactions (type, amount, reason, created_by, created_at, order_id) " + // THÊM
+                // order_id
+                "VALUES (?, ?, ?, ?, NOW(), ?)"; // + ?
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -78,6 +83,12 @@ public class TransactionDAO {
             stmt.setDouble(2, transaction.getAmount());
             stmt.setString(3, transaction.getReason());
             stmt.setInt(4, transaction.getCreatedBy());
+            // THÊM:
+            if (transaction.getOrderId() != null) {
+                stmt.setInt(5, transaction.getOrderId());
+            } else {
+                stmt.setNull(5, Types.INTEGER);
+            }
 
             int rows = stmt.executeUpdate();
 

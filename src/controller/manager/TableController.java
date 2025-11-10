@@ -479,41 +479,6 @@ public class TableController {
             alert.setContentText(content);
             alert.showAndWait();
         }
-<<<<<<< HEAD
-    }
-
-    private void showConfirmation(String title, String content, Runnable onConfirm, Runnable onCancel) {
-        try {
-            if (floorTabPane.getScene() == null) {
-                throw new NullPointerException("Scene is null - falling back to standard confirmation");
-            }
-            Pane rootPane = (Pane) floorTabPane.getScene().getRoot();
-            SweetAlert.showConfirmation(rootPane, title, content, onConfirm, onCancel);
-        } catch (Exception e) {
-            System.err.println("Failed to show SweetConfirmation: " + e.getMessage());
-            // Fallback to regular confirmation
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle(title);
-            alert.setHeaderText(null);
-            alert.setContentText(content);
-            if (alert.showAndWait().get() == ButtonType.OK) {
-                if (onConfirm != null) onConfirm.run();
-            } else {
-                if (onCancel != null) onCancel.run();
-            }
-        }
-    }
-
-    private Alert.AlertType convertToAlertType(SweetAlert.AlertType sweetType) {
-        return switch (sweetType) {
-            case SUCCESS -> Alert.AlertType.INFORMATION;
-            case ERROR -> Alert.AlertType.ERROR;
-            case WARNING -> Alert.AlertType.WARNING;
-            case QUESTION -> Alert.AlertType.CONFIRMATION;
-            default -> Alert.AlertType.INFORMATION;
-        };
-=======
->>>>>>> 82ad102 (add Overlay alert)
     }
 
     private void showConfirmation(String title, String content, Runnable onConfirm, Runnable onCancel) {
