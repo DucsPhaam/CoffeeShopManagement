@@ -80,6 +80,7 @@ public class ReportController {
     private double previousRevenue = 0;
     private int previousOrders = 0;
     private double previousAvgOrder = 0;
+    private double previousCost = 0;
 
     @FXML
     public void initialize() {
@@ -250,7 +251,9 @@ public class ReportController {
             // Lấy dữ liệu kỳ trước
             calculatePreviousPeriodData(conn, previousDateRange);
 
-            updateSummaryCards(totalRevenue, totalOrders);
+            double totalCost = getTotalExpenses(conn, dateRange);
+
+            updateSummaryCards(totalRevenue, totalOrders, totalCost);
             setupRevenueByDateTable();
             updateRevenueChart();
             updateRevenuePieChart();
@@ -313,7 +316,9 @@ public class ReportController {
 
             calculatePreviousPeriodData(conn, previousDateRange);
 
-            updateSummaryCards(totalRevenue, totalOrders);
+            double totalCost = getTotalExpenses(conn, dateRange);
+
+            updateSummaryCards(totalRevenue, totalOrders, totalCost);
             setupRevenueByStaffTable();
             updateStaffRevenueChart();
             updateStaffPieChart();
@@ -378,7 +383,9 @@ public class ReportController {
 
             calculatePreviousPeriodData(conn, previousDateRange);
 
-            updateSummaryCards(totalRevenue, totalOrders);
+            double totalCost = getTotalExpenses(conn, dateRange);
+
+            updateSummaryCards(totalRevenue, totalOrders, totalCost);
             setupProductPerformanceTable();
             updateProductChart();
             updateProductPieChart();
@@ -421,27 +428,60 @@ public class ReportController {
 
             ResultSet rs = ps.executeQuery();
 
+            TreeSet<Date> allDates = new TreeSet<>();
+            Map<Date, Double> revenueMap = new HashMap<>();
+            Map<Date, Integer> ordersMap = new HashMap<>();
+
+            while (rs.next()) {
+                Date date = rs.getDate("order_date");
+                allDates.add(date);
+                revenueMap.put(date, rs.getDouble("revenue"));
+                ordersMap.put(date, rs.getInt("orders"));
+            }
+
+            String expenseSql = "SELECT DATE(created_at) as expense_date, " +
+                    "SUM(amount) as total_expense " +
+                    "FROM transactions " +
+                    "WHERE type = 'expense' " +
+                    "AND created_at BETWEEN ? AND ? " +
+                    "GROUP BY DATE(created_at)";
+
+            PreparedStatement psExpense = conn.prepareStatement(expenseSql);
+            psExpense.setTimestamp(1, new Timestamp(dateRange.fromDate.getTime()));
+            psExpense.setTimestamp(2, new Timestamp(dateRange.toDate.getTime()));
+
+            ResultSet rsExpense = psExpense.executeQuery();
+
+            Map<Date, Double> expenseMap = new HashMap<>();
+
+            while (rsExpense.next()) {
+                Date date = rsExpense.getDate("expense_date");
+                allDates.add(date);
+                expenseMap.put(date, rsExpense.getDouble("total_expense"));
+            }
+
             double totalRevenue = 0;
             double totalCost = 0;
             int totalOrders = 0;
 
-            while (rs.next()) {
-                double revenue = rs.getDouble("revenue");
-                double estimatedCost = revenue * 0.35;
-                double profit = revenue - estimatedCost;
+            for (Date date : allDates) {
+                double revenue = revenueMap.getOrDefault(date, 0.0);
+                double cost = expenseMap.getOrDefault(date, 0.0);
+                double profit = revenue - cost;
+                int orders = ordersMap.getOrDefault(date, 0);
 
                 Map<String, Object> row = new HashMap<>();
-                row.put("date", rs.getDate("order_date"));
+                row.put("date", date);
                 row.put("revenue", revenue);
-                row.put("cost", estimatedCost);
+                row.put("cost", cost);
                 row.put("profit", profit);
-                row.put("profit_margin", profit / revenue);
-                row.put("orders", rs.getInt("orders"));
+                row.put("profit_margin", revenue > 0 ? profit / revenue : 0);
+                row.put("orders", orders);
 
                 reportData.add(row);
                 totalRevenue += revenue;
-                totalCost += estimatedCost;
-                totalOrders += rs.getInt("orders");
+                totalCost += cost;
+                totalOrders += orders;
             }
 
             calculatePreviousPeriodData(conn, previousDateRange);
@@ -450,7 +490,7 @@ public class ReportController {
             lblTotalRevenue.setText(currencyFormat.format(totalRevenue));
             lblTotalOrders.setText(String.valueOf(totalOrders));
             lblNetProfit.setText(currencyFormat.format(netProfit));
-            lblProfitMargin.setText("Margin: " + percentFormat.format(netProfit / totalRevenue));
+            lblProfitMargin.setText("Margin: " + percentFormat.format(totalRevenue > 0 ? netProfit / totalRevenue : 0));
             lblAvgOrderValue.setText(currencyFormat.format(totalOrders > 0 ? totalRevenue / totalOrders : 0));
 
             updateSummaryCardChanges(totalRevenue, totalOrders);
@@ -563,9 +603,21 @@ public class ReportController {
                 previousOrders = rs.getInt("orders");
                 previousAvgOrder = previousOrders > 0 ? previousRevenue / previousOrders : 0;
             }
+
+            previousCost = getTotalExpenses(conn, previousDateRange);
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private double getTotalExpenses(Connection conn, DateRange range) throws SQLException {
+        String sql = "SELECT SUM(amount) FROM transactions WHERE type = 'expense' AND created_at BETWEEN ? AND ?";
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ps.setTimestamp(1, new Timestamp(range.fromDate.getTime()));
+        ps.setTimestamp(2, new Timestamp(range.toDate.getTime()));
+        ResultSet rs = ps.executeQuery();
+        return rs.next() ? rs.getDouble(1) : 0.0;
     }
 
     // Table Setup Methods
@@ -935,13 +987,12 @@ public class ReportController {
     }
 
     // Helper Methods - CẢI THIỆN SUMMARY CARDS
-    private void updateSummaryCards(double totalRevenue, int totalOrders) {
+    private void updateSummaryCards(double totalRevenue, int totalOrders, double totalCost) {
         lblTotalRevenue.setText(currencyFormat.format(totalRevenue));
         lblTotalOrders.setText(String.valueOf(totalOrders));
         lblAvgOrderValue.setText(currencyFormat.format(totalOrders > 0 ? totalRevenue / totalOrders : 0));
 
-        double estimatedCosts = totalRevenue * 0.35;
-        double profit = totalRevenue - estimatedCosts;
+        double profit = totalRevenue - totalCost;
         lblNetProfit.setText(currencyFormat.format(profit));
         lblProfitMargin.setText("Margin: " + percentFormat.format(totalRevenue > 0 ? profit / totalRevenue : 0));
 
