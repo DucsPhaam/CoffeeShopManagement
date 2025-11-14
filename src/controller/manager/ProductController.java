@@ -105,6 +105,30 @@ public class ProductController {
 
         // Set overlay click handler
         overlay.setOnMouseClicked(this::handleOverlayClick);
+
+        cmbInventory.setCellFactory(listView -> new ListCell<Inventory>() {
+            @Override
+            protected void updateItem(Inventory item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item.getName());
+                }
+            }
+        });
+
+        cmbInventory.setButtonCell(new ListCell<Inventory>() {
+            @Override
+            protected void updateItem(Inventory item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item.getName());
+                }
+            }
+        });
     }
 
     private void handleOverlayClick(MouseEvent event) {
