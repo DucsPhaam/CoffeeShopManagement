@@ -88,7 +88,7 @@
                 <TableView fx:id="tableProducts" VBox.vgrow="ALWAYS">
                     <columns>
                         <TableColumn fx:id="colId" text="ID" prefWidth="60.0" style="-fx-alignment: CENTER;" />
-                        <TableColumn fx:id="colImage" text="Image" prefWidth="80.0" style="-fx-alignment: CENTER;" />
+                        <!--                        <TableColumn fx:id="colImage" text="Image" prefWidth="80.0" style="-fx-alignment: CENTER;" />-->
                         <TableColumn fx:id="colName" text="Product Name" prefWidth="220.0" />
                         <TableColumn fx:id="colPrice" text="Price" prefWidth="100.0" style="-fx-alignment: CENTER;" />
                         <TableColumn fx:id="colDrinkTypes" text="Types" prefWidth="160.0" style="-fx-alignment: CENTER;" />

@@ -2,6 +2,7 @@ package controller.manager;
 
 import dao.InventoryDAO;
 import dao.TransactionDAO;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -23,7 +24,7 @@ import java.util.List;
 public class InventoryController {
 
     @FXML private TableView<Inventory> tableInventory;
-    @FXML private TableColumn<Inventory, Integer> colId;
+    @FXML private TableColumn<Inventory, String> colId;
     @FXML private TableColumn<Inventory, String> colName;
     @FXML private TableColumn<Inventory, Double> colQuantity;
     @FXML private TableColumn<Inventory, String> colUnit;
@@ -82,7 +83,11 @@ public class InventoryController {
     }
 
     private void setupTableColumns() {
-        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
+        colId.setCellValueFactory(cellData -> {
+            ObservableList<Inventory> items = tableInventory.getItems();
+            int index = items.indexOf(cellData.getValue());
+            return new SimpleStringProperty(String.valueOf(index + 1));
+        });
         colName.setCellValueFactory(new PropertyValueFactory<>("name"));
         colQuantity.setCellValueFactory(new PropertyValueFactory<>("quantity"));
         colUnit.setCellValueFactory(new PropertyValueFactory<>("unit"));
@@ -92,7 +97,7 @@ public class InventoryController {
         colStatus.setCellValueFactory(cellData -> {
             Inventory inv = cellData.getValue();
             String status = inv.getQuantity() <= inv.getMinStock() ? "Low Stock" : "Normal";
-            return new javafx.beans.property.SimpleStringProperty(status);
+            return new SimpleStringProperty(status);
         });
 
         colStatus.setCellFactory(col -> new TableCell<Inventory, String>() {
@@ -230,17 +235,15 @@ public class InventoryController {
     }
 
     private void updateStatistics() {
-        int total = filteredList.size();
+        int total = inventoryDAO.getTotalCount();
+        int displayed = filteredList.size(); // ← dùng filteredList
         int lowStockCount = (int) filteredList.stream()
-                .filter(item -> item.getQuantity() < item.getMinStock())
+                .filter(item -> item.getQuantity() <= item.getMinStock())
                 .count();
 
-        // Thống kê trên đầu
-        lblTotalItems.setText(total + " items");
+        lblTotalItems.setText("Total: " + total + " items");
         lblLowStockItems.setText("Low Stock: " + lowStockCount);
-
-        // Thống kê dưới bảng
-        lblTotalItemsInTable.setText("Total: " + total + " items");
+        lblTotalItemsInTable.setText("Displayed: " + displayed + " items");
         lblLowStockInTable.setText("Low Stock: " + lowStockCount);
     }
 

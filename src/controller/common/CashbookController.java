@@ -40,7 +40,7 @@ public class CashbookController {
     @FXML
     private TableView<Transaction> tableTransactions;
     @FXML
-    private TableColumn<Transaction, Integer> colId;
+    private TableColumn<Transaction, String> colId;
     @FXML
     private TableColumn<Transaction, String> colType;
     @FXML
@@ -140,13 +140,19 @@ public class CashbookController {
     }
 
     private void setupTableColumns() {
-        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colType.setCellValueFactory(new PropertyValueFactory<>("type"));
         colAmount.setCellValueFactory(new PropertyValueFactory<>("amount"));
         colReason.setCellValueFactory(new PropertyValueFactory<>("reason"));
         colCreatedBy.setCellValueFactory(new PropertyValueFactory<>("createdBy"));
         colCreatedAt.setCellValueFactory(cellData -> new SimpleStringProperty(
                 new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(cellData.getValue().getCreatedAt())));
+
+        // Format amount
+        colId.setCellValueFactory(cellData -> {
+            ObservableList<Transaction> items = tableTransactions.getItems();
+            int index = items.indexOf(cellData.getValue());
+            return new SimpleStringProperty(String.valueOf(index + 1));
+        });
 
         // Format amount
         colAmount.setCellFactory(col -> new TableCell<Transaction, Double>() {
@@ -243,8 +249,7 @@ public class CashbookController {
     }
 
     private void loadNextPage() {
-        if (!hasMoreRecords)
-            return;
+        if (!hasMoreRecords) return;
 
         List<Transaction> newTransactions = transactionDAO.getTransactionsPaginated(currentPage * PAGE_SIZE, PAGE_SIZE);
         if (newTransactions.isEmpty()) {
@@ -253,7 +258,7 @@ public class CashbookController {
             transactionList.addAll(newTransactions);
             currentPage++;
         }
-        applyFilters();
+        applyFilters(); // Sẽ sort lại
     }
 
     private void applyFilters() {
@@ -670,10 +675,10 @@ public class CashbookController {
         for (OrderItem item : items) {
             HBox box = new HBox(10);
             box.setPadding(new Insets(10));
-            box.setStyle(
-                    "-fx-background-color: white; -fx-background-radius: 10; -fx-border-color: #e2e8f0; -fx-border-width: 1;");
+            box.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-border-color: #e2e8f0; -fx-border-width: 1;");
 
-            ImageView img = new ImageView(); // ← THÊM DÒNG NÀY
+            // --- ẢNH ---
+            ImageView img = new ImageView();
             String path = item.getImage() != null && !item.getImage().isEmpty() ? item.getImage() : "img/temp_icon.png";
             try {
                 File f = new File(Paths.get("src/resources/" + path).toAbsolutePath().toString());
@@ -681,26 +686,28 @@ public class CashbookController {
                     img.setImage(new Image("file:" + f.getAbsolutePath()));
                 } else {
                     InputStream is = getClass().getResourceAsStream("/resources/img/temp_icon.png");
-                    if (is != null)
-                        img.setImage(new Image(is));
+                    if (is != null) img.setImage(new Image(is));
                 }
             } catch (Exception ex) {
                 InputStream is = getClass().getResourceAsStream("/resources/img/temp_icon.png");
-                if (is != null)
-                    img.setImage(new Image(is));
+                if (is != null) img.setImage(new Image(is));
             }
             img.setFitWidth(44);
             img.setFitHeight(44);
             img.setPreserveRatio(true);
 
+            // --- THÔNG TIN (TÊN + SỐ LƯỢNG + NOTE) ---
             VBox infoBox = new VBox(2);
-            HBox.setHgrow(infoBox, Priority.ALWAYS);
+            HBox.setHgrow(infoBox, Priority.ALWAYS);  // ← BẮT BUỘC
+            infoBox.setAlignment(Pos.CENTER_LEFT);
+
             Label name = new Label(item.getProductName() +
-                    (item.getDrinkType() != null && !item.getDrinkType().isEmpty() ? " (" + item.getDrinkType() + ")"
-                            : ""));
-            name.setStyle("-fx-font-size: 13.5px; -fx-font-weight: 600;");
+                    (item.getDrinkType() != null && !item.getDrinkType().isEmpty() ? " (" + item.getDrinkType() + ")" : ""));
+            name.setStyle("-fx-font-size: 13.5px; -fx-font-weight: 600; -fx-text-fill: #1a1a1a;");
+
             Label qty = new Label(item.getQuantity() + " × $" + df.format(item.getPrice()));
             qty.setStyle("-fx-font-size: 12.5px; -fx-text-fill: #64748b;");
+
             infoBox.getChildren().addAll(name, qty);
 
             if (item.getNote() != null && !item.getNote().trim().isEmpty()) {
@@ -709,10 +716,16 @@ public class CashbookController {
                 infoBox.getChildren().add(note);
             }
 
+            // --- GIÁ TIỀN ---
             Label price = new Label("$" + df.format(item.getPrice() * item.getQuantity()));
             price.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #6366f1;");
+            price.setAlignment(Pos.CENTER_RIGHT);
 
+            // --- CĂN CHỈNH: Ảnh | Tên (chiếm hết) | Giá ---
             box.getChildren().addAll(img, infoBox, price);
+            HBox.setHgrow(infoBox, Priority.ALWAYS);  // ← LẶP LẠI ĐỂ CHẮC CHẮN
+            HBox.setMargin(price, new Insets(0, 10, 0, 0)); // Đẩy giá ra chút
+
             itemsList.getChildren().add(box);
         }
         scroll.setContent(itemsList);

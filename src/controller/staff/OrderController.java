@@ -1122,7 +1122,7 @@ public class OrderController implements Initializable {
 
     private void clearOrder() {
         orderItems.clear(); updateOrderDisplay(); selectedTableId = null; lblSelectedTable.setText(""); menuPane.setVisible(false); menuPane.setManaged(false); btnDineIn.setSelected(true);
-            showSweetAlert(SweetAlert.AlertType.INFO, "Cleared", "Order cleared!");
+        showSweetAlert(SweetAlert.AlertType.INFO, "Cleared", "Order cleared!");
     }
 
     // Navigation

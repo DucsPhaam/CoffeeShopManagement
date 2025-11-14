@@ -36,8 +36,8 @@ import javafx.fxml.FXML;
 public class ProductController {
 
     @FXML private TableView<Product> tableProducts;
-    @FXML private TableColumn<Product, Integer> colId;
-    @FXML private TableColumn<Product, String> colImage;
+    @FXML private TableColumn<Product, String> colId;
+    //    @FXML private TableColumn<Product, String> colImage;
     @FXML private TableColumn<Product, String> colName;
     @FXML private TableColumn<Product, Double> colPrice;
     @FXML private TableColumn<Product, String> colDrinkTypes;
@@ -116,7 +116,11 @@ public class ProductController {
     }
 
     private void setupTableColumns() {
-        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
+        colId.setCellValueFactory(cellData -> {
+            ObservableList<Product> items = tableProducts.getItems();
+            int index = items.indexOf(cellData.getValue());
+            return new javafx.beans.property.SimpleStringProperty(String.valueOf(index + 1));
+        });
         colName.setCellValueFactory(new PropertyValueFactory<>("name"));
         colPrice.setCellValueFactory(new PropertyValueFactory<>("price"));
         colDrinkTypes.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(
@@ -138,63 +142,63 @@ public class ProductController {
         });
 
         // Image column
-        colImage.setCellFactory(col -> new TableCell<Product, String>() {
-            private final ImageView imageView = new ImageView();
-
-            {
-                imageView.setFitWidth(50);
-                imageView.setFitHeight(50);
-                imageView.setPreserveRatio(true);
-            }
-
-            @Override
-            protected void updateItem(String imagePath, boolean empty) {
-                super.updateItem(imagePath, empty);
-                if (empty || imagePath == null || imagePath.trim().isEmpty()) {
-                    setGraphic(null);
-                } else {
-                    try {
-                        // Chuẩn hóa đường dẫn
-                        Path path = Paths.get(imagePath);
-                        String fullPath = path.toAbsolutePath().toString();
-                        if (Files.exists(path)) {
-                            Image image = new Image("file:" + fullPath);
-                            if (!image.isError()) {
-                                imageView.setImage(image);
-                                setGraphic(imageView);
-                            } else {
-                                System.out.println("Image error for path: " + fullPath);
-                                loadDefaultImage();
-                            }
-                        } else {
-                            System.out.println("Image file not found: " + fullPath);
-                            loadDefaultImage();
-                        }
-                    } catch (Exception e) {
-                        System.out.println("Error loading image: " + imagePath + ", Error: " + e.getMessage());
-                        loadDefaultImage();
-                    }
-                }
-            }
-
-            private void loadDefaultImage() {
-                String defaultImagePath = "img/temp_icon.png";
-                try {
-                    Path defaultPath = Paths.get(defaultImagePath);
-                    if (Files.exists(defaultPath)) {
-                        Image defaultImage = new Image("file:" + defaultPath.toAbsolutePath().toString());
-                        imageView.setImage(defaultImage);
-                        setGraphic(imageView);
-                    } else {
-                        System.out.println("Default image not found: " + defaultImagePath);
-                        setGraphic(null);
-                    }
-                } catch (Exception e) {
-                    System.out.println("Error loading default image: " + e.getMessage());
-                    setGraphic(null);
-                }
-            }
-        });
+//        colImage.setCellFactory(col -> new TableCell<Product, String>() {
+//            private final ImageView imageView = new ImageView();
+//
+//            {
+//                imageView.setFitWidth(50);
+//                imageView.setFitHeight(50);
+//                imageView.setPreserveRatio(true);
+//            }
+//
+//            @Override
+//            protected void updateItem(String imagePath, boolean empty) {
+//                super.updateItem(imagePath, empty);
+//                if (empty || imagePath == null || imagePath.trim().isEmpty()) {
+//                    setGraphic(null);
+//                } else {
+//                    try {
+//                        // Chuẩn hóa đường dẫn
+//                        Path path = Paths.get(imagePath);
+//                        String fullPath = path.toAbsolutePath().toString();
+//                        if (Files.exists(path)) {
+//                            Image image = new Image("file:" + fullPath);
+//                            if (!image.isError()) {
+//                                imageView.setImage(image);
+//                                setGraphic(imageView);
+//                            } else {
+//                                System.out.println("Image error for path: " + fullPath);
+//                                loadDefaultImage();
+//                            }
+//                        } else {
+//                            System.out.println("Image file not found: " + fullPath);
+//                            loadDefaultImage();
+//                        }
+//                    } catch (Exception e) {
+//                        System.out.println("Error loading image: " + imagePath + ", Error: " + e.getMessage());
+//                        loadDefaultImage();
+//                    }
+//                }
+//            }
+//
+//            private void loadDefaultImage() {
+//                String defaultImagePath = "img/temp_icon.png";
+//                try {
+//                    Path defaultPath = Paths.get(defaultImagePath);
+//                    if (Files.exists(defaultPath)) {
+//                        Image defaultImage = new Image("file:" + defaultPath.toAbsolutePath().toString());
+//                        imageView.setImage(defaultImage);
+//                        setGraphic(imageView);
+//                    } else {
+//                        System.out.println("Default image not found: " + defaultImagePath);
+//                        setGraphic(null);
+//                    }
+//                } catch (Exception e) {
+//                    System.out.println("Error loading default image: " + e.getMessage());
+//                    setGraphic(null);
+//                }
+//            }
+//        });
 
         // Actions column with clear, readable buttons
         colActions.setCellFactory(col -> new TableCell<Product, Void>() {

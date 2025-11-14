@@ -124,34 +124,29 @@ public class InventoryDAO {
         return null;
     }
 
-    public List<Inventory> getInventoryPage(int page, int size) {
-        List<Inventory> result = new ArrayList<>();
-        String sql = "SELECT id, name, quantity, unit, min_stock, cost_per_unit FROM inventory " +
-                "ORDER BY id LIMIT ? OFFSET ?";
+    public List<Inventory> getInventoryPage(int offset, int limit) {
+        List<Inventory> list = new ArrayList<>();
+        String sql = "SELECT * FROM inventory ORDER BY name ASC LIMIT ? OFFSET ?"; // hoặc ORDER BY id DESC
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, size);
-            stmt.setInt(2, page * size);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    Inventory inv = new Inventory(
-                            rs.getInt("id"),
-                            rs.getString("name"),
-                            rs.getDouble("quantity"),
-                            rs.getString("unit"),
-                            rs.getDouble("min_stock"),
-                            rs.getDouble("cost_per_unit")
-                    );
-                    result.add(inv);
-                }
+            stmt.setInt(1, limit);
+            stmt.setInt(2, offset);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Inventory inv = new Inventory();
+                inv.setId(rs.getInt("id"));
+                inv.setName(rs.getString("name"));
+                inv.setQuantity(rs.getDouble("quantity"));
+                inv.setUnit(rs.getString("unit"));
+                inv.setMinStock(rs.getDouble("min_stock"));
+                inv.setCostPerUnit(rs.getDouble("cost_per_unit"));
+                list.add(inv);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return result;
+        return list;
     }
     public int getTotalCount() {
         String sql = "SELECT COUNT(*) FROM inventory";

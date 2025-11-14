@@ -119,7 +119,7 @@ public class ProductDAO {
 
     public List<Product> getProductsPaginated(int offset, int limit) {
         List<Product> products = new ArrayList<>();
-        String sql = "SELECT id, name, price, image, drink_types FROM products ORDER BY id LIMIT ? OFFSET ?";
+        String sql = "SELECT id, name, price, image, drink_types FROM products ORDER BY name ASC LIMIT ? OFFSET ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
