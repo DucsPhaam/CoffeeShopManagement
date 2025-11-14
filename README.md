@@ -73,7 +73,9 @@ Go to:
 ```Run → Edit Configurations → VM Options```
 
 Then add:
-```--module-path "E:\CoffeeShopManagement\lib" --add-modules javafx.controls,javafx.fxml```
+```--module-path "path\to\CoffeeShopManagement\lib" --add-modules javafx.controls,javafx.fxml``` </br>
+eg. ```--module-path "E:\CoffeeShopManagement\lib" --add-modules javafx.controls,javafx.fxml``` </br>
+
 (Note: The lib folder is already included in the Project. Use Oracle OpenJDK 20.0.2 as the SDK.)
 
 ## Contact
